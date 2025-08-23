@@ -17,6 +17,7 @@ app.get('/', (req, res) => {
 
 // Lista de rutas para la api
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes); // Usamos el router para las rutas /api/users
 app.use('/api/workspaces', workspaceRoutes); // Usamos el router para las rutas /api/workspaces
 app.use('/api/racks', rackRoutes); // Usamos el router para las rutas /api/racks
 app.use('/api/components', componentRoutes); // Usamos el router para las rutas /api/components
