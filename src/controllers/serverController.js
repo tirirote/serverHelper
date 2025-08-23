@@ -83,6 +83,7 @@ export const getServerByName = (req, res) => {
     return res.status(404).json({ message: 'Servidor no encontrado.' });
   }
   res.status(200).json({ server });
+  return server;
 };
 
 export const getAllComponents = (req, res) => {
