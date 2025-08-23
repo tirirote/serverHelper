@@ -1,5 +1,12 @@
+import { componentSchema } from '../schemas/componentSchema'
 
 export const createComponent = (req, res) => {
+
+  const { error } = componentSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   const newComponent = req.body;
   if (!newComponent.type || !newComponent.name || !newComponent.cost) {
     return res.status(400).json({ message: 'Faltan datos obligatorios para el componente.' });
@@ -18,7 +25,7 @@ export const deleteComponent = (req, res) => {
   const { name } = req.params;
   const initialLength = components.length;
   components = components.filter(c => c.name !== name);
-  
+
   if (components.length === initialLength) {
     return res.status(404).json({ message: 'Componente no encontrado.' });
   }
@@ -28,7 +35,7 @@ export const deleteComponent = (req, res) => {
 export const updateComponent = (req, res) => {
   const { name } = req.params;
   const newDetails = req.body;
-  
+
   const componentIndex = components.findIndex(c => c.name === name);
   if (componentIndex === -1) {
     return res.status(404).json({ message: 'Componente no encontrado.' });

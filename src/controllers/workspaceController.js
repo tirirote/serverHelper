@@ -1,8 +1,14 @@
 import { db } from '../db/index.js';
+import { workspaceSchema } from '../schemas/workspaceSchema.js';
 
 export const createWorkspace = (req, res) => {
+  const { error } = workspaceSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   const { name, description } = req.body;
-  
+
   if (!name) {
     return res.status(400).json({ message: 'El nombre del workspace es obligatorio.' });
   }
@@ -12,13 +18,13 @@ export const createWorkspace = (req, res) => {
     return res.status(409).json({ message: 'Ya existe un workspace con este nombre.' });
   }
 
-  const newWorkspace = { 
-    name, 
+  const newWorkspace = {
+    name,
     description: description || '',
     racks: []
   };
   db.workspaces.push(newWorkspace);
-  
+
   res.status(201).json({ message: 'Workspace creado con éxito', workspace: newWorkspace });
 };
 
@@ -41,7 +47,7 @@ export const getAllWorkspaces = (req, res) => {
 export const getAllCurrentRacks = (req, res) => {
   const { name } = req.params;
   const workspace = db.workspaces.find(ws => ws.name === name);
-  
+
   if (!workspace) {
     return res.status(404).json({ message: 'Workspace no encontrado.' });
   }

@@ -1,49 +1,77 @@
 import { db } from '../db/index.js';
+import { userSchema } from '../schemas/userSchema.js';
 
-export const createUser = (userData) => {
-  const { username, password } = userData;
-  
-  if (!username || !password) {
-    throw new Error('Username y password son obligatorios.');
+export const createUser = (req, res) => {
+  const { error } = userSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
   }
 
+  const { username, password } = req.body;
   const existingUser = db.users.find(user => user.username === username);
+
   if (existingUser) {
-    throw new Error('El nombre de usuario ya existe.');
+    return res.status(409).json({ message: 'El nombre de usuario ya existe.' });
   }
 
-  const newUser = { username, password }; // En un proyecto real, se encriptaría la contraseña aquí.
+  const newUser = { username, password };
   db.users.push(newUser);
-  return newUser;
+  res.status(201).json({ message: 'Usuario creado con éxito', user: newUser });
 };
 
-export const deleteUser = (username) => {
+export const deleteUser = (req, res) => {
+  const { username } = req.params;
   const initialLength = db.users.length;
-  db.users = db.users.filter(user => user.username !== username);
   
+  db.users = db.users.filter(user => user.username !== username);
+
   if (db.users.length === initialLength) {
-    return false; // Usuario no encontrado
+    return res.status(404).json({ message: 'Usuario no encontrado.' });
   }
-  return true; // Usuario eliminado
+
+  res.status(200).json({ message: 'Usuario eliminado con éxito.' });
 };
 
-export const updateUser = (username, newPassword, newUsername) => {
+export const updateUser = (req, res) => {
+  const { username } = req.params;
+  const { newPassword, newUsername } = req.body;
+
   const user = db.users.find(u => u.username === username);
-  if (user) {
-    user.password = newPassword; // O el campo que se quiera actualizar
-    user.username = newUsername;
-    return user;
+  if (!user) {
+    return res.status(404).json({ message: 'Usuario no encontrado.' });
   }
-  return null; // Usuario no encontrado
+
+  const { error } = userSchema.validate({ username: newUsername || user.username, password: newPassword || user.password });
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
+  if (newUsername) {
+    user.username = newUsername;
+  }
+  if (newPassword) {
+    user.password = newPassword;
+  }
+
+  res.status(200).json({ message: 'Usuario actualizado con éxito', user });
 };
 
-export const getAllusers = () => {
-  return db.users.map(user => {
+export const getAllUsers = (req, res) => {
+  const usersWithoutPasswords = db.users.map(user => {
     const { password, ...rest } = user;
     return rest;
   });
+  res.status(200).json(usersWithoutPasswords);
 };
 
-export const getUserByUsername = (username) => {
-  return db.users.find(user => user.username === username);
+export const getUserByUsername = (req, res) => {
+  const { username } = req.params;
+  const user = db.users.find(u => u.username === username);
+  
+  if (!user) {
+    return res.status(404).json({ message: 'Usuario no encontrado.' });
+  }
+
+  const { password, ...userWithoutPassword } = user;
+  res.status(200).json(userWithoutPassword);
 };

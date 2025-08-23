@@ -1,8 +1,14 @@
 import { removeRackFromWorkspace, getWorkspaceByName } from './workspaceController.js';
 import { getServerByName } from './serverController.js'
 import { db } from '../db/index.js';
+import { rackSchema } from '../schemas/rackSchema.js';
 
 export const createRack = (req, res) => {
+  const { error } = rackSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
   const { name, description, units, workspaceName } = req.body;
 
   if (!name || !workspaceName) {
