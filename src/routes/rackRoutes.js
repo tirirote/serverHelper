@@ -3,7 +3,8 @@ import {
   createRack, 
   getRackByName, 
   getAllRacks, 
-  deleteRackByName
+  deleteRackByName,
+  addServerToRack
 } from '../controllers/rackController.js';
 
 const router = Router();

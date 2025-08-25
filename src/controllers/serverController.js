@@ -60,7 +60,7 @@ export const createServer = (req, res) => {
     totalCost: calculateTotalCost(serverComponents),
   };
 
-  servers.push(newServer);
+  db.servers.push(newServer);
   res.status(201).json({ message: 'Servidor creado con éxito', server: newServer });
 };
 
@@ -69,7 +69,7 @@ export const deleteServerByName = (req, res) => {
   const initialLength = db.servers.length;
   db.servers = db.servers.filter(s => s.name !== name);
 
-  if (servers.length === initialLength) {
+  if (db.servers.length === initialLength) {
     return res.status(404).json({ message: 'Servidor no encontrado.' });
   }
   res.status(200).json({ message: 'Servidor eliminado con éxito.' });

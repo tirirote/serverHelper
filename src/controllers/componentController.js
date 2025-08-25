@@ -1,4 +1,5 @@
-import { componentSchema } from '../schemas/componentSchema'
+import { db } from '../db/index.js';
+import { componentSchema } from '../schemas/componentSchema.js'
 
 export const createComponent = (req, res) => {
 
@@ -12,23 +13,24 @@ export const createComponent = (req, res) => {
     return res.status(400).json({ message: 'Faltan datos obligatorios para el componente.' });
   }
 
-  const existingComponent = components.find(c => c.name === newComponent.name);
+  const existingComponent = db.components.find(c => c.name === newComponent.name);
   if (existingComponent) {
     return res.status(409).json({ message: 'Ya existe un componente con este nombre.' });
   }
 
-  components.push(newComponent);
+  db.components.push(newComponent);
   res.status(201).json({ message: 'Componente creado con éxito', component: newComponent });
 };
 
 export const deleteComponent = (req, res) => {
   const { name } = req.params;
-  const initialLength = components.length;
-  components = components.filter(c => c.name !== name);
+  const componentIndex = db.components.findIndex(c => c.name === name);
 
-  if (components.length === initialLength) {
+  if (componentIndex === -1) {
     return res.status(404).json({ message: 'Componente no encontrado.' });
   }
+
+  db.components.splice(componentIndex, 1); // Mutamos el array directamente
   res.status(200).json({ message: 'Componente eliminado con éxito.' });
 };
 
@@ -36,18 +38,28 @@ export const updateComponent = (req, res) => {
   const { name } = req.params;
   const newDetails = req.body;
 
-  const componentIndex = components.findIndex(c => c.name === name);
+  const componentIndex = db.components.findIndex(c => c.name === name);
   if (componentIndex === -1) {
     return res.status(404).json({ message: 'Componente no encontrado.' });
   }
 
-  components[componentIndex] = { ...components[componentIndex], ...newDetails };
-  res.status(200).json({ message: 'Componente actualizado con éxito', component: components[componentIndex] });
+  db.components[componentIndex] = { ...db.components[componentIndex], ...newDetails };
+  res.status(200).json({ message: 'Componente actualizado con éxito', component: db.components[componentIndex] });
+};
+
+export const getComponentByName = (req, res) => {
+  const { name } = req.params;
+  const component = db.components.find(c => c.name === name);
+
+  if (!component) {
+    return res.status(404).json({ message: 'Componente no encontrado.' });
+  }
+  res.status(200).json({ component });
 };
 
 export const getComponentCost = (req, res) => {
   const { name } = req.params;
-  const component = components.find(c => c.name === name);
+  const component = db.components.find(c => c.name === name);
   if (!component) {
     return res.status(404).json({ message: 'Componente no encontrado.' });
   }
@@ -56,7 +68,7 @@ export const getComponentCost = (req, res) => {
 
 export const getComponentCompatibleList = (req, res) => {
   const { name } = req.params;
-  const component = components.find(c => c.name === name);
+  const component = db.components.find(c => c.name === name);
   if (!component) {
     return res.status(404).json({ message: 'Componente no encontrado.' });
   }
@@ -65,7 +77,7 @@ export const getComponentCompatibleList = (req, res) => {
 
 export const getComponentDetails = (req, res) => {
   const { name } = req.params;
-  const component = components.find(c => c.name === name);
+  const component = db.components.find(c => c.name === name);
   if (!component) {
     return res.status(404).json({ message: 'Componente no encontrado.' });
   }
@@ -74,7 +86,7 @@ export const getComponentDetails = (req, res) => {
 
 export const getComponentType = (req, res) => {
   const { name } = req.params;
-  const component = components.find(c => c.name === name);
+  const component = db.components.find(c => c.name === name);
   if (!component) {
     return res.status(404).json({ message: 'Componente no encontrado.' });
   }

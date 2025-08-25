@@ -6,14 +6,16 @@ import {
   getComponentCost, 
   getComponentCompatibleList, 
   getComponentDetails, 
-  getComponentType 
-} from '../controllers/componentController.js';
+  getComponentType,
+  getComponentByName 
+} from '../controllers/componentController';
 
 const router = Router();
 
 router.post('/', createComponent);
 router.delete('/:name', deleteComponent);
 router.put('/:name', updateComponent);
+router.get('/:name', getComponentByName);
 router.get('/:name/cost', getComponentCost);
 router.get('/:name/compatible', getComponentCompatibleList);
 router.get('/:name/details', getComponentDetails);

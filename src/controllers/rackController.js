@@ -15,8 +15,11 @@ export const createRack = (req, res) => {
     return res.status(400).json({ message: 'El nombre del rack y el nombre del workspace son obligatorios.' });
   }
 
-  const workspace = getWorkspaceByName(req, res); // Reutilizamos la función del workspaceController
-  if (res.statusCode !== 200) return; // Si no se encuentra el workspace, getWorkspaceByName ya envió una respuesta de error
+  // Buscamos el workspace directamente en la base de datos simulada
+  const workspace = db.workspaces.find(ws => ws.name === workspaceName);
+  if (!workspace) {
+    return res.status(404).json({ message: 'Workspace no encontrado.' });
+  }
 
   const existingRack = db.racks.find(r => r.name === name && r.workspaceName === workspaceName);
   if (existingRack) {
@@ -30,13 +33,13 @@ export const createRack = (req, res) => {
     units: units || 42,
     workspaceName,
     servers: [],
-    fans: [], // Opcional, pero se puede incluir por defecto para la demo
+    fans: [],
     totalCost: 0,
     maintenanceCost: 0,
   };
 
   db.racks.push(newRack);
-  workspace.racks.push(newRack.name); // Añadimos el rack al workspace
+  workspace.racks.push(newRack.name);
 
   res.status(201).json({ message: 'Rack creado con éxito', rack: newRack });
 };
@@ -60,19 +63,27 @@ export const getAllRacks = (req, res) => {
 };
 
 export const deleteRackByName = (req, res) => {
-  const { name, workspaceName } = req.params;
+    const { name, workspaceName } = req.params;
 
-  const initialLength = db.racks.length;
-  db.racks = db.racks.filter(r => !(r.name === name && r.workspaceName === workspaceName));
+    const rackIndex = db.racks.findIndex(r => r.name === name && r.workspaceName === workspaceName);
 
-  if (db.racks.length === initialLength) {
-    return res.status(404).json({ message: 'Rack no encontrado.' });
-  }
+    if (rackIndex === -1) {
+        return res.status(404).json({ message: 'Rack no encontrado.' });
+    }
 
-  // Eliminar el rack del array de racks del workspace
-  removeRackFromWorkspace(workspaceName, name);
+    // Mutamos el array directamente
+    db.racks.splice(rackIndex, 1);
 
-  res.status(200).json({ message: 'Rack eliminado con éxito.' });
+    // Eliminar el rack del array de racks del workspace
+    const workspace = db.workspaces.find(ws => ws.name === workspaceName);
+    if (workspace) {
+        const workspaceRackIndex = workspace.racks.indexOf(name);
+        if (workspaceRackIndex > -1) {
+            workspace.racks.splice(workspaceRackIndex, 1);
+        }
+    }
+
+    res.status(200).json({ message: 'Rack eliminado con éxito.' });
 };
 
 export const addServerToRack = (req, res) => {
