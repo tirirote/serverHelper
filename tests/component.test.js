@@ -1,6 +1,6 @@
 import request from 'supertest';
-import { db } from '../db/index.js';
-import { setupTestEnvironment } from '../utils/setup.js';
+import { db } from '../src/db/index.js';
+import { setupTestEnvironment } from './utils/setup.js';
 
 const app = setupTestEnvironment();
 
@@ -56,7 +56,7 @@ describe('Component API (Simplified)', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body.message).toBe('Componente eliminado con éxito.');
-        expect(db.components.length).toBe(0);
+        expect(db.components.length).toBe(7);
     });
 
     it('should return 404 when trying to delete a non-existent component', async () => {

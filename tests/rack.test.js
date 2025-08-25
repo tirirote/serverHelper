@@ -1,6 +1,6 @@
 import request from 'supertest';
-import { db } from '../db/index.js';
-import { setupTestEnvironment } from '../utils/setup.js';
+import { db } from '../src/db/index.js';
+import { setupTestEnvironment } from './utils/setup.js'
 
 const app = setupTestEnvironment();
 

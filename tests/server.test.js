@@ -1,11 +1,11 @@
 import request from 'supertest';
-import { db } from '../db/index.js';
-import { setupTestEnvironment } from '../utils/setup.js';
+import { db } from '../src/db/index.js';
+import { setupTestEnvironment } from './utils/setup.js';
 
 const app = setupTestEnvironment();
 
-// Un conjunto de componentes válido para las pruebas
-const validServerComponents = [
+// Los nombres de los componentes deben coincidir con los predefinidos en testSetup.js
+const validServerComponentsForTest = [
     { name: 'CPU Test', type: 'CPU' },
     { name: 'RAM Test', type: 'RAM' },
     { name: 'Chasis Test', type: 'Chasis' },
@@ -21,14 +21,14 @@ describe('Server Service API (Simplified)', () => {
         const newServer = {
             name: 'Web Server',
             description: 'A basic web server',
-            components: validServerComponents,
+            components: validServerComponentsForTest,
         };
         const res = await request(app).post('/api/servers').send(newServer);
-
+        
         expect(res.statusCode).toEqual(201);
         expect(res.body.server).toHaveProperty('name', 'Web Server');
-        expect(res.body.server.totalCost).toBeDefined();
-        expect(db.servers.length).toBe(1);
+        expect(res.body.server.totalCost).toBeDefined(); // Verificamos que el coste se calculó
+        expect(db.servers.length).toBe(1); // Un servidor ha sido añadido a la BD
     });
 
     it('should get a server by its name', async () => {
@@ -36,7 +36,7 @@ describe('Server Service API (Simplified)', () => {
         const newServer = {
             name: 'Database Server',
             description: 'A test database server',
-            components: validServerComponents,
+            components: validServerComponentsForTest,
         };
         await request(app).post('/api/servers').send(newServer);
 
@@ -51,14 +51,14 @@ describe('Server Service API (Simplified)', () => {
         const newServer = {
             name: 'Server to Delete',
             description: 'A server to be deleted',
-            components: validServerComponents,
+            components: validServerComponentsForTest,
         };
         await request(app).post('/api/servers').send(newServer);
-        
+
         const res = await request(app).delete('/api/servers/Server%20to%20Delete');
 
         expect(res.statusCode).toEqual(200);
         expect(res.body.message).toBe('Servidor eliminado con éxito.');
-        expect(db.servers.length).toBe(0);
+        expect(db.servers.length).toBe(0); // El servidor ha sido eliminado de la BD
     });
 });
