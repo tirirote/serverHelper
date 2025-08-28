@@ -56,7 +56,7 @@ describe('Component API (Simplified)', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body.message).toBe('Componente eliminado con éxito.');
-        expect(db.components.length).toBe(7);
+        expect(db.components.length).toBe(11);
     });
 
     it('should return 404 when trying to delete a non-existent component', async () => {

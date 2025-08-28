@@ -11,3 +11,31 @@ export const db = {
     servers,
     components,
 };
+
+export const componentTypes = [
+  'CPU',
+  'RAM',
+  'Chasis',
+  'HardDisk',
+  'BiosConfig',
+  'Fan',
+  'PowerSupply',
+  'Placa Base',
+  'ServerChasis',
+  'NetworkInterface',
+  'OS',
+  'UPS',
+];
+
+export const mandatoryComponentTypes = [
+  'CPU',
+  'RAM',
+  'Chasis',
+  'HardDisk',
+  'BiosConfig',
+  'Fan',
+  'PowerSupply',
+  'ServerChasis',
+  'NetworkInterface',
+  'OS',
+];
