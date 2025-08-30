@@ -1,6 +1,19 @@
 import { db } from '../db/index.js';
 import { serverSchema } from '../schemas/serverSchema.js';
 
+// Costos de mantenimiento estimados por tipo de componente (en USD/mes)
+const maintenanceCost = {
+  CPU: 0.50,
+  RAM: 0.20,
+  HardDisk: 0.15,
+  PowerSupply: 0.30,
+  Fan: 0.05,
+  NetworkInterface: 0.10,
+  ServerChasis: 0.25,
+  OS: 0.40,
+  default: 0.05,
+};
+
 const validateComponents = (serverComponents) => {
   const mandatoryTypes = ['Chasis', 'CPU', 'RAM', 'HardDisk', 'BiosConfig', 'Fan', 'PowerSupply'];
   const serverComponentTypes = serverComponents.map(c => c.type);
@@ -112,4 +125,12 @@ export const getMissingComponents = (req, res) => {
   const missingComponents = mandatoryTypes.filter(type => !serverComponentTypes.includes(type));
 
   res.status(200).json({ missing: missingComponents });
+};
+
+export const getServerMaintenanceCost = (server) => {
+  let serverCost = 0;
+  server.components.forEach(comp => {
+    serverCost += maintenanceCost[comp.type] || maintenanceCost.default;
+  });
+  return serverCost;
 };

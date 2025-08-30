@@ -25,6 +25,7 @@ export const componentTypes = [
   'NetworkInterface',
   'OS',
   'UPS',
+  'Terminal'
 ];
 
 export const mandatoryComponentTypes = [
@@ -38,4 +39,5 @@ export const mandatoryComponentTypes = [
   'ServerChasis',
   'NetworkInterface',
   'OS',
+  'Terminal'
 ];

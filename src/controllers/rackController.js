@@ -2,6 +2,7 @@ import { removeRackFromWorkspace, getWorkspaceByName } from './workspaceControll
 import { getServerByName } from './serverController.js'
 import { db } from '../db/index.js';
 import { rackSchema } from '../schemas/rackSchema.js';
+import { getServerMaintenanceCost } from './serverController.js';
 
 export const createRack = (req, res) => {
   const { error } = rackSchema.validate(req.body);
@@ -63,27 +64,27 @@ export const getAllRacks = (req, res) => {
 };
 
 export const deleteRackByName = (req, res) => {
-    const { name, workspaceName } = req.params;
+  const { name, workspaceName } = req.params;
 
-    const rackIndex = db.racks.findIndex(r => r.name === name && r.workspaceName === workspaceName);
+  const rackIndex = db.racks.findIndex(r => r.name === name && r.workspaceName === workspaceName);
 
-    if (rackIndex === -1) {
-        return res.status(404).json({ message: 'Rack no encontrado.' });
+  if (rackIndex === -1) {
+    return res.status(404).json({ message: 'Rack no encontrado.' });
+  }
+
+  // Mutamos el array directamente
+  db.racks.splice(rackIndex, 1);
+
+  // Eliminar el rack del array de racks del workspace
+  const workspace = db.workspaces.find(ws => ws.name === workspaceName);
+  if (workspace) {
+    const workspaceRackIndex = workspace.racks.indexOf(name);
+    if (workspaceRackIndex > -1) {
+      workspace.racks.splice(workspaceRackIndex, 1);
     }
+  }
 
-    // Mutamos el array directamente
-    db.racks.splice(rackIndex, 1);
-
-    // Eliminar el rack del array de racks del workspace
-    const workspace = db.workspaces.find(ws => ws.name === workspaceName);
-    if (workspace) {
-        const workspaceRackIndex = workspace.racks.indexOf(name);
-        if (workspaceRackIndex > -1) {
-            workspace.racks.splice(workspaceRackIndex, 1);
-        }
-    }
-
-    res.status(200).json({ message: 'Rack eliminado con éxito.' });
+  res.status(200).json({ message: 'Rack eliminado con éxito.' });
 };
 
 export const addServerToRack = (req, res) => {
@@ -121,4 +122,26 @@ export const addServerToRack = (req, res) => {
     message: 'Servidor añadido al rack con éxito.',
     rack: rack
   });
+};
+
+export const getMaintenanceCost = (req, res) => {
+    const { workspaceName, rackName } = req.params;
+
+    const rack = db.racks.find(r => r.name === rackName && r.workspaceName === workspaceName);
+    if (!rack) {
+        return res.status(404).json({ message: 'Rack no encontrado.' });
+    }
+
+    let totalMaintenanceCost = 0;
+
+    // Iterar sobre los servidores del rack
+    rack.servers.forEach(serverName => {
+        const server = db.servers.find(s => s.name === serverName);
+        if (server) {
+            // Usamos el método auxiliar para obtener el coste de cada servidor
+            totalMaintenanceCost += getServerMaintenanceCost(server);
+        }
+    });
+
+    res.status(200).json({ totalMaintenanceCost: totalMaintenanceCost.toFixed(2) });
 };
