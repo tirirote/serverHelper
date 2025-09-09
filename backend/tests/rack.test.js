@@ -87,11 +87,10 @@ describe('Rack Service API', () => {
             { name: 'NIC Test', type: 'NetworkInterface' },
             { name: 'OS Test', type: 'OS' },
         ];
-        const res1 = await request(app).post('/api/servers').send({
+        await request(app).post('/api/servers').send({
             name: 'Server 1',
             components: validServerComponentsForTest
         });
-        console.log(JSON.stringify(res1, null, 2));
 
         // Paso 3: Añadir el servidor al rack manualmente
         const testRack = db.racks.find(r => r.name === 'Test Rack');
