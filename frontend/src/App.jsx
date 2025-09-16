@@ -1,35 +1,28 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './components/ui/Layout.jsx';
+import Playground from './pages/Playground.jsx';
+import Dashboard from './pages/Dashboard.jsx'; // Futuro componente del Dashboard
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          {/* La ruta principal ahora será el Dashboard */}
+          <Route index element={<Dashboard />} /> 
+          
+          {/* El Playground tendrá su propia ruta */}
+          <Route path="playground" element={<Playground />} />
+          
+          {/* Aquí irán las demás rutas de la app */}
+          <Route path="workspaces" element={<h1>Workspaces View</h1>} />
+          <Route path="shop" element={<h1>Shop View</h1>} />
+          <Route path="components" element={<h1>Components View</h1>} />
+          <Route path="servers" element={<h1>Servers View</h1>} />
+        </Route>
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;

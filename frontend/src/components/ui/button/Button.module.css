@@ -1,0 +1,42 @@
+/* ... (Estilos base de .button, .primary, .danger, etc. sin cambios) ... */
+
+/* Estilos específicos para botones de icono */
+.iconButton {
+  width: 48px;  /* Tamaño fijo para un botón cuadrado */
+  height: 48px;
+  padding: 0;   /* Sin padding para centrar el icono */
+  border-radius: 8px; /* Borde más redondeado para el estilo cuadrado */
+  font-size: 24px; /* Aumentar el tamaño del icono (o ajustarlo con svg) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- ESTADOS DEL BOTÓN DE ICONO (Normal, Hover, Clicked, Disabled) --- */
+.iconButton:not(:disabled) {
+  background-color: var(--color-gray-darkest);
+  border: 2px solid var(--color-gray-dark);
+  color: var(--color-light-gray);
+  box-shadow: 2px 2px 0px var(--color-gray-dark);
+}
+
+.iconButton:not(:disabled):hover {
+  background-color: var(--color-light-gray);
+  color: var(--color-gray-darkest);
+  border-color: var(--color-light-gray);
+}
+
+.iconButton:not(:disabled):active {
+  background-color: var(--color-white);
+  color: var(--color-gray-darkest);
+  border-color: var(--color-white);
+}
+
+.iconButton:disabled {
+  background-color: var(--color-gray-dark);
+  color: var(--color-medium-gray);
+  border: 2px solid var(--color-gray-dark);
+  box-shadow: 2px 2px 0px var(--color-gray-dark);
+  cursor: not-allowed;
+  opacity: 0.6;
+}

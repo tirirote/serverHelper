@@ -1,0 +1,66 @@
+/* Contenedor del Toast */
+.toast {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  gap: 12px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Tipos de Toast según la paleta de colores */
+.info {
+  background-color: var(--color-blue);
+  color: var(--color-white);
+}
+.error {
+  background-color: var(--color-red-bright);
+  color: var(--color-white);
+}
+.success {
+  background-color: var(--color-green-dark);
+  color: var(--color-white);
+}
+.warning {
+  background-color: var(--color-yellow-bright);
+  color: var(--color-gray-darkest);
+}
+
+.message {
+  font-family: var(--font-body);
+  font-size: 14px;
+  margin: 0;
+}
+
+.icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeOut {
+  animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}

@@ -1,0 +1,40 @@
+.layoutContainer {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-gray-dark);
+}
+
+.mainContent {
+  flex-grow: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Botón para abrir la sidebar */
+.menuButton {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 1001;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* El overlay que oscurece el fondo */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Color oscuro semitransparente */
+  z-index: 999;
+  animation: fadeInOverlay 0.3s ease-in-out;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

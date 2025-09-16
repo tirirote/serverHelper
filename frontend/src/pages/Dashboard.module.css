@@ -1,0 +1,5 @@
+.container {
+  padding: 40px;
+  color: var(--color-white);
+  font-family: var(--font-body);
+}

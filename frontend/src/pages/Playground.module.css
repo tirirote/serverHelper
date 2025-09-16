@@ -1,0 +1,45 @@
+.playgroundContainer {
+  padding: 40px;
+  color: var(--color-white);
+  font-family: var(--font-body);
+}
+
+.title {
+  font-family: var(--font-title);
+  font-size: 32px;
+  color: var(--color-white);
+  margin-bottom: 8px;
+}
+
+.description {
+  font-size: 16px;
+  color: var(--color-medium-gray);
+  margin-bottom: 40px;
+}
+
+.section {
+  margin-bottom: 60px;
+}
+
+.sectionTitle {
+  font-family: var(--font-title);
+  font-size: 24px;
+  color: var(--color-orange-light);
+  margin-bottom: 24px;
+  border-bottom: 2px solid var(--color-medium-gray);
+  padding-bottom: 8px;
+}
+
+.componentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  align-items: center;
+}
+
+/* Estilos específicos para los wrappers de componentes que lo necesitan */
+.sliderWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

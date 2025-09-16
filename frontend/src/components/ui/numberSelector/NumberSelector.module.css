@@ -1,0 +1,41 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background-color: var(--color-gray-darkest);
+  border: 2px solid var(--color-gray-dark);
+  border-radius: 8px;
+  padding: 8px 16px;
+  user-select: none; /* Evita que el texto sea seleccionable */
+}
+
+.button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 20px;
+  font-weight: bold;
+  padding: 0;
+  transition: color 0.2s ease-in-out;
+}
+
+.button:hover:not(:disabled) {
+  color: var(--color-orange-light);
+}
+
+.button:disabled {
+  color: var(--color-medium-gray);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.value {
+  font-family: var(--font-title);
+  font-size: 18px;
+  color: var(--color-white);
+  min-width: 40px; /* Asegura un ancho fijo para que el valor no salte */
+  text-align: center;
+}

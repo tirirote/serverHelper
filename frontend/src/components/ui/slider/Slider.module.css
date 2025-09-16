@@ -1,0 +1,62 @@
+/* Contenedor del Slider */
+.sliderContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.valueLabel,
+.maxLabel {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-medium-gray);
+}
+
+/* Estilo Base del Input Range */
+.sliderInput {
+  -webkit-appearance: none; /* Elimina la apariencia por defecto en WebKit */
+  appearance: none;
+  width: 100%;
+  height: 8px; /* Altura de la barra */
+  border-radius: 4px;
+  background-color: var(--color-gray-dark); /* Color de la barra */
+  border: 2px solid var(--color-gray-darkest);
+  cursor: pointer;
+}
+
+/* Estilo para el "Thumb" (el círculo que se arrastra) */
+/* NOTA: Estos estilos son difíciles de simplificar para todos los navegadores
+   sin usar selectores específicos. Los navegadores aplicarán un estilo por defecto.
+   Para un diseño simplificado, podemos aceptar el estilo por defecto o
+   usar selectores específicos de forma mínima para una apariencia base.
+   Añadiremos los selectores más comunes para mejorar la consistencia visual. */
+.sliderInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--color-medium-gray);
+  border: 2px solid var(--color-gray-darkest);
+  border-radius: 50%;
+  margin-top: -8px; /* Ajuste para centrarlo verticalmente */
+}
+
+.sliderInput::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--color-medium-gray);
+  border: 2px solid var(--color-gray-darkest);
+  border-radius: 50%;
+}
+
+/* Estado de enfoque y hover */
+.sliderInput:focus {
+  outline: none; /* Elimina el borde de enfoque del navegador */
+  box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.5); /* Sombra para indicar enfoque */
+}
+
+.sliderInput:disabled {
+  background-color: var(--color-gray-darkest);
+  cursor: not-allowed;
+  opacity: 0.6;
+}

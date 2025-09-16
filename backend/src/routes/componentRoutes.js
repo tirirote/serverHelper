@@ -8,7 +8,7 @@ import {
   getComponentDetails, 
   getComponentType,
   getComponentByName 
-} from '../controllers/componentController';
+} from '../controllers/componentController.js';
 
 const router = Router();
 
