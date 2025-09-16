@@ -1,12 +1,69 @@
-/* ... (Estilos base de .button, .primary, .danger, etc. sin cambios) ... */
+/* Estilos Base del Botón */
+.button {
+  font-family: var(--font-body);
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  border: solid;
+  border-radius: 8px;
+  border-color: var(--color-gray-lightest);
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-transform: uppercase;
+  background-color: var(--color-gray-darkest);
+  color: var(--color-gray-lightest);
+  border-color: var(--color-gray-dark);
+}
+
+/* --- ESTADO NORMAL --- */
+.button:not(:disabled) {
+  border: solid;
+  border-radius: 8px;
+  border-color: var(--color-gray-lightest);
+  color: var(--color-gray-lightest);
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+}
+
+/* --- ESTADO HOVER --- */
+.button:not(:disabled):hover {
+  background-color: var(--color-gray-light);
+  color: var(--color-white);
+  transform: translateY(-4px);
+  border-color: var(--color-white);
+}
+
+/* --- ESTADO ACTIVE --- */
+.button:not(:disabled):active {
+  background-color: var(--color-gray-lightest);
+  color: var(--color-yellow);
+  border-color: var(--color-yellow);
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+/* --- ESTADO DISABLED --- */
+.button:disabled {
+  background-color: var(--color-gray-dark);
+  color: var(--color-gray-lightest);
+  border-color: var(--color-gray-light);
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 
 /* Estilos específicos para botones de icono */
 .iconButton {
-  width: 48px;  /* Tamaño fijo para un botón cuadrado */
+  width: 48px;
   height: 48px;
-  padding: 0;   /* Sin padding para centrar el icono */
-  border-radius: 8px; /* Borde más redondeado para el estilo cuadrado */
-  font-size: 24px; /* Aumentar el tamaño del icono (o ajustarlo con svg) */
+  padding: 0;
+  border-radius: 8px;
+  font-size: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,27 +72,29 @@
 /* --- ESTADOS DEL BOTÓN DE ICONO (Normal, Hover, Clicked, Disabled) --- */
 .iconButton:not(:disabled) {
   background-color: var(--color-gray-darkest);
-  border: 2px solid var(--color-gray-dark);
-  color: var(--color-light-gray);
+  border-color: var(--color-gray-light);
+  color: var(--color-gray-light);
   box-shadow: 2px 2px 0px var(--color-gray-dark);
 }
 
 .iconButton:not(:disabled):hover {
-  background-color: var(--color-light-gray);
-  color: var(--color-gray-darkest);
-  border-color: var(--color-light-gray);
+  background-color: var(--color-gray-light);
+  color: var(--color-white);
+  border-color: var(--color-gray-lightest);
 }
 
 .iconButton:not(:disabled):active {
-  background-color: var(--color-white);
+  background-color: var(--color-gray-lightest);
   color: var(--color-gray-darkest);
-  border-color: var(--color-white);
+  border-color: var(--color-gray-light);
+  transform: translateY(2px);
+  box-shadow: none;
 }
 
 .iconButton:disabled {
   background-color: var(--color-gray-dark);
-  color: var(--color-medium-gray);
-  border: 2px solid var(--color-gray-dark);
+  color: var(--color-gray-lightest);
+  border-color: var(--color-gray-light);
   box-shadow: 2px 2px 0px var(--color-gray-dark);
   cursor: not-allowed;
   opacity: 0.6;

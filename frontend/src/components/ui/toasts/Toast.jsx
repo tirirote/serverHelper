@@ -2,19 +2,20 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styles from './Toast.module.css';
 
-// Puedes usar iconos de alguna librería como react-icons o iconos SVG personalizados
+// Importa los iconos específicos de lucide-react
 import { 
-  BsInfoCircle, 
-  BsExclamationCircle, 
-  BsCheckCircle, 
-  BsExclamationTriangle 
-} from 'react-icons/bs';
+  Info, 
+  XCircle, 
+  CheckCircle, 
+  AlertTriangle 
+} from 'lucide-react';
 
+// Asigna los componentes de iconos a los tipos de toast
 const icons = {
-  info: <BsInfoCircle />,
-  error: <BsExclamationCircle />,
-  success: <BsCheckCircle />,
-  warning: <BsExclamationTriangle />,
+  info: <Info size={24} />,
+  error: <XCircle size={24} />,
+  success: <CheckCircle size={24} />,
+  warning: <AlertTriangle size={24} />,
 };
 
 const Toast = ({ message, type = 'info', onDismiss }) => {

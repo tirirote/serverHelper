@@ -1,41 +1,75 @@
-.container {
+.selectorWrapper {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background-color: var(--color-gray-darkest);
-  border: 2px solid var(--color-gray-dark);
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px;
+  /* Ajusta el padding para el contenedor principal */
   border-radius: 8px;
-  padding: 8px 16px;
-  user-select: none; /* Evita que el texto sea seleccionable */
+  background-color: var(--color-gray-dark);
+  border: solid;
+  border-color: var(--color-gray-light);
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
 }
 
-.button {
+.buttonLeft, .buttonRight {
+  /* Estilos base de los botones de icono */
   background: none;
   border: none;
   cursor: pointer;
+  padding: 4px;
+  /* Padding interno para los botones */
+  margin-bottom: 8px;
+  color: var(--color-gray-lightest);
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: solid;
+  border-radius: 8px;
+  border-color: var(--color-gray-light);
+  background-color: var(--color-gray-darkest);
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+}
+
+.buttonLeft:hover,
+.buttonRight:hover {
+  background-color: var(--color-gray-light);
+  border: solid;
+  border-color: var(--color-white);
   color: var(--color-white);
-  font-family: var(--font-body);
-  font-size: 20px;
-  font-weight: bold;
-  padding: 0;
-  transition: color 0.2s ease-in-out;
+  transform: translateY(-4px);
 }
 
-.button:hover:not(:disabled) {
-  color: var(--color-orange-light);
+.buttonLeft:active,
+.buttonRight:active {
+  background-color: var(--color-gray-lightest);
+  color: var(--color-yellow);
+  border-color: var(--color-yellow);
+  transform: translateY(4px);
+  box-shadow: none;
 }
 
-.button:disabled {
-  color: var(--color-medium-gray);
+.buttonLeft:disabled,
+.buttonRight:disabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  background-color: var(--color-gray-dark);
+  color: var(--color-gray-light);
+  border-color: var(--color-gray-light);
+  transform: translateY(0px);
 }
 
-.value {
-  font-family: var(--font-title);
-  font-size: 18px;
+.valueDisplay {
+  /* Estilo para el número central */
+  font-family: var(--font-body);
+  font-size: 24px;
+  font-weight: 600;
   color: var(--color-white);
-  min-width: 40px; /* Asegura un ancho fijo para que el valor no salte */
+  margin: 8px;
+  margin-bottom: 8px;
+  /* Espacio para separar del número */
+  background-color: var(--color-gray-darkest);
   text-align: center;
+  border-radius: 8px;
+  flex-grow: 1;
 }

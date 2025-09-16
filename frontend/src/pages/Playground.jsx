@@ -33,14 +33,31 @@ const Playground = () => {
 
   return (
     <div className={styles.playgroundContainer}>
-      <h1 className={styles.title}>Playground</h1>
-      <p className={styles.description}>
-        Aquí puedes ver y probar todos los componentes de la UI.
+      <h1>Playground</h1>
+      <p>
+        Aquí puedes ver y probar todos los componentes de la UI y la tipografía de la aplicación.
       </p>
 
+      {/* --- TIPOGRAFÍA --- */}
+      <section>
+        <h2>Tipografía</h2>
+        <div className={styles.textExamples}>
+          <h1>Título de Nivel 1 (h1)</h1>
+          <p>Este es un párrafo de ejemplo con la tipografía principal del cuerpo del texto. Sirve para mostrar contenido largo y detallado. Puedes usar etiquetas como <strong>texto en negrita</strong> y <em>texto en cursiva</em> para darle más énfasis a las palabras.</p>
+          <h2>Título de Nivel 2 (h2)</h2>
+          <p>Este es otro párrafo que muestra cómo se ve el texto de cuerpo.</p>
+          <h3>Título de Nivel 3 (h3)</h3>
+          <p>Los títulos de este nivel se usan para subtítulos más específicos.</p>
+          <h4>Título de Nivel 4 (h4)</h4>
+          <h5>Título de Nivel 5 (h5)</h5>
+          <h6>Título de Nivel 6 (h6)</h6>
+          <p>Texto en un <span style={{ color: 'var(--color-orange)' }}>span de color naranja</span> para destacar una palabra dentro de un párrafo.</p>
+        </div>
+      </section>
+
       {/* --- BOTONES --- */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Botones</h2>
+      <section>
+        <h2>Botones</h2>
         <div className={styles.componentGrid}>
           <Button onClick={() => handleToast('info')}>Botón Normal</Button>
           <Button variant="danger" onClick={() => handleToast('warning')}>Botón Peligro</Button>
@@ -55,8 +72,8 @@ const Playground = () => {
       </section>
 
       {/* --- CAMPOS DE INPUT --- */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Campos de Input</h2>
+      <section>
+        <h2>Campos de Input</h2>
         <div className={styles.componentGrid}>
           <InputField label="Nombre de Usuario" placeholder="Escribe aquí..." />
           <InputField label="Máximo 20 caracteres" maxLength={20} value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
@@ -65,8 +82,8 @@ const Playground = () => {
       </section>
 
       {/* --- SLIDERS --- */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Sliders</h2>
+      <section>
+        <h2>Sliders</h2>
         <div className={styles.componentGrid}>
           <div className={styles.sliderWrapper}>
             <Slider 
@@ -88,8 +105,8 @@ const Playground = () => {
       </section>
 
       {/* --- SELECTOR DE NÚMEROS --- */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Selector de Números</h2>
+      <section>
+        <h2>Selector de Números</h2>
         <div className={styles.componentGrid}>
           <NumberSelector 
             value={selectorValue} 
@@ -101,8 +118,8 @@ const Playground = () => {
       </section>
 
       {/* --- TOASTS --- */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Toasts</h2>
+      <section>
+        <h2>Toasts</h2>
         <div className={styles.componentGrid}>
           <Button onClick={() => handleToast('info')}>Info Toast</Button>
           <Button onClick={() => handleToast('success')}>Success Toast</Button>

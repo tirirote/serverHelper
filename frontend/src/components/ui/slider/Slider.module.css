@@ -1,62 +1,167 @@
-/* Contenedor del Slider */
-.sliderContainer {
+.sliderWrapper {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
+  padding: 12px 16px;
+  /* Padding para el recuadro */
+  border-radius: 8px;
+  /* Bordes redondeados */
+  background-color: var(--color-gray-darkest);
+  /* Fondo normal */
+  border: solid;
+  border-color: var(--color-gray-lightest);
+  border-radius: 8px;
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+  /* Sombra normal */
+  transition: all 0.2s ease-in-out;
+}
+
+/* Estado Seleccionado (Focused) */
+.focusedWrapper {
+  background-color: var(--color-gray-light);
+  /* Fondo más claro */
+  border-color: var(--color-white);
+  /* Borde blanco */
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+}
+
+/* Estado Deshabilitado */
+.disabledWrapper {
+  background-color: var(--color-gray-dark);
+  /* Fondo más oscuro */
+  border-color: var(--color-gray-light);
+  /* Borde más oscuro */
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+  /* Sombra más oscura */
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .valueLabel,
 .maxLabel {
   font-family: var(--font-body);
   font-size: 14px;
-  color: var(--color-medium-gray);
+  color: var(--color-white);
+  /* Color del texto dentro del recuadro */
 }
 
-/* Estilo Base del Input Range */
+/* Asegurarse de que el texto en estado deshabilitado también cambie de color */
+.disabledWrapper .valueLabel,
+.disabledWrapper .maxLabel {
+  color: var(--color-gray-lightest);
+  cursor: not-allowed;
+}
+
 .sliderInput {
-  -webkit-appearance: none; /* Elimina la apariencia por defecto en WebKit */
+  -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 8px; /* Altura de la barra */
-  border-radius: 4px;
-  background-color: var(--color-gray-dark); /* Color de la barra */
-  border: 2px solid var(--color-gray-darkest);
+  height: 8px;
+  /* Altura de la barra */
+  border: none;
+  background: transparent;
+  /* Ahora el fondo del input es transparente */
   cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Estilo para el Track (la barra del slider) */
+.sliderInput::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(to right,
+      var(--color-white) var(--progress-percent, 0%),
+      /* Color de progreso */
+      var(--color-gray-dark) var(--progress-percent, 0%)
+      /* Color restante */
+    );
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+}
+
+.sliderInput::-moz-range-track {
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(to right,
+      var(--color-white) var(--progress-percent, 0%),
+      var(--color-gray-dark) var(--progress-percent, 0%));
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
 }
 
 /* Estilo para el "Thumb" (el círculo que se arrastra) */
-/* NOTA: Estos estilos son difíciles de simplificar para todos los navegadores
-   sin usar selectores específicos. Los navegadores aplicarán un estilo por defecto.
-   Para un diseño simplificado, podemos aceptar el estilo por defecto o
-   usar selectores específicos de forma mínima para una apariencia base.
-   Añadiremos los selectores más comunes para mejorar la consistencia visual. */
 .sliderInput::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 20px;
   height: 20px;
-  background: var(--color-medium-gray);
+  background: var(--color-white);
   border: 2px solid var(--color-gray-darkest);
   border-radius: 50%;
-  margin-top: -8px; /* Ajuste para centrarlo verticalmente */
+  margin-top: -6px;
+  /* Ajuste para centrarlo verticalmente */
+  transition: all 0.2s ease-in-out;
+  /* IMPORTANTE: Necesitamos el z-index para que el thumb esté sobre el track si se usa clip-path */
+  z-index: 2;
 }
 
 .sliderInput::-moz-range-thumb {
   width: 20px;
   height: 20px;
-  background: var(--color-medium-gray);
+  background: var(--color-white);
   border: 2px solid var(--color-gray-darkest);
   border-radius: 50%;
+  transition: all 0.2s ease-in-out;
+  z-index: 2;
 }
 
-/* Estado de enfoque y hover */
-.sliderInput:focus {
-  outline: none; /* Elimina el borde de enfoque del navegador */
-  box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.5); /* Sombra para indicar enfoque */
+/* Thumb en estado Focused */
+.sliderInput:focus::-webkit-slider-thumb {
+  background-color: var(--color-orange);
+  border-color: var(--color-white);
 }
 
-.sliderInput:disabled {
-  background-color: var(--color-gray-darkest);
+.sliderInput:focus::-moz-range-thumb {
+  background-color: var(--color-orange);
+  border-color: var(--color-white);
+}
+
+/* Estilos para el Thumb en estado Deshabilitado */
+.sliderInput:disabled::-webkit-slider-thumb {
+  background-color: var(--color-gray-light);
+  border-color: var(--color-gray-darkest);
   cursor: not-allowed;
-  opacity: 0.6;
+}
+
+.sliderInput:disabled::-moz-range-thumb {
+  background-color: var(--color-gray-light);
+  border-color: var(--color-gray-darkest);
+  cursor: not-allowed;
+}
+
+/* ESTILOS DEL TRACK SEGÚN ESTADO (Focused, Disabled) */
+
+/* Track en estado Focused */
+.focusedWrapper .sliderInput::-webkit-slider-runnable-track,
+.focusedWrapper .sliderInput::-moz-range-track {
+  border-color: var(--color-white);
+  /* Borde blanco cuando enfocado */
+  background: linear-gradient(to right,
+      var(--color-orange) var(--progress-percent, 0%),
+      var(--color-white) var(--progress-percent, 0%)
+      /* Fondo blanco para el resto del track */
+    );
+}
+
+/* Track en estado Deshabilitado */
+.disabledWrapper .sliderInput::-webkit-slider-runnable-track,
+.disabledWrapper .sliderInput::-moz-range-track {
+  background: linear-gradient(to right,
+      var(--color-gray-light) var(--progress-percent, 0%),
+      /* Gris claro para el progreso */
+      var(--color-gray-dark) var(--progress-percent, 0%)
+      /* Gris oscuro para el resto */
+    );
+  border-color: var(--color-gray-darkest);
+  cursor: not-allowed;
 }

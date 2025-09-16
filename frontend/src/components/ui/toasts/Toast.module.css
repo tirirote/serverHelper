@@ -4,27 +4,29 @@
   align-items: center;
   padding: 12px 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: solid;
+  border-color: var(--color-gray-light);
+  background-color: var(--color-gray-darkest);
+  box-shadow: 0 8px 2px var(--color-gray-darkest);
   gap: 12px;
   animation: fadeIn 0.3s ease-in-out;
 }
 
 /* Tipos de Toast según la paleta de colores */
 .info {
-  background-color: var(--color-blue);
   color: var(--color-white);
 }
+
 .error {
-  background-color: var(--color-red-bright);
-  color: var(--color-white);
+  color: var(--color-red);
 }
+
 .success {
-  background-color: var(--color-green-dark);
-  color: var(--color-white);
+  color: var(--color-green);
 }
+
 .warning {
-  background-color: var(--color-yellow-bright);
-  color: var(--color-gray-darkest);
+  color: var(--color-yellow);
 }
 
 .message {
@@ -42,11 +44,12 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateX(-40px);
   }
+
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
 
@@ -57,10 +60,11 @@
 @keyframes fadeOut {
   from {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
+
   to {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateX(40px);
   }
 }
