@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from './sidebar/Sidebar';
+import Sidebar from '../sidebar/Sidebar';
 import styles from './Layout.module.css';
 import { Menu } from 'lucide-react';
 
@@ -15,7 +15,7 @@ const Layout = () => {
     <div className={styles.layoutContainer}>
       {/* Botón para abrir/cerrar la sidebar */}
       <button onClick={toggleSidebar} className={styles.menuButton}>
-        <Menu size={24} color="white" />
+        <Menu size={24}/>
       </button>
 
       {/* El componente de la barra lateral */}

@@ -3,6 +3,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  height: 48px;
   padding: 4px;
   /* Ajusta el padding para el contenedor principal */
   border-radius: 8px;
@@ -19,34 +20,26 @@
   cursor: pointer;
   padding: 4px;
   /* Padding interno para los botones */
-  margin-bottom: 8px;
   color: var(--color-gray-lightest);
   transition: all 0.2s ease-in-out;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: solid;
-  border-radius: 8px;
-  border-color: var(--color-gray-light);
-  background-color: var(--color-gray-darkest);
-  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+  border-radius: 16px;
+  background-color: var(--color-gray-dark);
 }
 
 .buttonLeft:hover,
 .buttonRight:hover {
   background-color: var(--color-gray-light);
-  border: solid;
-  border-color: var(--color-white);
   color: var(--color-white);
-  transform: translateY(-4px);
 }
 
 .buttonLeft:active,
 .buttonRight:active {
   background-color: var(--color-gray-lightest);
-  color: var(--color-yellow);
-  border-color: var(--color-yellow);
-  transform: translateY(4px);
+  color: var(--color-white);
+  border-color: var(--color-white);
   box-shadow: none;
 }
 
@@ -66,7 +59,6 @@
   font-weight: 600;
   color: var(--color-white);
   margin: 8px;
-  margin-bottom: 8px;
   /* Espacio para separar del número */
   background-color: var(--color-gray-darkest);
   text-align: center;

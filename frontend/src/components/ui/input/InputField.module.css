@@ -39,15 +39,17 @@
 .inputField:focus {
   background-color: var(--color-gray-light);
   border-color: var(--color-white);
-  color: var(--color-white)
+  color: var(--color-white);
+  box-shadow: inset 4px 4px 0px var(--color-gray-dark);
+  transform: translateY(-4px);
 }
 
 .inputField:disabled {
   background-color: var(--color-gray-dark);
   border-color: var(--color-gray-light);
-  color: var(--color-gray-lightest);
+  color: var(--color-gray-light);
+  box-shadow: inset 4px 4px 0px var(--color-gray-darkest);
   cursor: not-allowed;
-  opacity: 0.7;
 }
 
 /* --- Estilos para el Contador de Caracteres --- */
@@ -58,5 +60,5 @@
   font-family: var(--font-body);
   font-size: 15px;
   font-weight: 800;
-  color: var(--color-gray-light);
+  color: var(--color-gray-lightest);
 }

@@ -1,0 +1,29 @@
+.showcaseGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--color-gray-dark);
+}
+
+.category h3 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--color-white);
+  border-bottom: 2px solid var(--color-gray-light);
+  padding-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}

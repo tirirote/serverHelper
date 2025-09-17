@@ -1,99 +1,159 @@
-/* Estilos Base del Botón */
 .button {
-  font-family: var(--font-body);
-  padding: 12px 24px;
-  border-radius: 8px;
   cursor: pointer;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-family: var(--font-body);
   font-size: 16px;
-  font-weight: 700;
-  text-align: center;
-  border: solid;
-  border-radius: 8px;
-  border-color: var(--color-gray-lightest);
-  transition: all 0.2s ease-in-out;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  font-weight: 600;
   text-transform: uppercase;
-  background-color: var(--color-gray-dark);
-  color: var(--color-gray-lightest);
-  border-color: var(--color-gray-dark);  
-  box-shadow: 0px 8px 0px var(--color-gray-darkest);
-}
-
-/* --- ESTADO NORMAL --- */
-.button:not(:disabled) {
-  border: solid;
-  border-radius: 8px;
-  border-color: var(--color-gray-darkest);
-  color: var(--color-gray-lightest);
-}
-
-/* --- ESTADO HOVER --- */
-.button:not(:disabled):hover {
-  background-color: var(--color-gray-light);
-  color: var(--color-white);
-  transform: translateY(-4px);
-  border-color: var(--color-gray-lightest);  
-  box-shadow: 0px 8px 0px var(--color-white);
-}
-
-/* --- ESTADO ACTIVE --- */
-.button:not(:disabled):active {
-  background-color: var(--color-gray-lightest);
-  color: var(--color-white);
-  border-color: var(--color-white);
-  transform: translateY(4px);
-  box-shadow: none;
-}
-
-/* --- ESTADO DISABLED --- */
-.button:disabled {
-  background-color: var(--color-gray-dark);
-  color: var(--color-gray-light);
-  border-color: var(--color-gray-light);
-  box-shadow: 0px 8px 0px var(--color-gray-light);
-  cursor: not-allowed;
-}
-
-/* Estilos específicos para botones de icono */
-.iconButton {
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  border-radius: 8px;
-  font-size: 24px;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid transparent;
+  box-shadow: 2px 2px 0px var(--color-gray-dark);
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+}
+
+/* --- Variantes de Botones --- */
+
+/* Botón Primario */
+.primary {
+  background-color: var(--color-gray-dark);
+  border: solid 4px var(--color-gray-light);
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+  color: var(--color-black);
+}
+
+.primary:hover {
+  background-color: var(--color-gray-light);
+  border: solid 4px var(--color-white);
+  box-shadow: 0px 12px 0px var(--color-white);
+  color: var(--color-white);
+  transform: translateY(-4px);
+  font-weight: 700;
+
+}
+
+.primary:active {
+  background-color: var(--color-gray-lightest);
+  border: solid 4px var(--color-white);
+  transform: translateY(8px);
+  box-shadow: none;
+}
+
+/* Botón Secundario */
+.secondary {
+  background-color: var(--color-gray-light);
+  color: var(--color-gray-lightest);
   box-shadow: 0px 8px 0px var(--color-gray-darkest);
 }
 
-/* --- ESTADOS DEL BOTÓN DE ICONO (Normal, Hover, Clicked, Disabled) --- */
-.iconButton:not(:disabled) {
-  background-color: var(--color-gray-darkest);
-  border-color: var(--color-gray-light);
-  color: var(--color-gray-light);
-}
-
-.iconButton:not(:disabled):hover {
-  background-color: var(--color-gray-light);
-  color: var(--color-white);
-  border-color: var(--color-gray-lightest);
-}
-
-.iconButton:not(:disabled):active {
+.secondary:hover {
   background-color: var(--color-gray-lightest);
   color: var(--color-white);
-  border-color: var(--color-white);
+  box-shadow: 0px 12px 0px var(--color-white);
+  transform: translateY(-4px);
+  font-weight: 700;
+}
+
+.secondary:active {
+  background-color: var(--color-white);
+  color: var(--color-gray-lightest);
+  transform: translateY(8px);
+  box-shadow: none;
+}
+
+/* Botón de Peligro */
+.danger {
+  background-color: var(--color-gray-darkest);
+  border: solid 4px var(--color-red);
+  color: var(--color-red);
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+}
+
+.danger:hover {
+  background-color: var(--color-red);
+  border: solid 4px var(--color-white);
+  color: var(--color-white);
+  box-shadow: 0px 12px 0px var(--color-white);
+  transform: translateY(-4px);
+  font-weight: 700;
+}
+
+.danger:active {
   transform: translateY(2px);
   box-shadow: none;
 }
 
-.iconButton:disabled {
-  background-color: var(--color-gray-dark);
-  color: var(--color-gray-light);
-  border-color: var(--color-gray-light);
+/* Botón Fantasma (para iconos o texto ligero) */
+.ghost {
+  background: var(--color-gray-dark);
+  border: none;
+  color: var(--color-gray-lightest);
+  border-radius: 32px;
+  box-shadow: none;
+}
+
+.ghost:hover {
+  background: var(--color-gray-light);
+  color: var(--color-white);
+  transform: translateY(-4px);
+  font-weight: 700;
+}
+
+.ghost:active {
+  background: var(--color-gray-lightest);
+  transform: translateY(2px);
+}
+
+/* Botón de solo icono */
+.icon-only {
+  background: none;
+  border: none;
+  color: var(--color-gray-lightest);
+  border-radius: 8px;
+  border: solid 4px var(--color-gray-light);
+  padding: 8px;
+  box-shadow: none;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px; /* Padding para dar un poco de espacio alrededor del ícono */
+  width: 48px; /* Tamaño del icono (24px) + 2 * padding (8px) */
+  height: 48px;  
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+}
+
+.icon-only:hover {
+  color: var(--color-white);
+  background-color: var(--color-gray-light);
+  border: solid 4px var(--color-white);  
+  box-shadow: 0px 12px 0px var(--color-white);
+  transform: translateY(-4px);
+}
+
+.icon-only:active {
+  background-color: var(--color-gray-lightest);
+  transform: translateY(4px);
+  box-shadow: none;
+}
+
+/* Estado Deshabilitado */
+.disabled {
+  background: var(--color-gray-dark);
   cursor: not-allowed;
+  border: solid 4px var(--color-gray-light);
+  box-shadow: 0px 8px 0px var(--color-gray-light);
+  color: var(--color-gray-light);
+  transform: none;
+}
+/* Estado Deshabilitado */
+.disabled:hover {
+  background: var(--color-gray-dark);
+  border: solid 4px var(--color-gray-light);
+  box-shadow: 0px 8px 0px var(--color-gray-light);
+  color: var(--color-gray-light);
+  transform: translateY(0px);
 }

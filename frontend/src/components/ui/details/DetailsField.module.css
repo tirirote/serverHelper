@@ -29,8 +29,11 @@
 }
 
 .detailsField textarea:focus {
+  background-color: var(--color-gray-light);
   outline: none;
   border-color: var(--color-white);
+  box-shadow: inset 4px 4px 0px var(--color-gray-dark);
+  transform: translateY(-4px);
 }
 
 .detailsField .charCounter {
@@ -40,5 +43,5 @@
   font-family: var(--font-body);
   font-size: 15px;
   font-weight: 800;
-  color: var(--color-gray-light);
+  color: var(--color-gray-lightest);
 }

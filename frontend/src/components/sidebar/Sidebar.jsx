@@ -5,21 +5,19 @@ import { NavLink } from 'react-router-dom'; // Usaremos NavLink para el enrutami
 
 // Los iconos se importan de Lucide React
 import {
-  SquareTerminal,
   Server,
-  Package,
-  Boxes,
   User,
   LogOut,
-  Menu,
   ShoppingBag,
+  Cpu,
+  FolderOpen
 } from 'lucide-react';
 
 const navItems = [
-  { name: 'Workspaces', icon: <Boxes />, to: '/workspaces' },
+  { name: 'Workspaces', icon: <FolderOpen />, to: '/workspaces' },
   { name: 'Shop', icon: <ShoppingBag />, to: '/shop' },
-  { name: 'Components', icon: <Package />, to: '/components' },
-  { name: 'Servers', icon: <Server />, to: '/servers' },
+  { name: 'Components', icon: <Cpu />, to: '/components' },
+  { name: 'Servers', icon: <Server />, to: '/servers' }
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -27,9 +25,6 @@ const Sidebar = ({ isOpen, onClose }) => {
     <nav className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
       <div className={styles.topSection}>
         <div className={styles.header}>
-          <button className={styles.menuToggle} onClick={onClose}>
-            <Menu size={24} />
-          </button>
           <span className={styles.logo}>LOGO</span>
         </div>
 

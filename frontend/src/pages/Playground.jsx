@@ -1,3 +1,4 @@
+// ... imports
 import React, { useState } from 'react';
 import Button from '../components/ui/button/Button.jsx';
 import InputField from '../components/ui/input/InputField.jsx';
@@ -6,15 +7,20 @@ import NumberSelector from '../components/ui/numberSelector/NumberSelector.jsx';
 import { useToast } from '../components/ui/toasts/ToastProvider.jsx';
 import { Search, PlusCircle, Trash2 } from 'lucide-react';
 import NewComponentForm from '../components/form/component/NewComponentForm.jsx';
-import Dialog from '../components/ui/dialog/Dialog.jsx'; // Importa el nuevo componente Dialog
+import UserForm from '../components/form/user/UserForm.jsx';
+import NewRackForm from '../components/form/rack/NewRackForm.jsx'; // Nuevo import
+import Dialog from '../components/ui/dialog/Dialog.jsx';
 import styles from './Playground.module.css';
+import ButtonShowcase from '../components/ui/button/ButtonShowcase.jsx'; // Nuevo import
 
 const Playground = () => {
   const { showToast } = useToast();
   const [sliderValue, setSliderValue] = useState(50);
   const [selectorValue, setSelectorValue] = useState(1);
   const [inputValue, setInputValue] = useState('');
-  const [showForm, setShowForm] = useState(false);
+  const [showComponentForm, setShowComponentForm] = useState(false);
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [showRackForm, setShowRackForm] = useState(false); // Nuevo estado
 
   const handleToast = (type) => {
     switch (type) {
@@ -41,17 +47,31 @@ const Playground = () => {
         Aquí puedes ver y probar todos los componentes de la UI y la tipografía de la aplicación.
       </p>
 
-      {/* --- FORMULARIO INTERACTIVO (ahora con Diálogo) --- */}
+      {/* --- FORMULARIOS --- */}
       <section>
-        <h2>Formulario en Diálogo</h2>
-        <Button onClick={() => setShowForm(true)}>Mostrar Formulario</Button>
+        <h2>Formularios</h2>
+        <div className={styles.componentGrid}>
+          <Button onClick={() => setShowComponentForm(true)}>Mostrar Formulario de Componente</Button>
+          <Button onClick={() => setShowUserForm(true)}>Mostrar Formulario de Usuario</Button>
+          <Button onClick={() => setShowRackForm(true)}>Mostrar Formulario de Rack</Button>
+        </div>
       </section>
 
-      {/* --- EL DIÁLOGO CONTIENE EL FORMULARIO --- */}
-      <Dialog isOpen={showForm} onClose={() => setShowForm(false)}>
-        <NewComponentForm onClose={() => setShowForm(false)} />
+      {/* --- EL DIÁLOGO CONTIENE EL FORMULARIO DE COMPONENTE --- */}
+      <Dialog isOpen={showComponentForm} onClose={() => setShowComponentForm(false)}>
+        <NewComponentForm onClose={() => setShowComponentForm(false)} />
       </Dialog>
-      
+
+      {/* --- EL DIÁLOGO CONTIENE EL FORMULARIO DE USUARIO --- */}
+      <Dialog isOpen={showUserForm} onClose={() => setShowUserForm(false)}>
+        <UserForm onClose={() => setShowUserForm(false)} />
+      </Dialog>
+
+      {/* --- EL DIÁLOGO CONTIENE EL FORMULARIO DE RACK --- */}
+      <Dialog isOpen={showRackForm} onClose={() => setShowRackForm(false)}>
+        <NewRackForm onClose={() => setShowRackForm(false)} />
+      </Dialog>
+
       {/* --- TIPOGRAFÍA --- */}
       <section>
         <h2>Tipografía</h2>
@@ -72,17 +92,7 @@ const Playground = () => {
       {/* --- BOTONES --- */}
       <section>
         <h2>Botones</h2>
-        <div className={styles.componentGrid}>
-          <Button onClick={() => handleToast('info')}>Botón Normal</Button>
-          <Button variant="danger" onClick={() => handleToast('warning')}>Botón Peligro</Button>
-          <Button disabled>Botón Deshabilitado</Button>
-          <Button onClick={() => handleToast('success')}>
-            <Search size={24} />
-          </Button>
-          <Button onClick={() => handleToast('error')} disabled>
-            <Trash2 size={24} />
-          </Button>
-        </div>
+        <ButtonShowcase />
       </section>
 
       {/* --- CAMPOS DE INPUT --- */}
@@ -100,19 +110,19 @@ const Playground = () => {
         <h2>Sliders</h2>
         <div className={styles.componentGrid}>
           <div className={styles.sliderWrapper}>
-            <Slider 
-              min={0} 
-              max={100} 
-              value={sliderValue} 
-              onChange={(e) => setSliderValue(Number(e.target.value))} 
+            <Slider
+              min={0}
+              max={100}
+              value={sliderValue}
+              onChange={(e) => setSliderValue(Number(e.target.value))}
             />
           </div>
           <div className={styles.sliderWrapper}>
-            <Slider 
-              min={0} 
-              max={100} 
-              value={57} 
-              disabled={true} 
+            <Slider
+              min={0}
+              max={100}
+              value={57}
+              disabled={true}
             />
           </div>
         </div>
@@ -122,11 +132,11 @@ const Playground = () => {
       <section>
         <h2>Selector de Números</h2>
         <div className={styles.componentGrid}>
-          <NumberSelector 
-            value={selectorValue} 
-            min={-5} 
-            max={5} 
-            onChange={setSelectorValue} 
+          <NumberSelector
+            value={selectorValue}
+            min={-5}
+            max={5}
+            onChange={setSelectorValue}
           />
         </div>
       </section>

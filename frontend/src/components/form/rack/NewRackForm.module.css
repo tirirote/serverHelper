@@ -1,0 +1,93 @@
+.formContainer {
+    position: relative;
+    padding: 8px;
+    box-shadow: 4px 4px 0px var(--color-gray-dark);
+    max-width: 450px;
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--color-gray-dark);
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+}
+
+.header h2 {
+    font-size: 2rem;
+    color: var(--color-white);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.unitsContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.unitsContainer label {
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--color-white);
+    text-transform: uppercase;
+}
+
+.serversContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.serversContainer label {
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--color-white);
+    text-transform: uppercase;
+}
+
+.addServerButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--color-white);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.addServerButton:hover {
+    color: var(--color-orange);
+}
+
+.serversList {
+    background-color: var(--color-gray-dark);
+    border: 2px solid var(--color-gray-dark);
+    border-radius: 8px;
+    padding: 12px;
+    max-height: 150px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.serversListItem {
+    font-family: var(--font-body);
+    color: var(--color-white);
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.doneButton {
+    align-self: flex-end;
+}
