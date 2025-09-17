@@ -34,35 +34,44 @@
 
  h1 {
    font-family: var(--font-title);
-   font-size: 2.5rem;
-   font-weight: 600;
+   font-size: 2rem;
+   font-weight: 700;
    /* Negrita, el peso más alto para el título principal */
    color: var(--color-white);
  }
 
  h2 {
    font-family: var(--font-title);
-   font-size: 2rem;
-   font-weight: 600;
-   /* Semi-negrita, un escalón más abajo */
-   color: var(--color-gray-lightest);
+   font-size: 1.75rem;
+   font-weight: 700;
+   /* Peso medio */
+   color: var(--color-yellow);
  }
 
  h3 {
    font-family: var(--font-title);
-   font-size: 1.5rem;
-   font-weight: 600;
+   font-size: 1.75rem;
+   font-weight: 700;
    /* Peso medio */
-   color: var(--color-gray-lightest);
+   color: var(--color-orange);
  }
 
- h4,
+ h4 {
+   font-family: var(--font-title);
+   font-size: 1.75rem;
+   font-weight: 700;
+   /* Peso medio */
+   color: var(--color-white);
+ }
+
+
  h5,
  h6 {
    font-family: var(--font-title);
-   font-size: 1.5rem;
-   font-weight: 600;
-   /* Volvemos a negrita para el cuerpo de texto */
+   font-style: italic;
+   font-size: 1.75rem;
+   font-weight: 700;
+   /* Peso medio */
    color: var(--color-gray-lightest);
  }
 
@@ -70,6 +79,7 @@
  div,
  label {
    font-family: var(--font-body);
+   color: var(--color-gray-lightest);
    font-weight: 400;
  }
 

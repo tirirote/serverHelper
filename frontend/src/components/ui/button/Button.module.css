@@ -16,18 +16,18 @@
   justify-content: center;
   gap: 8px;
   text-transform: uppercase;
-  background-color: var(--color-gray-darkest);
+  background-color: var(--color-gray-dark);
   color: var(--color-gray-lightest);
-  border-color: var(--color-gray-dark);
+  border-color: var(--color-gray-dark);  
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
 }
 
 /* --- ESTADO NORMAL --- */
 .button:not(:disabled) {
   border: solid;
   border-radius: 8px;
-  border-color: var(--color-gray-lightest);
+  border-color: var(--color-gray-darkest);
   color: var(--color-gray-lightest);
-  box-shadow: 0px 8px 0px var(--color-gray-darkest);
 }
 
 /* --- ESTADO HOVER --- */
@@ -35,14 +35,15 @@
   background-color: var(--color-gray-light);
   color: var(--color-white);
   transform: translateY(-4px);
-  border-color: var(--color-white);
+  border-color: var(--color-gray-lightest);  
+  box-shadow: 0px 8px 0px var(--color-white);
 }
 
 /* --- ESTADO ACTIVE --- */
 .button:not(:disabled):active {
   background-color: var(--color-gray-lightest);
-  color: var(--color-yellow);
-  border-color: var(--color-yellow);
+  color: var(--color-white);
+  border-color: var(--color-white);
   transform: translateY(4px);
   box-shadow: none;
 }
@@ -50,11 +51,10 @@
 /* --- ESTADO DISABLED --- */
 .button:disabled {
   background-color: var(--color-gray-dark);
-  color: var(--color-gray-lightest);
+  color: var(--color-gray-light);
   border-color: var(--color-gray-light);
-  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+  box-shadow: 0px 8px 0px var(--color-gray-light);
   cursor: not-allowed;
-  opacity: 0.6;
 }
 
 /* Estilos específicos para botones de icono */
@@ -67,6 +67,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
 }
 
 /* --- ESTADOS DEL BOTÓN DE ICONO (Normal, Hover, Clicked, Disabled) --- */
@@ -74,7 +75,6 @@
   background-color: var(--color-gray-darkest);
   border-color: var(--color-gray-light);
   color: var(--color-gray-light);
-  box-shadow: 2px 2px 0px var(--color-gray-dark);
 }
 
 .iconButton:not(:disabled):hover {
@@ -85,17 +85,15 @@
 
 .iconButton:not(:disabled):active {
   background-color: var(--color-gray-lightest);
-  color: var(--color-gray-darkest);
-  border-color: var(--color-gray-light);
+  color: var(--color-white);
+  border-color: var(--color-white);
   transform: translateY(2px);
   box-shadow: none;
 }
 
 .iconButton:disabled {
   background-color: var(--color-gray-dark);
-  color: var(--color-gray-lightest);
+  color: var(--color-gray-light);
   border-color: var(--color-gray-light);
-  box-shadow: 2px 2px 0px var(--color-gray-dark);
   cursor: not-allowed;
-  opacity: 0.6;
 }

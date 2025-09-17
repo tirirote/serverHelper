@@ -3,41 +3,89 @@
   display: flex;
   align-items: center;
   padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: 4px;
   border: solid;
-  border-color: var(--color-gray-light);
-  background-color: var(--color-gray-darkest);
-  box-shadow: 0 8px 2px var(--color-gray-darkest);
+  border-color: var(--color-gray-dark);
+  background-color: var(--color-gray-dark);
+  box-shadow: -4px 8px 2px var(--color-gray-darkest);
   gap: 12px;
   animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Tipos de Toast según la paleta de colores */
-.info {
-  color: var(--color-white);
-}
-
-.error {
-  color: var(--color-red);
-}
-
-.success {
-  color: var(--color-green);
-}
-
-.warning {
-  color: var(--color-yellow);
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
 }
 
 .message {
-  font-family: var(--font-body);
-  font-size: 14px;
-  margin: 0;
+  font-weight: 500;
+  flex-grow: 1;
 }
 
-.icon svg {
-  width: 20px;
-  height: 20px;
+/* Animación de salida */
+.fadeOut {
+  transform: translateX(120%);
+  opacity: 0;
+}
+
+/* --- ESTILOS ESPECÍFICOS POR TIPO --- */
+
+/* Success Toast */
+.success {
+  background-color: var(--color-gray-dark);
+  border-left: 4px solid var(--color-green);
+}
+
+.success .icon {
+  color: var(--color-green);
+}
+
+.success .message {
+  color: var(--color-green);
+}
+
+/* Error Toast */
+.error {
+  background-color: var(--color-gray-dark);
+  border-left: 4px solid var(--color-red);
+}
+
+.error .icon {
+  color: var(--color-red);
+}
+
+.error .message {
+  color: var(--color-red);
+}
+
+/* Warning Toast */
+.warning {
+  background-color: var(--color-gray-dark);
+  border-left: 4px solid var(--color-yellow);
+}
+
+.warning .icon {
+  color: var(--color-yellow);
+}
+
+.warning .message {
+  color: var(--color-yellow);
+}
+
+/* Info Toast */
+.info {
+  background-color: var(--color-gray-dark);
+  border-left: 4px solid var(--color-blue);
+}
+
+.info .icon {
+  color: var(--color-blue);
+}
+
+.info .message {
+  color: var(--color-blue);
 }
 
 /* Animaciones */

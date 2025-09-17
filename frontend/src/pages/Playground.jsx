@@ -40,7 +40,7 @@ const Playground = () => {
 
       {/* --- TIPOGRAFÍA --- */}
       <section>
-        <h2>Tipografía</h2>
+        <h3>Tipografía</h3>
         <div className={styles.textExamples}>
           <h1>Título de Nivel 1 (h1)</h1>
           <p>Este es un párrafo de ejemplo con la tipografía principal del cuerpo del texto. Sirve para mostrar contenido largo y detallado. Puedes usar etiquetas como <strong>texto en negrita</strong> y <em>texto en cursiva</em> para darle más énfasis a las palabras.</p>
@@ -57,7 +57,7 @@ const Playground = () => {
 
       {/* --- BOTONES --- */}
       <section>
-        <h2>Botones</h2>
+        <h3>Botones</h3>
         <div className={styles.componentGrid}>
           <Button onClick={() => handleToast('info')}>Botón Normal</Button>
           <Button variant="danger" onClick={() => handleToast('warning')}>Botón Peligro</Button>
@@ -73,7 +73,7 @@ const Playground = () => {
 
       {/* --- CAMPOS DE INPUT --- */}
       <section>
-        <h2>Campos de Input</h2>
+        <h3>Campos de Input</h3>
         <div className={styles.componentGrid}>
           <InputField label="Nombre de Usuario" placeholder="Escribe aquí..." />
           <InputField label="Máximo 20 caracteres" maxLength={20} value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
@@ -83,7 +83,7 @@ const Playground = () => {
 
       {/* --- SLIDERS --- */}
       <section>
-        <h2>Sliders</h2>
+        <h3>Sliders</h3>
         <div className={styles.componentGrid}>
           <div className={styles.sliderWrapper}>
             <Slider 
@@ -106,7 +106,7 @@ const Playground = () => {
 
       {/* --- SELECTOR DE NÚMEROS --- */}
       <section>
-        <h2>Selector de Números</h2>
+        <h3>Selector de Números</h3>
         <div className={styles.componentGrid}>
           <NumberSelector 
             value={selectorValue} 
@@ -119,7 +119,7 @@ const Playground = () => {
 
       {/* --- TOASTS --- */}
       <section>
-        <h2>Toasts</h2>
+        <h3>Toasts</h3>
         <div className={styles.componentGrid}>
           <Button onClick={() => handleToast('info')}>Info Toast</Button>
           <Button onClick={() => handleToast('success')}>Success Toast</Button>
