@@ -1,0 +1,60 @@
+.formContainer {
+    position: relative;
+    padding: 16px;
+    background-color: transparent;
+    max-width: 450px;
+    width: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--color-gray-dark);
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+}
+
+.header h2 {
+    font-size: 2rem;
+    color: var(--color-white);
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: var(--color-gray-lightest);
+    cursor: pointer;
+    padding: 16px;
+    transition: color 0.2s;
+}
+
+.closeButton:hover {
+    color: var(--color-white);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.costContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.costContainer label {
+    font-family: var(--font-body);
+    font-weight: 200;
+    color: var(--color-white);
+    text-transform: uppercase;
+}
+
+.costContainer .currency {
+    font-family: var(--font-body);
+    font-weight: 200;
+    font-size: 24px;
+    color: var(--color-white);
+}

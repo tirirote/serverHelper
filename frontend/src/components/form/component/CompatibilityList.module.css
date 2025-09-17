@@ -1,0 +1,68 @@
+.listContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.listContainer label {
+    font-family: var(--font-body);
+    font-weight: 200;
+    color: var(--color-white);
+    text-transform: uppercase;
+}
+
+.list {
+    background-color: var(--color-gray-dark);
+    box-shadow: inset 4px 4px 0px var(--color-gray-darkest);
+    border-radius: 8px;
+    border: solid;
+    border-color: var(--color-gray-lightest);
+    padding: 12px;
+    max-height: 150px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    /* Estilos de la barra de desplazamiento para WebKit */
+    /* Ancho de la barra de desplazamiento */
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    /* Fondo del track de la barra de desplazamiento */
+    &::-webkit-scrollbar-track {
+        background: var(--color-gray-darkest);
+        border-radius: 6px;
+    }
+
+    /* El "thumb" o la parte arrastrable de la barra */
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--color-gray-dark);
+        border-radius: 6px;
+        border: 3px solid var(--color-gray-light);
+    }
+    
+    /* Estilo del thumb al pasar el cursor por encima */
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: var(--color-gray-lightest);
+        border: 3px solid var(--color-white);
+    }
+}
+
+.listItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-body);
+    color: var(--color-white);
+    padding: 12px;
+    border-radius: 8px;
+    border: solid;
+    border-color: var(--color-gray-darkest);
+}
+
+/* Estilo para el hover de los ítems de la lista */
+.listItem:hover {
+    background-color: var(--color-gray-darkest);
+}
