@@ -9,9 +9,11 @@ import { Search, PlusCircle, Trash2 } from 'lucide-react';
 import NewComponentForm from '../components/form/component/NewComponentForm.jsx';
 import UserForm from '../components/form/user/UserForm.jsx';
 import NewRackForm from '../components/form/rack/NewRackForm.jsx'; // Nuevo import
+import BuyComponentForm from '../components/form/buy/BuyComponentForm.jsx';
 import Dialog from '../components/ui/dialog/Dialog.jsx';
 import styles from './Playground.module.css';
 import ButtonShowcase from '../components/ui/button/ButtonShowcase.jsx'; // Nuevo import
+import TextShowcase from '../components/ui/text/TextShowcase.jsx'; // Nuevo import
 
 const Playground = () => {
   const { showToast } = useToast();
@@ -21,6 +23,7 @@ const Playground = () => {
   const [showComponentForm, setShowComponentForm] = useState(false);
   const [showUserForm, setShowUserForm] = useState(false);
   const [showRackForm, setShowRackForm] = useState(false); // Nuevo estado
+  const [showBuyForm, setShowBuyForm] = useState(false);
 
   const handleToast = (type) => {
     switch (type) {
@@ -54,6 +57,7 @@ const Playground = () => {
           <Button onClick={() => setShowComponentForm(true)}>Mostrar Formulario de Componente</Button>
           <Button onClick={() => setShowUserForm(true)}>Mostrar Formulario de Usuario</Button>
           <Button onClick={() => setShowRackForm(true)}>Mostrar Formulario de Rack</Button>
+          <Button onClick={() => setShowBuyForm(true)}>Mostrar Formulario de Compra</Button>
         </div>
       </section>
 
@@ -71,28 +75,20 @@ const Playground = () => {
       <Dialog isOpen={showRackForm} onClose={() => setShowRackForm(false)}>
         <NewRackForm onClose={() => setShowRackForm(false)} />
       </Dialog>
-
-      {/* --- TIPOGRAFÍA --- */}
-      <section>
-        <h2>Tipografía</h2>
-        <div className={styles.textExamples}>
-          <h1>Título de Nivel 1 (h1)</h1>
-          <p>Este es un párrafo de ejemplo con la tipografía principal del cuerpo del texto. Sirve para mostrar contenido largo y detallado. Puedes usar etiquetas como <strong>texto en negrita</strong> y <em>texto en cursiva</em> para darle más énfasis a las palabras.</p>
-          <h2>Título de Nivel 2 (h2)</h2>
-          <p>Este es otro párrafo que muestra cómo se ve el texto de cuerpo.</p>
-          <h3>Título de Nivel 3 (h3)</h3>
-          <p>Los títulos de este nivel se usan para subtítulos más específicos.</p>
-          <h4>Título de Nivel 4 (h4)</h4>
-          <h5>Título de Nivel 5 (h5)</h5>
-          <h6>Título de Nivel 6 (h6)</h6>
-          <p>Texto en un <span style={{ color: 'var(--color-orange)' }}>span de color naranja</span> para destacar una palabra dentro de un párrafo.</p>
-        </div>
-      </section>
-
+      <Dialog isOpen={showBuyForm} onClose={() => setShowBuyForm(false)}> {/* Nuevo diálogo */}
+        <BuyComponentForm onClose={() => setShowBuyForm(false)} />
+      </Dialog>
+      
       {/* --- BOTONES --- */}
       <section>
         <h2>Botones</h2>
         <ButtonShowcase />
+      </section>
+
+      {/* --- TIPOGRAFÍA --- */}
+      <section>
+        <h2>Tipografía</h2>
+        <TextShowcase />
       </section>
 
       {/* --- CAMPOS DE INPUT --- */}

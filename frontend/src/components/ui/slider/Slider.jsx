@@ -5,31 +5,25 @@ import styles from './Slider.module.css';
 const Slider = React.forwardRef(({ value, min = 0, max = 100, onChange, disabled = false, ...props }, ref) => {
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleFocus = () => setIsFocused(true);
-  const handleBlur = () => setIsIsFocused(false);
-
   // Calcula el porcentaje del valor para el track de progreso
   const progressPercent = ((value - min) / (max - min)) * 100;
+  const wrapperClass = `${styles.sliderWrapper} ${isFocused ? styles.focusedWrapper : ''} ${disabled ? styles.disabledWrapper : ''}`;
+
 
   return (
-    <div
-      className={`${styles.sliderWrapper} ${isFocused ? styles.focusedWrapper : ''} ${disabled ? styles.disabledWrapper : ''}`}
-    >
+    <div className={wrapperClass}>
       <span className={styles.valueLabel}>{value}</span>
       <input
-        ref={ref}
         type="range"
         min={min}
         max={max}
         value={value}
         onChange={onChange}
         disabled={disabled}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         className={styles.sliderInput}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        // Añade la variable CSS para controlar el background del track
         style={{ '--progress-percent': `${progressPercent}%` }}
-        {...props}
       />
       <span className={styles.maxLabel}>{max}</span>
     </div>

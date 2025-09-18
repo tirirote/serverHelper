@@ -14,11 +14,6 @@
     margin-bottom: 24px;
 }
 
-.header h2 {
-    font-size: 2rem;
-    color: var(--color-white);
-}
-
 .form {
     display: flex;
     flex-direction: column;

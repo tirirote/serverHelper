@@ -1,0 +1,24 @@
+.quote {
+    background-color: var(--color-gray-light);
+    border: solid 4px var(--color-gray-light);
+    border-left: solid 4px var(--color-orange);
+    padding: 16px;
+    font-style: italic;
+    color: var(--color-gray-lightest);
+    border-radius: 4px;
+    margin: 0;
+}
+
+.quote p {
+    margin: 0;
+    color: var(--color-white);
+}
+
+.quoteAuthor {
+    display: block;
+    margin-top: 8px;
+    text-align: right;
+    font-style: normal;
+    color: var(--color-orange);
+    font-weight: 600;
+}

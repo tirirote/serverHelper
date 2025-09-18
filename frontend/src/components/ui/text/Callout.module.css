@@ -1,0 +1,39 @@
+.callout {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 32px;
+    border-left: 4px solid;
+    border-radius: 4px;
+    font-family: var(--font-body);
+    background-color: var(--color-gray-light);    
+    box-shadow: 4px 4px 0px var(--color-gray-darkest);
+}
+
+.icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.content p {
+    flex-grow: 1;
+    color: var(--color-white);
+    font-style: italic;
+    font-weight: 200;
+}
+
+.info {
+    border-left-color: var(--color-blue);
+    color: var(--color-blue);
+}
+
+.warning {
+    border-left-color: var(--color-yellow);
+    color: var(--color-yellow);
+}
+
+.danger {
+    border-left-color: var(--color-red);
+    color: var(--color-red);
+}

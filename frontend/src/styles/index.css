@@ -2,15 +2,13 @@
  @import url('./colors.css');
 
  /* Fuentes */
- @import url('https://fonts.googleapis.com/css2?family=Chango&family=Genos:ital,wght@0,100..900;1,100..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Patrick+Hand&family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Varela+Round&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=Chango&family=Genos:ital,wght@0,100..900;1,100..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Patrick+Hand&family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Varela+Round&display=swap');
 
  /* Fuentes y estilos globales */
  :root {
    --font-title: 'Genos';
    --font-body: 'Nunito';
-
-   /* Estilos globales */
-   background-color: var(--color-gray-dark);
+   --font-code: 'Ubuntu Mono';
    color: var(--color-white);
    font-family: var(--font-body);
    line-height: 1.5;
@@ -41,14 +39,16 @@
  }
 
  h2 {
+   padding: 4px;
    font-family: var(--font-title);
    font-size: 1.75rem;
    font-weight: 700;
    /* Peso medio */
-   color: var(--color-yellow);
+   color: var(--color-white);
  }
 
  h3 {
+   padding: 4px;
    font-family: var(--font-title);
    font-size: 1.75rem;
    font-weight: 700;
@@ -57,6 +57,7 @@
  }
 
  h4 {
+   padding: 4px;
    font-family: var(--font-title);
    font-size: 1.75rem;
    font-weight: 700;
@@ -64,9 +65,9 @@
    color: var(--color-white);
  }
 
-
  h5,
  h6 {
+   padding: 4px;
    font-family: var(--font-title);
    font-style: italic;
    font-size: 1.75rem;
@@ -75,9 +76,7 @@
    color: var(--color-gray-lightest);
  }
 
- p,
- div,
- label {
+ p {
    font-family: var(--font-body);
    color: var(--color-gray-lightest);
    font-weight: 400;
@@ -92,16 +91,24 @@
  /* Enlaces */
  a {
    font-weight: 500;
-   color: var(--color-orange);
+   color: var(--color-blue);
    text-decoration: none;
    transition: color 0.25s;
  }
 
  a:hover {
-   color: var(--color-orange);
+   color: var(--color-white);
  }
 
  /* Asegúrate de que los estilos por defecto de los botones no interfieran */
  button {
    font-family: var(--font-body);
+ }
+
+ /* --- Estilos para Código --- */
+ code {
+   font-family: var(--font-code);
+   font-weight: 400;
+   background-color: var(--color-gray-light);
+   color: var(--color-white);
  }
