@@ -1,22 +1,23 @@
 import { Router } from 'express';
-import { 
-  createRack, 
-  getRackByName, 
-  getAllRacks, 
+import {
+  createRack,
+  getRackByName,
+  getAllRacks,
   deleteRackByName,
-  addServerToRack,
-  getMaintenanceCost
+  getRackMaintenanceCost,
+  updateRack,
+  addServerToRack
+  
 } from '../controllers/rackController.js';
 
 const router = Router();
 
 router.post('/', createRack);
+router.delete('/:workspaceName/:name', deleteRackByName);
+router.put('/:name', updateRack);
 router.get('/:workspaceName', getAllRacks);
 router.get('/:workspaceName/:name', getRackByName);
-router.delete('/:workspaceName/:name', deleteRackByName);
-router.get('/:workspaceName/:rackName/maintenance', getMaintenanceCost);
-
-//Ruta de integración con servidores
+router.get('/:workspaceName/:name/maintenance-cost', getRackMaintenanceCost);
 router.post('/add-server', addServerToRack);
 
 export default router;

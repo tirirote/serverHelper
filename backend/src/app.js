@@ -4,6 +4,7 @@ import workspaceRoutes from './routes/workspaceRoutes.js';
 import rackRoutes from './routes/rackRoutes.js';
 import serverRoutes from './routes/serverRoutes.js';
 import componentRoutes from './routes/componentRoutes.js';
+import networkRoutes from './routes/networkRoutes.js'
 
 export const createApp = () => {
     const app = express();
@@ -15,6 +16,7 @@ export const createApp = () => {
     app.use('/api/racks', rackRoutes);
     app.use('/api/servers', serverRoutes);
     app.use('/api/components', componentRoutes);
+    app.use('/api/networks', networkRoutes)
 
     return app;
 };

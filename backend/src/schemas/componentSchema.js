@@ -3,8 +3,11 @@ import Joi from 'joi';
 export const componentSchema = Joi.object({
   type: Joi.string().required(),
   name: Joi.string().min(3).max(50).required(),
-  cost: Joi.number().positive().required(),
+  price: Joi.number().positive().required(),  
+  maintenanceCost: Joi.number().positive().allow(null),
+  estimatedConsumption: Joi.number().positive().allow(null),
   compatibleList: Joi.array().items(Joi.string()).optional().default([]),
   details: Joi.string().max(255).optional().allow(''),
-  selled: Joi.boolean().default(false),
+  isSelled: Joi.boolean().default(false),
+  modelPath: Joi.string().trim().allow(null, '')
 });

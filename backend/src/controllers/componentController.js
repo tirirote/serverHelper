@@ -9,7 +9,7 @@ export const createComponent = (req, res) => {
   }
 
   const newComponent = req.body;
-  if (!newComponent.type || !newComponent.name || !newComponent.cost) {
+  if (!newComponent.type || !newComponent.name || !newComponent.price) {
     return res.status(400).json({ message: 'Faltan datos obligatorios para el componente.' });
   }
 
@@ -57,13 +57,31 @@ export const getComponentByName = (req, res) => {
   res.status(200).json({ component });
 };
 
-export const getComponentCost = (req, res) => {
+export const getComponentPrice = (req, res) => {
   const { name } = req.params;
   const component = db.components.find(c => c.name === name);
   if (!component) {
     return res.status(404).json({ message: 'Componente no encontrado.' });
   }
-  res.status(200).json({ cost: component.cost });
+  res.status(200).json({ price: component.price });
+};
+
+export const getComponentMaintenanceCost = (req, res) => {
+    const { name } = req.params;
+    const component = db.components.find(c => c.name === name);
+    if (!component) {
+        return res.status(404).json({ message: 'Componente no encontrado.' });
+    }
+    res.status(200).json({ maintenanceCost: component.maintenanceCost });
+};
+
+export const getComponentModelPath = (req, res) => {
+    const { name } = req.params;
+    const component = db.components.find(c => c.name === name);
+    if (!component) {
+        return res.status(404).json({ message: 'Componente no encontrado.' });
+    }
+    res.status(200).json({ modelPath: component.modelPath });
 };
 
 export const getComponentCompatibleList = (req, res) => {

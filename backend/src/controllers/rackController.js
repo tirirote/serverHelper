@@ -2,7 +2,6 @@ import { removeRackFromWorkspace, getWorkspaceByName } from './workspaceControll
 import { getServerByName } from './serverController.js'
 import { db } from '../db/index.js';
 import { rackSchema } from '../schemas/rackSchema.js';
-import { getServerMaintenanceCost } from './serverController.js';
 
 export const createRack = (req, res) => {
   const { error } = rackSchema.validate(req.body);
@@ -36,31 +35,13 @@ export const createRack = (req, res) => {
     servers: [],
     fans: [],
     totalCost: 0,
-    maintenanceCost: 0,
+    totalMaintenanceCost: 0,
   };
 
   db.racks.push(newRack);
   workspace.racks.push(newRack.name);
 
   res.status(201).json({ message: 'Rack creado con éxito', rack: newRack });
-};
-
-export const getRackByName = (req, res) => {
-  const { name, workspaceName } = req.params;
-  const rack = db.racks.find(r => r.name === name && r.workspaceName === workspaceName);
-
-  if (!rack) {
-    return res.status(404).json({ message: 'Rack no encontrado.' });
-  }
-
-  res.status(200).json({ rack });
-};
-
-export const getAllRacks = (req, res) => {
-  const { workspaceName } = req.params;
-  const racksInWorkspace = db.racks.filter(r => r.workspaceName === workspaceName);
-
-  res.status(200).json({ racks: racksInWorkspace });
 };
 
 export const deleteRackByName = (req, res) => {
@@ -87,61 +68,94 @@ export const deleteRackByName = (req, res) => {
   res.status(200).json({ message: 'Rack eliminado con éxito.' });
 };
 
-export const addServerToRack = (req, res) => {
-  const { workspaceName, rackName, serverName } = req.body;
+export const updateRack = (req, res) => {
+  const { name } = req.params;
+  const updatedDetails = req.body;
 
-  // 1. Validar si el rack existe en el workspace
-  const workspace = getWorkspaceByName(req, res);
-  if (res.statusCode !== 200) return;
-
-  const rack = db.racks.find(r => r.name === rackName && r.workspaceName === workspaceName);
-  if (!rack) {
-    return res.status(404).json({ message: 'Rack no encontrado en el workspace.' });
+  const rackIndex = db.racks.findIndex(r => r.name === name);
+  if (rackIndex === -1) {
+    return res.status(404).json({ message: 'Rack no encontrado.' });
   }
 
-  // 2. Validar si el servidor existe
-  const server = getServerByName(req, res);
-  if (res.statusCode !== 200) return;
+  const updatedRack = { ...db.racks[rackIndex], ...updatedDetails };
 
-  // 3. Validar si hay suficiente espacio en el rack para el servidor (asumiendo que los servidores tienen una altura en U)
-  const serverUnits = server.units || 1; // Asumimos 1U por defecto para la demo
-  const usedUnits = rack.servers.reduce((sum, s) => sum + (s.units || 1), 0);
-  const remainingUnits = rack.units - usedUnits;
-
-  if (serverUnits > remainingUnits) {
-    return res.status(400).json({ message: 'No hay suficiente espacio en el rack para este servidor.' });
+  const { error } = rackSchema.validate(updatedRack);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
   }
 
-  // 4. Agregar el servidor al rack
-  rack.servers.push({ name: server.name, units: serverUnits });
-
-  // 5. Recalcular el coste total del rack
-  rack.totalCost += server.totalCost;
+  db.racks[rackIndex] = updatedRack;
 
   res.status(200).json({
-    message: 'Servidor añadido al rack con éxito.',
-    rack: rack
+    message: 'Rack actualizado con éxito',
+    rack: db.racks[rackIndex]
   });
 };
 
-export const getMaintenanceCost = (req, res) => {
-    const { workspaceName, rackName } = req.params;
+export const getRackByName = (req, res) => {
+  const { name, workspaceName } = req.params;
+  const rack = db.racks.find(r => r.name === name && r.workspaceName === workspaceName);
 
-    const rack = db.racks.find(r => r.name === rackName && r.workspaceName === workspaceName);
+  if (!rack) {
+    return res.status(404).json({ message: 'Rack no encontrado.' });
+  }
+
+  res.status(200).json({ rack });
+};
+
+export const getAllRacks = (req, res) => {
+  const { workspaceName } = req.params;
+  const racksInWorkspace = db.racks.filter(r => r.workspaceName === workspaceName);
+
+  res.status(200).json({ racks: racksInWorkspace });
+};
+
+export const addServerToRack = (req, res) => {
+    const { rackName, serverName } = req.body;
+
+    // 1. Encontrar el rack
+    const rack = db.racks.find(r => r.name === rackName);
     if (!rack) {
         return res.status(404).json({ message: 'Rack no encontrado.' });
     }
 
-    let totalMaintenanceCost = 0;
+    // 2. Encontrar el servidor
+    const server = db.servers.find(s => s.name === serverName);
+    if (!server) {
+        return res.status(404).json({ message: 'Servidor no encontrado.' });
+    }
 
-    // Iterar sobre los servidores del rack
-    rack.servers.forEach(serverName => {
-        const server = db.servers.find(s => s.name === serverName);
-        if (server) {
-            // Usamos el método auxiliar para obtener el coste de cada servidor
-            totalMaintenanceCost += getServerMaintenanceCost(server);
-        }
+    // 3. Verificar si el servidor ya está en el rack
+    if (rack.servers.includes(serverName)) {
+        return res.status(409).json({ message: 'El servidor ya está en este rack.' });
+    }
+    
+    // 4. Añadir el servidor al rack
+    rack.servers.push(serverName);
+
+    res.status(200).json({ 
+        message: 'Servidor añadido al rack con éxito.', 
+        rack 
     });
+};
 
-    res.status(200).json({ totalMaintenanceCost: totalMaintenanceCost.toFixed(2) });
+export const getRackMaintenanceCost = (req, res) => {
+  const { name } = req.params;
+  
+  const rack = db.racks.find(r => r.name === name);
+  if (!rack) {
+    return res.status(404).json({ message: 'Rack no encontrado.' });
+  }
+
+  let totalMaintenanceCost = 0;
+
+  // Iterar sobre los servidores en el rack
+  rack.servers.forEach(serverName => {
+    const server = db.servers.find(s => s.name === serverName);
+    if (server && typeof server.totalMaintenanceCost === 'number') {
+      totalMaintenanceCost += server.totalMaintenanceCost;
+    }
+  });
+
+  res.status(200).json({ totalMaintenanceCost: totalMaintenanceCost.toFixed(2) });
 };
