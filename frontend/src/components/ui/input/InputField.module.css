@@ -3,6 +3,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-bottom: -4px;
+  width: 100%;
 }
 
 .label {
@@ -15,24 +17,39 @@
 
 /* Contenedor que agrupa el input y el contador para el posicionamiento */
 .inputWrapper {
-  position: relative; /* Clave para posicionar el contador de forma absoluta */
+  position: relative;
   width: 100%;
+}
+
+.startAdornment {
+  position: absolute;
+  left: 12px;
+  top: 25%;
+  color: var(--color-gray-lightest);
+  z-index: 2;
+  pointer-events: none;
+
 }
 
 /* Estilos para el campo de input */
 .inputField {
   font-family: var(--font-body);
   font-size: 16px;
-  padding: 12px 16px;
+  padding: 8px;
   border-radius: 8px;
   background-color: var(--color-gray-dark);
-  border: solid;
-  border-color: var(--color-gray-lightest);
+  border: solid 4px var(--color-gray-light);
+  outline: none;
   color: var(--color-white);
   transition: all 0.2s ease-in-out;
-  outline: none;
-  width: 100%; /* Asegura que ocupe todo el ancho de su contenedor */  
+  width: 100%;
+  /* Asegura que ocupe todo el ancho de su contenedor */
   box-shadow: inset 4px 4px 0px var(--color-gray-darkest);
+}
+
+.inputFieldWithAdornment {
+  padding-left: 36px;
+
 }
 
 /* ... Estilos para :focus y :disabled ... */
@@ -41,24 +58,53 @@
   border-color: var(--color-white);
   color: var(--color-white);
   box-shadow: inset 4px 4px 0px var(--color-gray-dark);
-  transform: translateY(-4px);
 }
 
 .inputField:disabled {
-  background-color: var(--color-gray-dark);
+  background-color: var(--color-gray-light);
   border-color: var(--color-gray-light);
-  color: var(--color-gray-light);
-  box-shadow: inset 4px 4px 0px var(--color-gray-darkest);
+  color: var(--color-gray-dark);
+  box-shadow: inset 4px 4px 0px var(--color-gray-dark);
   cursor: not-allowed;
 }
 
 /* --- Estilos para el Contador de Caracteres --- */
 .charCounter {
   position: absolute;
-  bottom: -24px; /* Posicionamiento debajo del input */
+  bottom: -24px;
+  /* Posicionamiento debajo del input */
   right: 8px;
   font-family: var(--font-body);
   font-size: 15px;
   font-weight: 800;
   color: var(--color-gray-lightest);
+}
+
+.inputField[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+
+  --clear-icon-color: var(--color-gray-lightest);
+  --clear-icon-size: 18px;
+
+  display: inline-block;
+  height: var(--clear-icon-size);
+  width: var(--clear-icon-size);
+  cursor: pointer;
+
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>');
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: 100%;
+
+  /* 🚨 4. Aplicar el color usando background-color (Controlado por la variable) */
+  background-color: var(--clear-icon-color);
+  opacity: 1;
+  transition: all 0.2s ease-in-out;
+}
+
+/* 🚨 Flexibilidad en el estado hover */
+.inputField[type="search"]::-webkit-search-cancel-button:hover {
+  opacity: 1;
+  background-color: var(--color-white);
 }

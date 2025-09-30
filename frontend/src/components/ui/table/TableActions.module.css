@@ -1,0 +1,8 @@
+.actionsContainer {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    border-radius: 8px;
+    padding: 4px;
+    padding-bottom: 16px;
+}

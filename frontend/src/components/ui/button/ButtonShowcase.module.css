@@ -23,7 +23,7 @@
 
 .buttonGroup {
   display: flex;
-  gap: 16px;
+  gap: 32px;
   flex-wrap: wrap;
   align-items: center;
 }

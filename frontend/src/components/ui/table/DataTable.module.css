@@ -1,0 +1,99 @@
+.tableContainer {
+    width: 100%;
+    margin-top: 20px;
+    border: 4px solid var(--color-gray-light);
+    border-radius: 8px;
+    overflow: hidden;
+    overflow-y: auto;
+    background-color: var(--color-gray-darkest);
+    box-shadow: 0px 8px 0px var(--color-gray-darkest);
+
+}
+
+.tableHeader {
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-columns: repeat(var(--column-count), 1fr);
+    background-color: var(--color-gray-dark);
+    padding: 10px 15px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-white);
+    text-transform: uppercase;
+    border-bottom: 4px solid var(--color-gray-light);
+}
+
+.headerCell {
+    padding: 5px;
+    text-align: left;
+}
+
+.tableBody {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 8px;
+    border: solid 4px var(--color-gray-darkest);
+    border-bottom: none;
+
+    /* Estilos de la barra de desplazamiento para WebKit */
+    /* Ancho de la barra de desplazamiento */
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    /* Fondo del track de la barra de desplazamiento */
+    &::-webkit-scrollbar-track {
+        background: var(--color-gray-darkest);
+        border-radius: 4px;
+    }
+
+    /* El "thumb" o la parte arrastrable de la barra */
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--color-gray-dark);
+        border-radius: 4px;
+        border: 3px solid var(--color-gray-light);
+    }
+
+    /* Estilo del thumb al pasar el cursor por encima */
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: var(--color-gray-lightest);
+        border-color: var(--color-white);
+    }
+}
+
+/* Estilo de Filas */
+
+.dataRow {
+    display: grid;
+    grid-template-columns: repeat(var(--column-count), 1fr);
+    padding: 15px;
+    border-bottom: 4px solid var(--color-gray-darkest);
+    background-color: var(--color-gray-dark);
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--color-white);
+    transition: background-color 0.2s;
+}
+
+.dataRow:hover {
+    background-color: var(--color-gray-light);
+    cursor: pointer;
+}
+
+.dataCell {
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.emptyState {
+    padding: 20px;
+    text-align: center;
+    color: var(--color-gray-light);
+    font-style: italic;
+}

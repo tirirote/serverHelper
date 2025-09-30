@@ -15,8 +15,8 @@ const BuyComponentForm = ({ onClose }) => {
         buyPrice: '100€',
         maintenancePrice: '2.50 USD/month',
         type: 'Type',
-        details: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        modelPath: '/public/assets/models/test.glb',
+        details: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sapien sapien, pretium sit amet nulla ut, pharetra malesuada sem. Vivamus sit amet lacus eleifend, iaculis orci nec, pharetra libero. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Aenean blandit turpis in ipsum feugiat sagittis. Etiam in nunc ut erat mattis dignissim non vitae quam. Aenean et facilisis magna. Etiam ligula risus, blandit eget imperdiet eget, dapibus in ex. Phasellus ac ligula luctus elit venenatis porttitor et ut nulla. In congue lorem tellus. Fusce pellentesque egestas dolor, eu egestas libero tincidunt ut. Etiam arcu nulla, aliquam in mauris vitae, pretium luctus mi. Vestibulum eu eros sit amet ante vestibulum vehicula. Aenean hendrerit, eros vel volutpat tincidunt, neque nibh aliquam enim, lacinia congue lorem risus et metus.',
+        modelPath: '/assets/models/test.glb',
         compatibleWith: [
             { id: 1, name: 'Rack-1', count: 1 },
             { id: 2, name: 'Server-1', count: 1 },
@@ -34,14 +34,21 @@ const BuyComponentForm = ({ onClose }) => {
         <div className={styles.formContainer}>
             <div className={styles.header}>
                 <h2>{component.name}</h2>
+                <h2 className={styles.buyPrice}>{component.buyPrice}</h2>
             </div>
             <div className={styles.content}>
                 <ModelViewer modelPath={component.modelPath} />
                 <div className={styles.detailsSection}>
-                    <div className={styles.type}>
-                        <label>Component Type</label>
+                    <div className={styles.detailItem}>
+                        <label className={styles.detailLabel}>Component Type</label>
                         <span>{component.type}</span>
                     </div>
+                    <div className={styles.detailItem}>
+                        <label className={styles.detailLabel}>Maintenance Cost</label>
+                        <span>{component.maintenancePrice}</span>
+                    </div>
+                </div>
+                <div>
                     <DetailsField
                         label="DETAILS"
                         value={component.details}
@@ -50,17 +57,7 @@ const BuyComponentForm = ({ onClose }) => {
                 </div>
                 <CompatibilityList items={component.compatibleWith} />
             </div>
-            <div className={styles.actions}>
-                <div className={styles.priceContainer}>
-                    <div className={styles.priceItem}>
-                        <label>Buy Price</label>
-                        <span className={styles.buyPrice}>{component.buyPrice}</span>
-                    </div>
-                    <div className={styles.priceItem}>
-                        <label>Maintenance</label>
-                        <span className={styles.maintenancePrice}>{component.maintenancePrice}</span>
-                    </div>
-                </div>
+            <div className={styles.buyButton}>
                 <Button
                     onClick={handleBuy}
                     variant="primary"

@@ -1,0 +1,37 @@
+.searchFilterBarContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 8px;
+    margin-bottom: 24px;
+}
+
+.searchIcon {
+    color: var(--color-gray-lightest);
+    position: relative;
+}
+
+.clearButton {
+    /* Posicionamiento absoluto */
+    position: absolute;
+    right: 8px; /* Pequeño ajuste para que no toque el borde del input */
+    top: 50%;
+    transform: translateY(-50%);
+    
+    /* Asegurar que el botón no tenga estilos de fondo o sombra que estorben */
+    background: transparent !important;
+    box-shadow: none !important; 
+    border: none !important;
+
+    /* Asegurar que el icono sea visible sobre el fondo del input */
+    color: var(--color-gray-lightest);
+    z-index: 10;
+    
+    /* Nota: Con la variante "icon", el tamaño de tu botón debe ser pequeño.
+       Si tu botón tiene mucho padding, ajusta 'right' y el 'padding-right' del InputField. */
+}
+
+.clearButton:hover {
+    color: var(--color-white);
+}

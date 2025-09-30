@@ -36,6 +36,7 @@
    font-weight: 700;
    /* Negrita, el peso más alto para el título principal */
    color: var(--color-white);
+   margin: 8px;
  }
 
  h2 {
@@ -44,7 +45,8 @@
    font-size: 1.75rem;
    font-weight: 700;
    /* Peso medio */
-   color: var(--color-white);
+   color: var(--color-gray-lightest);
+   margin: 8px;
  }
 
  h3 {

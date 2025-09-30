@@ -23,9 +23,36 @@
   color: var(--color-white);
   font-family: var(--font-body);
   font-size: 16px;
+  word-wrap: normal;
+  overflow-y: auto;
   resize: none;
   transition: all 0.2s ease-in-out;
   box-shadow: inset 4px 4px 0px var(--color-gray-darkest);
+
+  /* Estilos de la barra de desplazamiento para WebKit */
+    /* Ancho de la barra de desplazamiento */
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    /* Fondo del track de la barra de desplazamiento */
+    &::-webkit-scrollbar-track {
+        background: var(--color-gray-darkest);
+        border-radius: 4px;
+    }
+
+    /* El "thumb" o la parte arrastrable de la barra */
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--color-gray-dark);
+        border-radius: 4px;
+        border: 3px solid var(--color-gray-light);
+    }
+    
+    /* Estilo del thumb al pasar el cursor por encima */
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: var(--color-gray-lightest);
+        border-color: var(--color-white);
+    }
 }
 
 .detailsField textarea:focus {
@@ -33,7 +60,6 @@
   outline: none;
   border-color: var(--color-white);
   box-shadow: inset 4px 4px 0px var(--color-gray-dark);
-  transform: translateY(-4px);
 }
 
 .detailsField .charCounter {

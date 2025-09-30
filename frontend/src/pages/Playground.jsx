@@ -14,6 +14,10 @@ import Dialog from '../components/ui/dialog/Dialog.jsx';
 import styles from './Playground.module.css';
 import ButtonShowcase from '../components/ui/button/ButtonShowcase.jsx'; // Nuevo import
 import TextShowcase from '../components/ui/text/TextShowcase.jsx'; // Nuevo import
+import SearchFilterBar from '../components/ui/searchbar/SearchFilterBar.jsx';
+import DataTable from '../components/ui/table/DataTable.jsx';
+import TableActions from '../components/ui/table/TableActions.jsx';
+import ComponentGallery from '../components/ui/gallery/ComponentGallery.jsx';
 
 const Playground = () => {
   const { showToast } = useToast();
@@ -24,6 +28,66 @@ const Playground = () => {
   const [showUserForm, setShowUserForm] = useState(false);
   const [showRackForm, setShowRackForm] = useState(false); // Nuevo estado
   const [showBuyForm, setShowBuyForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const mockGalleryData = [
+    { id: 'c-1', name: 'CPU Intel i9-14900K', type: 'Processor', cost: 799, status: 'Active', modelPath: '/assets/models/test.glb' },
+    { id: 'c-2', name: 'RAM Corsair Vengeance 32GB', type: 'Memory', cost: 180, status: 'Active', modelPath: '/assets/models/test.glb' },
+    { id: 'c-3', name: 'SSD Samsung 990 Pro 1TB', type: 'Storage', cost: 95, status: 'Inactive', modelPath: '/assets/models/test.glb' },
+    { id: 'c-4', name: 'GPU NVIDIA RTX 4090', type: 'Graphics', cost: 1999, status: 'Error', modelPath: '/assets/models/test.glb' },
+    { id: 'c-5', name: 'PSU Corsair HX1000i', type: 'Power Supply', cost: 250, status: 'Active', modelPath: '/assets/models/test.glb' },
+    { id: 'c-6', name: 'Case Fractal Define 7', type: 'Case', cost: 150, status: 'Active', modelPath: '/assets/models/test.glb' },
+  ];
+
+  // 🚨 MANEJADOR DE SELECCIÓN PARA LA COMPRA
+  const handleComponentSelect = (componentId) => {
+    // Aquí normalmente pasarías el ID al formulario de compra
+    showToast(`Componente seleccionado para compra: ${componentId}`, 'info');
+    setShowBuyForm(true); // Abrir el formulario de compra
+  };
+
+  const mockTableData = [
+    { id: 'c-1', name: 'CPU Intel i9', type: 'Processor', cost: 799, status: 'Active' },
+    { id: 'c-2', name: 'RAM 32GB DDR5', type: 'Memory', cost: 180, status: 'Active' },
+    { id: 'c-3', name: 'SSD 1TB NVMe', type: 'Storage', cost: 95, status: 'Inactive' },
+    { id: 'c-4', name: 'GPU RTX 4090', type: 'Graphics', cost: 1999, status: 'Error' }
+  ];
+
+  const tableColumns = [
+    { header: 'ID', key: 'id', render: (item) => <span style={{ fontWeight: 'bold' }}>{item.id}</span> },
+    { header: 'Nombre', key: 'name' },
+    { header: 'Tipo', key: 'type' },
+    { header: 'Costo (€)', key: 'cost', render: (item) => `€${item.cost.toLocaleString('es-ES')}` },
+    {
+      header: 'Estado',
+      key: 'status',
+      render: (item) => {
+        let statusColor;
+        switch (item.status) {
+          case 'Active': statusColor = 'var(--color-success)'; break;
+          case 'Inactive': statusColor = 'var(--color-warning)'; break;
+          case 'Error': statusColor = 'var(--color-error)'; break;
+          default: statusColor = 'var(--color-info)';
+        }
+        return (
+          <span style={{ color: statusColor }}>
+            {item.status}
+          </span>
+        );
+      }
+    },
+    {
+      header: 'Acciones',
+      key: 'actions', // Clave dummy
+      render: (item) => (
+        <TableActions
+          itemId={item.id}
+          onViewDetails={(id) => handleAction('view', id)}
+          onDelete={(id) => handleAction('delete', id)}
+        />
+      )
+    },
+  ];
 
   const handleToast = (type) => {
     switch (type) {
@@ -41,6 +105,10 @@ const Playground = () => {
         showToast('Esto es un mensaje de información.', 'info');
         break;
     }
+  };
+
+  const handleFilterClick = () => {
+    handleToast('info', 'El botón de Filtros funciona!');
   };
 
   return (
@@ -75,10 +143,20 @@ const Playground = () => {
       <Dialog isOpen={showRackForm} onClose={() => setShowRackForm(false)}>
         <NewRackForm onClose={() => setShowRackForm(false)} />
       </Dialog>
+
+      {/* --- EL DIÁLOGO CONTIENE EL FORMULARIO DE COMPRA --- */}
       <Dialog isOpen={showBuyForm} onClose={() => setShowBuyForm(false)}> {/* Nuevo diálogo */}
         <BuyComponentForm onClose={() => setShowBuyForm(false)} />
       </Dialog>
       
+      <section>
+        <h2>Galería de Componentes (Visual)</h2>
+        <ComponentGallery
+          items={mockGalleryData}
+          onItemSelected={handleComponentSelect}
+        />
+      </section>
+
       {/* --- BOTONES --- */}
       <section>
         <h2>Botones</h2>
@@ -89,6 +167,26 @@ const Playground = () => {
       <section>
         <h2>Tipografía</h2>
         <TextShowcase />
+      </section>
+
+      {/* 🚨 NUEVA SECCIÓN: DATA TABLE */}
+      <section>
+        <h2>Data Table (Listado)</h2>
+        <DataTable
+          columns={tableColumns} // Usamos la nueva definición
+          data={mockTableData}
+        />
+      </section>
+
+      {/* --- CAMPO DE BÚSQUEDA --- */}
+      <section>
+        <h2>Barra de Búsqueda</h2>
+        <SearchFilterBar
+          onSearchChange={setSearchTerm}
+          onFilterClick={handleFilterClick}
+          searchPlaceholder="Busca componentes, racks o servidores..."
+        />
+        <p>Término de Búsqueda Actual: <strong>{searchTerm}</strong></p>
       </section>
 
       {/* --- CAMPOS DE INPUT --- */}
