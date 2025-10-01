@@ -18,6 +18,7 @@ import SearchFilterBar from '../components/ui/searchbar/SearchFilterBar.jsx';
 import DataTable from '../components/ui/table/DataTable.jsx';
 import TableActions from '../components/ui/table/TableActions.jsx';
 import ComponentGallery from '../components/ui/gallery/ComponentGallery.jsx';
+import NetworkConfigForm from '../components/form/network/NetworkConfigForm.jsx';
 
 const Playground = () => {
   const { showToast } = useToast();
@@ -29,7 +30,8 @@ const Playground = () => {
   const [showRackForm, setShowRackForm] = useState(false); // Nuevo estado
   const [showBuyForm, setShowBuyForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [showNetworkForm, setShowNetworkForm] = useState(false);
+  
   const mockGalleryData = [
     { id: 'c-1', name: 'CPU Intel i9-14900K', type: 'Processor', cost: 799, status: 'Active', modelPath: '/assets/models/test.glb' },
     { id: 'c-2', name: 'RAM Corsair Vengeance 32GB', type: 'Memory', cost: 180, status: 'Active', modelPath: '/assets/models/test.glb' },
@@ -89,6 +91,12 @@ const Playground = () => {
     },
   ];
 
+   // Función de ejemplo para manejar el envío del formulario de red
+  const handleNetworkSubmit = (data) => {
+    console.log('Network Config Saved:', data);
+    showToast('Configuración de Red Guardada con éxito.', 'success');
+  };
+
   const handleToast = (type) => {
     switch (type) {
       case 'success':
@@ -126,6 +134,7 @@ const Playground = () => {
           <Button onClick={() => setShowUserForm(true)}>Mostrar Formulario de Usuario</Button>
           <Button onClick={() => setShowRackForm(true)}>Mostrar Formulario de Rack</Button>
           <Button onClick={() => setShowBuyForm(true)}>Mostrar Formulario de Compra</Button>
+          <Button onClick={() => setShowNetworkForm(true)}>Mostrar Formulario de Red</Button>
         </div>
       </section>
 
@@ -148,7 +157,19 @@ const Playground = () => {
       <Dialog isOpen={showBuyForm} onClose={() => setShowBuyForm(false)}> {/* Nuevo diálogo */}
         <BuyComponentForm onClose={() => setShowBuyForm(false)} />
       </Dialog>
-      
+
+      {/* 🚨 DIÁLOGO PARA EL FORMULARIO DE RED */}
+      <Dialog 
+        isOpen={showNetworkForm} 
+        onClose={() => setShowNetworkForm(false)}
+        title="Configurar Network"
+      >
+        <NetworkConfigForm 
+          onClose={() => setShowNetworkForm(false)} 
+          onSubmit={handleNetworkSubmit}
+        />
+      </Dialog>
+
       <section>
         <h2>Galería de Componentes (Visual)</h2>
         <ComponentGallery

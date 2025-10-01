@@ -3,6 +3,8 @@
   flex-direction: column;
   gap: 8px;
   position: relative;
+  margin-bottom: 8px;
+  margin-top: 8px;
 }
 
 .detailsField label {
@@ -10,6 +12,7 @@
   font-weight: 200;
   color: var(--color-white);
   text-transform: uppercase;
+  margin-top: 8px;
 }
 
 .detailsField textarea {
@@ -19,7 +22,7 @@
   border-radius: 8px;
   background-color: var(--color-gray-dark);
   border: solid;
-  border-color: var(--color-gray-lightest);
+  border-color: var(--color-gray-light);
   color: var(--color-white);
   font-family: var(--font-body);
   font-size: 16px;
