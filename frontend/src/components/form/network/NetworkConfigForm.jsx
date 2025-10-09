@@ -40,10 +40,9 @@ const NetworkConfigForm = ({ onClose, onSubmit }) => {
             <InputField
                 label="Nombre de la Red"
                 name="networkName"
-                placeholder="Ej: Prod-Web-Internal"
+                placeholder="Escribe el nombre de red"
                 value={formData.networkName}
                 onChange={handleChange}
-                startAdornment={<Network size={20} />}
                 required
             />
 
@@ -51,10 +50,9 @@ const NetworkConfigForm = ({ onClose, onSubmit }) => {
             <InputField
                 label="Máscara de Subred"
                 name="subnetMask"
-                placeholder="255.255.255.0"
+                placeholder="Escribe la máscara de red"
                 value={formData.subnetMask}
                 onChange={handleChange}
-                startAdornment={<Server size={20} />}
                 required
             />
 
@@ -62,10 +60,9 @@ const NetworkConfigForm = ({ onClose, onSubmit }) => {
             <InputField
                 label="Gateway IP"
                 name="gatewayIP"
-                placeholder="Ej: 192.168.1.1"
+                placeholder="Escribe la puerta de enlace"
                 value={formData.gatewayIP}
                 onChange={handleChange}
-                startAdornment={<Server size={20} />}
                 required
             />
 
@@ -73,17 +70,16 @@ const NetworkConfigForm = ({ onClose, onSubmit }) => {
             <InputField
                 label="Servidor DNS Primario (Opcional)"
                 name="dnsServer"
-                placeholder="Ej: 8.8.8.8"
+                placeholder="Escribe el servidor DNS"
                 value={formData.dnsServer}
                 onChange={handleChange}
-                startAdornment={<Info size={20} />}
             />
 
             {/* Descripción (Usando tu DetailsField) */}
             <DetailsField
                 label="Descripción de la Red"
                 name="description"
-                placeholder="Una breve explicación sobre el propósito de esta subred."
+                placeholder="Escribe una breve explicación sobre el propósito de esta red."
                 value={formData.description}
                 onChange={handleChange}
                 maxLength={200}
@@ -91,11 +87,8 @@ const NetworkConfigForm = ({ onClose, onSubmit }) => {
 
             {/* Botones de Acción */}
             <div className={styles.actions}>
-                <Button variant="primary" onClick={onClose} type="button">
-                    Cancelar
-                </Button>
                 <Button variant="primary" type="submit">
-                    Guardar Configuración
+                    Done
                 </Button>
             </div>
         </form>

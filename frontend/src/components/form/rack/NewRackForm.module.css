@@ -84,5 +84,7 @@
 }
 
 .doneButton {
-    align-self: flex-end;
+    display: flex;
+    justify-content: end;
+    margin-top: 16px;
 }

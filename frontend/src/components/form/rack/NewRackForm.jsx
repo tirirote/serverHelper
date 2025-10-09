@@ -74,7 +74,9 @@ const NewRackForm = ({ onClose }) => {
                         ))}
                     </div>
                 )}
-                <Button type="submit" className={styles.doneButton}>DONE</Button>
+                <div className={styles.doneButton} >
+                    <Button type="submit" >DONE</Button>
+                </div>
             </form>
         </div>
     );

@@ -21,5 +21,7 @@
 }
 
 .doneButton {
-    align-self: flex-end; /* Alinea el botón a la derecha */
+    display: flex;
+    justify-content: end;
+    margin-top: 16px;
 }

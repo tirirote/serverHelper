@@ -1,6 +1,7 @@
 .formContainer {
     position: relative;
     padding: 8px;
+    box-shadow: 4px 4px 0px var(--color-gray-dark);
     max-width: 450px;
     width: 100%;
     font-family: var(--font-body);
@@ -55,7 +56,6 @@
 
 .buyButton {
     display: flex;
-    flex-grow: 1;
-    width: 100%;
+    justify-content: end;
     margin-top: 16px;
 }

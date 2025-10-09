@@ -52,3 +52,9 @@
     font-size: 24px;
     color: var(--color-white);
 }
+
+.doneButton {
+    display: flex;
+    justify-content: end;
+    margin-top: 16px;
+}
