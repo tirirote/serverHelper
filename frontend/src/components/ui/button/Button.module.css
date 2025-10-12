@@ -20,16 +20,16 @@
 
 /* Botón Primario */
 .primary {
-  background-color: var(--color-gray-dark);
+  background-color: var(--color-gray-darkest);
   border-color: var(--color-gray-light);
   color: var(--color-gray-lightest);
-  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+  box-shadow: 0px 8px 0px var(--color-gray-light);
 
 
 }
 
 .primary:hover {
-  background-color: var(--color-gray-lightest);
+  background-color: var(--color-gray-light);
   border: solid 4px var(--color-white);
   color: var(--color-white);
   transform: translateY(-4px);
@@ -37,28 +37,29 @@
 }
 
 .primary:active {
-  background-color: var(--color-gray-lightest);
+  background-color: var(--color-white);
   border: solid 4px var(--color-white);
+    color: var(--color-gray-darkest);
   transform: translateY(8px);
   box-shadow: none;
 }
 
 /* Botón Secundario */
 .secondary {
-  background-color: var(--color-gray-light);
+  background-color: var(--color-gray-dark);
   color: var(--color-gray-lightest);
+  border: solid 4px var(--color-gray-light);
 
 }
 
 .secondary:hover {
   background-color: var(--color-white);
   color: var(--color-gray-darkest);
+  border-color: var(--color-white);
   transform: translateY(-4px);
 }
 
 .secondary:active {
-  background-color: var(--color-white);
-  color: var(--color-gray-lightest);
   transform: translateY(8px);
   box-shadow: none;
 }
@@ -80,7 +81,6 @@
 
 .danger:active {
   transform: translateY(2px);
-  box-shadow: none;
 }
 
 /* Botón Fantasma (para iconos o texto ligero) */

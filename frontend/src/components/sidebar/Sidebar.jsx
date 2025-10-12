@@ -2,8 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import styles from './Sidebar.module.css';
-import Icon from '/assets/icon.png';
-import Logo from '/assets/logo.png';
+
 // Íconos de Lucide React
 import {
   Server,
@@ -16,6 +15,10 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+
+//Logos
+import Icon from '/assets/icon.png';
+import Logo from '/assets/logo.png';
 
 const navItems = [
   { name: 'Dashboard', icon: <LayoutDashboard />, to: '/dashboard' },
@@ -82,6 +85,16 @@ const Sidebar = ({ isOpen, handleLogout, onToggle }) => {
       <div className={styles.bottomSection}>
         <hr className={styles.divider} />
         <div className={styles.logoutSection}>
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              `${styles.navItem} ${isActive ? styles.active : ''}`
+            }
+            onClick={handleNavigation}
+          >
+            <User size={20} />
+            {isOpen && <span className={styles.navLabel}>Perfil y Config.</span>}
+          </NavLink>
           <button className={styles.logoutBtn} onClick={handleLogout}>
             <LogOut size={20} />
             {isOpen && <span className={styles.navLabel}>Log Out</span>}

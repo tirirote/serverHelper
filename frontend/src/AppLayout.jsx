@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import WelcomePage from './pages/welcome/WelcomePage.jsx';
-import Playground from './pages/Playground.jsx';
 import Sidebar from './components/sidebar/Sidebar.jsx';
 import styles from './AppLayout.module.css';
+
+//Pages
+import ProfilePage from './pages/profile/ProfilePage.jsx';
+import WelcomePage from './pages/welcome/WelcomePage.jsx';
+import Playground from './pages/Playground.jsx';
 
 const AppLayout = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -52,6 +55,7 @@ const AppLayout = () => {
                             <Route path="/shop" element={<Playground handleLogout={handleLogout} />} />
                             <Route path="/components" element={<Playground handleLogout={handleLogout} />} />
                             <Route path="/servers" element={<Playground handleLogout={handleLogout} />} />
+                            <Route path="/profile" element={<ProfilePage />} />
                             <Route path="*" element={<Playground handleLogout={handleLogout} />} />
                         </Routes>
                     </main>

@@ -169,9 +169,11 @@
 
 .logoutSection {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     margin-bottom: 16px;
+    gap: 8px;
 }
 
 .logoutBtn {
@@ -192,7 +194,7 @@
 /* Estilo del botón cuando está expandido */
 .open .logoutBtn {
     padding: 8px 15px;
-    justify-content: center;
+    justify-content: start;
     width: 90%;
 }
 
