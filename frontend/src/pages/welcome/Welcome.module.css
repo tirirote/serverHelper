@@ -1,0 +1,133 @@
+/* src/pages/Welcome/Welcome.module.css */
+
+.welcomeLayout {
+    /* Asegura que ocupe toda la pantalla y maneje la barra superior */
+    min-height: 100vh; 
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-gray-dark);
+    color: var(--color-white);
+}
+
+/* --- Navbar Styles --- */
+.navbar {
+    width: 100%;
+    padding: 32px 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 4px solid var(--color-gray-darkest);
+    background-color: var(--color-gray-dark);
+}
+
+.logo {
+    font-family: var(--font-header);
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--color-white);
+}
+
+.authActions {
+    display: flex;
+    gap: 10px;
+}
+
+.navButton {
+    /* Ajustes para botones en la barra de navegación */
+    padding: 8px 15px;
+    font-size: 14px;
+}
+
+/* --- Content Styles --- */
+.contentContainer {
+    /* Centra el contenido en el espacio restante */
+    flex-grow: 1; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.contentBox {
+    max-width: 900px;
+    padding: 40px;
+}
+
+.title {
+    font-family: var(--font-header);
+    font-size: 48px;
+    color: var(--color-white); 
+    margin: 0;
+}
+
+.titleDivider {
+    border: 0;
+    height: 1px;
+    background-color: var(--color-gray-light);
+    margin: 10px auto 25px auto;
+    width: 40%; /* Línea divisoria debajo del título */
+}
+
+.tagline {
+    font-size: 20px;
+    color: var(--color-primary);
+    font-weight: 500;
+    margin-bottom: 50px;
+}
+
+/* --- Visual Section Styles (Para el modelo y repo) --- */
+.visualSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 50px;
+    margin-top: 50px;
+}
+
+.visualItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 150px;
+}
+
+.serverIcon {
+    color: var(--color-info); /* Icono del servidor */
+    margin-bottom: 10px;
+}
+
+.githubIcon {
+    color: var(--color-white); /* Icono de Github */
+    margin-bottom: 10px;
+}
+
+.itemLabel {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--color-gray-light);
+}
+
+.visualText {
+    flex-grow: 1;
+    text-align: left;
+    color: var(--color-gray-lightest);
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .visualSection {
+        flex-direction: column;
+        gap: 30px;
+    }
+    .visualText {
+        text-align: center;
+    }
+    .title {
+        font-size: 36px;
+    }
+    .navbar {
+        padding: 10px 20px;
+    }
+}

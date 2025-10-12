@@ -1,0 +1,72 @@
+import React, { useState } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import WelcomePage from './pages/welcome/WelcomePage.jsx';
+import Playground from './pages/Playground.jsx';
+import Sidebar from './components/sidebar/Sidebar.jsx';
+import styles from './AppLayout.module.css';
+
+const AppLayout = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    // CAMBIO: Establecer a false para que esté contraído por defecto
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const navigate = useNavigate();
+
+    const handleLogin = () => {
+        setIsAuthenticated(true);
+        navigate('/dashboard');
+    };
+
+    const handleLogout = () => {
+        setIsAuthenticated(false);
+        navigate('/');
+    };
+
+    const handleSidebarToggle = () => {
+        setIsSidebarOpen(prev => !prev);
+    };
+
+    if (isAuthenticated) {
+        return (
+            <div className={styles.appLayout}>
+
+                {/* OVERLAY: Visible cuando el sidebar está abierto */}
+                {isSidebarOpen && (
+                    <div
+                        className={styles.overlay}
+                        onClick={() => setIsSidebarOpen(false)} // Cierra el sidebar al pulsar el overlay
+                        aria-label="Cerrar menú lateral"
+                    />
+                )}
+
+                <Sidebar
+                    isOpen={isSidebarOpen}
+                    handleLogout={handleLogout}
+                    onToggle={handleSidebarToggle} // Pasamos la función de toggle al Sidebar
+                />
+
+                <div className={`${styles.contentWrapper} ${isSidebarOpen ? styles.contentShift : ''}`}>
+                    <main className={styles.mainContent}>
+                        <Routes>
+                            <Route path="/dashboard" element={<Playground handleLogout={handleLogout} />} />
+                            <Route path="/workspaces" element={<Playground handleLogout={handleLogout} />} />
+                            <Route path="/shop" element={<Playground handleLogout={handleLogout} />} />
+                            <Route path="/components" element={<Playground handleLogout={handleLogout} />} />
+                            <Route path="/servers" element={<Playground handleLogout={handleLogout} />} />
+                            <Route path="*" element={<Playground handleLogout={handleLogout} />} />
+                        </Routes>
+                    </main>
+                </div>
+            </div>
+        );
+    }
+
+    // Estructura para usuarios no autenticados
+    return (
+        <Routes>
+            <Route path="/" element={<WelcomePage onLoginSuccess={handleLogin} />} />
+            <Route path="*" element={<WelcomePage onLoginSuccess={handleLogin} />} />
+        </Routes>
+    );
+};
+
+export default AppLayout;

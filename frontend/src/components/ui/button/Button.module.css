@@ -22,18 +22,18 @@
 .primary {
   background-color: var(--color-gray-dark);
   border-color: var(--color-gray-light);
-  box-shadow: 0px 8px 0px var(--color-gray-darkest);
   color: var(--color-gray-lightest);
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+
 
 }
 
 .primary:hover {
-  background-color: var(--color-gray-light);
+  background-color: var(--color-gray-lightest);
   border: solid 4px var(--color-white);
-  box-shadow: 0px 12px 0px var(--color-white);
   color: var(--color-white);
   transform: translateY(-4px);
-
+  box-shadow: 0px 12px 0px var(--color-white);
 }
 
 .primary:active {
@@ -47,14 +47,12 @@
 .secondary {
   background-color: var(--color-gray-light);
   color: var(--color-gray-lightest);
-  box-shadow: 0px 8px 0px var(--color-gray-darkest);
 
 }
 
 .secondary:hover {
-  background-color: var(--color-gray-lightest);
-  color: var(--color-white);
-  box-shadow: 0px 12px 0px var(--color-white);
+  background-color: var(--color-white);
+  color: var(--color-gray-darkest);
   transform: translateY(-4px);
 }
 
@@ -67,10 +65,9 @@
 
 /* Botón de Peligro */
 .danger {
-  background-color: var(--color-gray-darkest);
+  background-color: var(--color-gray-dar);
   border-color: var(--color-red);
   color: var(--color-red);
-  box-shadow: 0px 8px 0px var(--color-gray-darkest);
 
 }
 
@@ -78,7 +75,6 @@
   background-color: var(--color-red);
   border-color: var(--color-white);
   color: var(--color-white);
-  box-shadow: 0px 12px 0px var(--color-white);
   transform: translateY(-4px);
 }
 

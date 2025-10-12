@@ -1,45 +1,78 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { NavLink } from 'react-router-dom';
 import styles from './Sidebar.module.css';
-import { NavLink } from 'react-router-dom'; // Usaremos NavLink para el enrutamiento
-
-// Los iconos se importan de Lucide React
+import Icon from '/assets/icon.png';
+import Logo from '/assets/logo.png';
+// Íconos de Lucide React
 import {
   Server,
   User,
   LogOut,
   ShoppingBag,
   Cpu,
-  FolderOpen
+  FolderOpen,
+  LayoutDashboard,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 const navItems = [
+  { name: 'Dashboard', icon: <LayoutDashboard />, to: '/dashboard' },
   { name: 'Workspaces', icon: <FolderOpen />, to: '/workspaces' },
   { name: 'Shop', icon: <ShoppingBag />, to: '/shop' },
   { name: 'Components', icon: <Cpu />, to: '/components' },
   { name: 'Servers', icon: <Server />, to: '/servers' }
 ];
 
-const Sidebar = ({ isOpen, onClose }) => {
+const Sidebar = ({ isOpen, handleLogout, onToggle }) => {
+
+  // Función para cerrar el sidebar al navegar (mejora la UX en móvil)
+  const handleNavigation = () => {
+    // En móvil, si está abierto, lo cerramos al pulsar un enlace.
+    if (window.innerWidth <= 768 && isOpen) {
+      onToggle();
+    }
+  };
+
+  const ToggleIcon = isOpen ? ChevronLeft : ChevronRight;
+
   return (
-    <nav className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+    <nav className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}>
       <div className={styles.topSection}>
         <div className={styles.header}>
-          <span className={styles.logo}>LOGO</span>
+          {isOpen && <img
+            src={Logo}
+            alt="Icono de Server Helper"
+            className={styles.logoImage}
+          />}
+          {!isOpen && <img
+            src={Icon}
+            alt="Icono de Server Helper"
+            className={styles.iconImage}
+          />}
+          {/* Botón de Toggle DENTRO del Sidebar */}
+          <button
+            className={styles.toggleButton}
+            onClick={onToggle}
+            aria-label={isOpen ? "Contraer menú" : "Expandir menú"}
+          >
+            <ToggleIcon size={20} />
+          </button>
         </div>
 
         <ul className={styles.navList}>
           {navItems.map((item) => (
-            <li key={item.name}>
+            <li key={item.name} className={styles.navItemContainer}>
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
                   `${styles.navItem} ${isActive ? styles.active : ''}`
                 }
-                onClick={onClose}
+                onClick={handleNavigation} // Cierra al navegar
               >
                 {item.icon}
-                <span>{item.name}</span>
+                {isOpen && <span className={styles.navLabel}>{item.name}</span>}
               </NavLink>
             </li>
           ))}
@@ -49,11 +82,10 @@ const Sidebar = ({ isOpen, onClose }) => {
       <div className={styles.bottomSection}>
         <hr className={styles.divider} />
         <div className={styles.logoutSection}>
-          <button className={styles.logoutBtn} onClick={() => { /* Lógica de logout */ }}>
-            <LogOut />
-            <span>Log Out</span>
+          <button className={styles.logoutBtn} onClick={handleLogout}>
+            <LogOut size={20} />
+            {isOpen && <span className={styles.navLabel}>Log Out</span>}
           </button>
-          <User size={24} />
         </div>
       </div>
     </nav>
@@ -62,7 +94,8 @@ const Sidebar = ({ isOpen, onClose }) => {
 
 Sidebar.propTypes = {
   isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
+  handleLogout: PropTypes.func.isRequired,
+  onToggle: PropTypes.func.isRequired,
 };
 
 export default Sidebar;

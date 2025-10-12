@@ -20,7 +20,7 @@ import TableActions from '../components/ui/table/TableActions.jsx';
 import ComponentGallery from '../components/ui/gallery/ComponentGallery.jsx';
 import NetworkConfigForm from '../components/form/network/NetworkConfigForm.jsx';
 
-const Playground = () => {
+const Playground = ({ handleLogout }) => {
   const { showToast } = useToast();
   const [sliderValue, setSliderValue] = useState(50);
   const [selectorValue, setSelectorValue] = useState(1);
