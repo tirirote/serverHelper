@@ -1,0 +1,127 @@
+/* src/pages/Workspaces/WorkspacesPage.module.css */
+
+.workspacesPage {
+    padding: 50px;
+    color: var(--color-white);
+}
+
+.headerContainer {
+    display: flex;
+    align-self: start;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 32px 0px;
+    border-bottom: 4px solid var(--color-gray-light);
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* --- DataTable Styles (Integration) --- */
+
+.centerAlign {
+    text-align: center;
+}
+
+.nameCell {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: var(--color-primary-light);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.nameCell:hover {
+    color: var(--color-primary);
+}
+
+/* Las acciones de la tabla son manejadas por TableActions.jsx */
+
+/* --- Status Badges --- */
+
+.badgeBase {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.active {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: var(--color-success); 
+}
+
+.pending {
+    background-color: rgba(251, 191, 36, 0.2);
+    color: var(--color-warning); 
+}
+
+.archived {
+    background-color: rgba(107, 114, 128, 0.2);
+    color: var(--color-gray-light); 
+}
+
+/* --- Empty State --- */
+.emptyState {
+    text-align: center;
+    padding: 50px;
+    background-color: var(--color-gray-darkest);
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.emptyIcon {
+    color: var(--color-gray-light);
+    margin-bottom: 15px;
+}
+
+/* --- Dialog/Modal Styles (Estructura interna) --- */
+
+.dialogContent, .dialogForm {
+    width: 100%;
+}
+
+.dialogHeader {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--color-gray-dark);
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.dialogDanger {
+    color: var(--color-error);
+}
+
+.dialogTitle {
+    color: var(--color-white);
+    font-size: 20px;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.dialogDanger .dialogTitle {
+    color: var(--color-error);
+}
+
+.dialogBody {
+    padding: 10px 0;
+    color: var(--color-gray-light);
+    line-height: 1.6; 
+}
+
+.dialogBody p strong {
+    color: var(--color-white);
+}
+
+.dialogFooter {
+    border-top: 1px solid var(--color-gray-dark);
+    padding-top: 15px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}

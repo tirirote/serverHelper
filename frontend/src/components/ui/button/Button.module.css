@@ -1,7 +1,7 @@
 .button {
   cursor: pointer;
   border-radius: 8px;
-  padding: 8px 32px;
+  padding: 8px 16px;
   font-family: var(--font-body);
   font-size: 16px;
   font-weight: 600;

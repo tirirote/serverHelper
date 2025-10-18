@@ -1,0 +1,100 @@
+/* src/components/simulations/RackSimulator.module.css */
+
+.simulatorContainer {
+    position: relative;
+    width: 100%;
+    /* Altura definida por el contenedor padre para asegurar que el canvas no sea 0 */
+    height: 100%; 
+    min-height: 400px;
+    cursor: default;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.simulatorContainer canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* --- Tooltip (Hover) --- */
+
+.rackTooltip {
+    position: fixed; /* Usamos fixed para que funcione correctamente con clientX/Y */
+    z-index: 20;
+    background-color: var(--color-gray-dark);
+    border: 1px solid var(--color-primary);
+    padding: 10px 15px;
+    border-radius: 8px;
+    pointer-events: none; /* Ignora eventos del ratón */
+    transform: translate(10px, 10px); /* Ajuste visual */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    min-width: 180px;
+}
+
+.tooltipName {
+    font-weight: 700;
+    color: var(--color-white);
+    margin: 0 0 5px 0;
+    border-bottom: 1px dashed var(--color-gray);
+    padding-bottom: 5px;
+}
+
+.tooltipDetail {
+    font-size: 14px;
+    color: var(--color-gray-light);
+    margin: 3px 0;
+    display: flex;
+    align-items: center;
+}
+
+.tooltipDetail strong {
+    color: var(--color-primary-light);
+    margin-left: 5px;
+}
+
+.tooltipClick {
+    font-size: 12px;
+    color: var(--color-info);
+    margin-top: 5px;
+    font-style: italic;
+}
+
+
+/* --- Action Menu (Click) --- */
+
+.actionMenu {
+    position: fixed;
+    z-index: 30;
+    background-color: var(--color-gray-darkest);
+    border: 2px solid var(--color-primary);
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    padding: 10px;
+    transform: translate(-50%, -100%); /* Centrar bajo el cursor */
+    min-width: 200px;
+}
+
+.menuTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-primary-light);
+    margin: 0 0 10px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--color-gray-dark);
+}
+
+.menuActions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.menuClose {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 20px;
+    color: var(--color-gray-light);
+    cursor: pointer;
+}
