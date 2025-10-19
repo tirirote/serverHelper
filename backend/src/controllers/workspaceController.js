@@ -1,16 +1,12 @@
 import { db } from '../db/index.js';
 import { workspaceSchema } from '../schemas/workspaceSchema.js';
+import { findNetworkByName } from './networkController.js';
 
-export const createWorkspace = (req, res) => {
-
-  const { name, description, network } = req.body;
-
-  const existingNetwork = db.networks.find(n => n.name === network);
-  if (!existingNetwork) {
-    return res.status(400).json({ message: `La red "${network}" no existe.` });
-  }
-
+//AUX
+const validateWorkspace = (req, res) => {
+  const { name } = req.body;
   const { error } = workspaceSchema.validate(req.body);
+
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
@@ -18,11 +14,43 @@ export const createWorkspace = (req, res) => {
   if (!name) {
     return res.status(400).json({ message: 'El nombre del workspace es obligatorio.' });
   }
+};
 
+const findExistingWorkspaceByName = (name, res) => {
   const existingWorkspace = db.workspaces.find(ws => ws.name === name);
   if (existingWorkspace) {
     return res.status(409).json({ message: 'Ya existe un workspace con este nombre.' });
   }
+}
+
+export const findWorkspaceByName = (name, res) => {
+  const workspace = db.workspaces.find(ws => ws.name === name);
+
+  if (!workspace) {
+    return res.status(404).json({ message: 'Workspace no encontrado.' });
+  }
+  return workspace;
+}
+
+const findWorkspaceIndexByName = (name, res) => {
+  const workspaceIndex = db.workspaces.findIndex(w => w.name === name);
+
+  if (workspaceIndex === -1) {
+    return res.status(404).json({ message: 'Workspace no encontrado.' });
+  }
+  return workspaceIndex;
+};
+
+//API
+export const createWorkspace = (req, res) => {
+
+  const { name, description, network } = req.body;
+
+  findNetworkByName(network, res);
+
+  validateWorkspace(req, res);
+
+  findExistingWorkspaceByName(name, res);
 
   const newWorkspace = {
     name,
@@ -38,17 +66,11 @@ export const updateWorkspace = (req, res) => {
   const { name } = req.params;
   const updatedDetails = req.body;
 
-  const workspaceIndex = db.workspaces.findIndex(w => w.name === name);
-  if (workspaceIndex === -1) {
-    return res.status(404).json({ message: 'Workspace no encontrado.' });
-  }
+  const workspaceIndex = findWorkspaceIndexByName(name, res);
 
   const updatedWorkspace = { ...db.workspaces[workspaceIndex], ...updatedDetails };
 
-  const { error } = workspaceSchema.validate(updatedWorkspace);
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
-  }
+  validateWorkspace(req, res);
 
   db.workspaces[workspaceIndex] = updatedWorkspace;
 
@@ -73,11 +95,8 @@ export const deleteWorkspaceByName = (req, res) => {
 
 export const getWorkspaceByName = (req, res) => {
   const { name } = req.params;
-  const workspace = db.workspaces.find(ws => ws.name === name);
-
-  if (!workspace) {
-    return res.status(404).json({ message: 'Workspace no encontrado.' });
-  }
+  
+  const workspace = findWorkspaceByName(name, res);
 
   res.status(200).json({ workspace });
 };
@@ -91,10 +110,7 @@ export const addRackToWorkspace = (req, res) => {
   const { workspaceName, rackName } = req.body;
 
   // 1. Encontrar el workspace
-  const workspace = db.workspaces.find(w => w.name === workspaceName);
-  if (!workspace) {
-    return res.status(404).json({ message: 'Workspace no encontrado.' });
-  }
+  const workspace = findWorkspaceByName(workspaceName, res);
 
   // 2. Encontrar el rack
   const rack = db.racks.find(r => r.name === rackName);

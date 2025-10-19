@@ -47,7 +47,7 @@ describe('User Service API', () => {
         const res = await request(app)
             .put('/api/users/userToUpdate')
             .send({ newPassword: 'newpassword' });
-
+        
         expect(res.statusCode).toEqual(200);
         expect(res.body.user.password).toBe('newpassword');
     });

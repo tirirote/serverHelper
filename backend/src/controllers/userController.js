@@ -1,6 +1,26 @@
 import { db } from '../db/index.js';
 import { userSchema } from '../schemas/userSchema.js';
 
+//AUX
+const findUserByName = (username, res) => {
+  const user = db.users.find(u => u.username === username);
+
+  if (!user) {
+    return res.status(404).json({ message: 'Usuario no encontrado.' });
+  }
+  return user;
+};
+
+const findExistingUserByName = (username, res) => {
+
+  const existingUser = db.users.find(user => user.username === username);
+
+  if (existingUser) {
+    return res.status(409).json({ message: 'El nombre de usuario ya existe.' });
+  }
+};
+
+//API
 export const createUser = (req, res) => {
   const { error } = userSchema.validate(req.body);
   if (error) {
@@ -8,11 +28,8 @@ export const createUser = (req, res) => {
   }
 
   const { username, password } = req.body;
-  const existingUser = db.users.find(user => user.username === username);
-
-  if (existingUser) {
-    return res.status(409).json({ message: 'El nombre de usuario ya existe.' });
-  }
+  
+  findExistingUserByName(username, res);
 
   const newUser = { username, password };
   db.users.push(newUser);
@@ -22,7 +39,7 @@ export const createUser = (req, res) => {
 export const deleteUser = (req, res) => {
   const { username } = req.params;
   const initialLength = db.users.length;
-  
+
   db.users = db.users.filter(user => user.username !== username);
 
   if (db.users.length === initialLength) {
@@ -36,10 +53,7 @@ export const updateUser = (req, res) => {
   const { username } = req.params;
   const { newPassword, newUsername } = req.body;
 
-  const user = db.users.find(u => u.username === username);
-  if (!user) {
-    return res.status(404).json({ message: 'Usuario no encontrado.' });
-  }
+  const user = findUserByName(username, res);
 
   const { error } = userSchema.validate({ username: newUsername || user.username, password: newPassword || user.password });
   if (error) {
@@ -66,11 +80,8 @@ export const getAllUsers = (req, res) => {
 
 export const getUserByUsername = (req, res) => {
   const { username } = req.params;
-  const user = db.users.find(u => u.username === username);
-  
-  if (!user) {
-    return res.status(404).json({ message: 'Usuario no encontrado.' });
-  }
+
+  const user = findUserByName(username, res);
 
   const { password, ...userWithoutPassword } = user;
   res.status(200).json(userWithoutPassword);

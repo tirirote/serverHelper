@@ -93,7 +93,8 @@ describe('Workspace Service API', () => {
             name: 'Invalid Workspace',
             network: 'NonExistentNet'
         });
-        expect(res.statusCode).toEqual(400);
-        expect(res.body.message).toBe('La red "NonExistentNet" no existe.');
+
+        expect(res.statusCode).toEqual(404);
+        expect(res.body.message).toBe('Red no encontrada.');
     });
 });

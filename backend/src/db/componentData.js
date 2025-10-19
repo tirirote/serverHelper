@@ -1,6 +1,6 @@
 export const components = [
   {
-    type: 'Chasis',
+    type: 'ServerChasis',
     name: 'Chasis 1U',
     price: 250,
     maintenanceCost: 5.0, // Costo de mantenimiento USD/mes
@@ -88,7 +88,7 @@ export const components = [
     modelPath: './assets/models/gpu.glb',
   },
   {
-    type: 'Placa Base',
+    type: 'MotherBoard',
     name: 'Placa Base 1',
     price: 400,
     maintenanceCost: 5.0,
@@ -97,5 +97,27 @@ export const components = [
     details: 'Placa base compatible con el chasis 1U.',
     isSelled: false,
     modelPath: './assets/models/motherboard.glb',
-  }
+  },
+  {
+    type: 'NetworkInterface',
+    name: 'Tarjeta de Red 10G',
+    price: 150,
+    maintenanceCost: 1.5,
+    estimatedConsumption: 8,
+    compatibleList: ['Placa Base 1', 'Placa Base 2'],
+    details: 'Interfaz de red con capacidad de 10 Gigabit.',
+    isSelled: false,
+    modelPath: './assets/models/nic.glb', // Modelo para Network Interface Card
+  },
+  {
+    type: 'OS',
+    name: 'Ubuntu Server 22.04 LTS',
+    price: 0, // Licencia gratuita/open source
+    maintenanceCost: 0.5,
+    estimatedConsumption: 0,
+    compatibleList: ['Intel Xeon E5-2690'], // Asume compatibilidad con la CPU
+    details: 'Sistema Operativo de servidor Linux, estable y de largo soporte.',
+    isSelled: false,
+    modelPath: './assets/models/os.glb',
+  },
 ];

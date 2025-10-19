@@ -2,7 +2,6 @@ import request from 'supertest';
 import { db } from '../src/db/index.js';
 import { setupTestEnvironment } from './utils/setup.js';
 import { components as initialComponents } from '../src/db/componentData.js';
-import { racks } from '../src/db/rackData.js';
 
 const app = setupTestEnvironment();
 
@@ -25,6 +24,7 @@ beforeEach(() => {
     db.racks = [testRack];
 
 });
+
 
 describe('Server Service API', () => {
 
@@ -191,15 +191,17 @@ describe('Server Service API', () => {
 
         // Definir una lista de componentes de actualización que también es válida
         const updatedComponents = [
-            { name: 'Intel Xeon E5-2690', type: 'CPU' }, // Componente existente
-            { name: 'DDR4 32GB', type: 'RAM' },          // Componente existente
-            { name: 'SSD 1TB', type: 'HardDisk' },       // Componente existente
-            { name: 'BIOS Standard', type: 'BiosConfig' }, // Componente existente
-            { name: 'Ventilador 80mm', type: 'Fan' },    // Componente existente
-            { name: 'Fuente 500W', type: 'PowerSupply' }, // Componente existente
-            { name: 'NVIDIA A100', type: 'GPU' },        // Nuevo componente
-            { name: 'Placa Base 1', type: 'Placa Base' }, // Nuevo componente
-            { name: 'Chasis 1U', type: 'Chasis' }
+            { name: 'Intel Xeon E5-2690', type: 'CPU' },
+            { name: 'DDR4 32GB', type: 'RAM' }, 
+            { name: 'SSD 1TB', type: 'HardDisk' },
+            { name: 'BIOS Standard', type: 'BiosConfig' }, 
+            { name: 'Ventilador 80mm', type: 'Fan' },
+            { name: 'Fuente 500W', type: 'PowerSupply' },
+            { name: 'NVIDIA A100', type: 'GPU' },
+            { name: 'Placa Base 1', type: 'Placa Base' }, 
+            { name: 'Chasis 1U', type: 'ServerChasis' },
+            { name: 'Tarjeta de Red 10G', type: 'NetworkInterface' },
+            { name: 'Ubuntu Server 22.04 LTS', type: 'OS' }
         ];
 
         const res = await request(app).put(`/api/servers/${encodeURIComponent(serverName)}`).send({ name: serverName, components: updatedComponents });

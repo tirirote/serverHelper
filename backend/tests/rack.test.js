@@ -32,7 +32,7 @@ describe('Rack Service API', () => {
         const newRack = {
             name: 'Rack A1',
             workspaceName: testWorkspace.name,
-            units: 42
+            units: 42,
         };
         const res = await request(app).post('/api/racks').send(newRack);
 
@@ -77,6 +77,7 @@ describe('Rack Service API', () => {
     it('should not delete a non-existent rack', async () => {
         await request(app).post('/api/workspaces').send(testWorkspace);
         const res = await request(app).delete('/api/racks/Test%20Workspace/Nonexistent%20Rack');
+
         expect(res.statusCode).toEqual(404);
         expect(res.body).toHaveProperty('message', 'Rack no encontrado.');
     });
@@ -96,7 +97,8 @@ describe('Rack Service API', () => {
         testRack.servers.push('Server 1');
 
         const res = await request(app).get('/api/racks/Test%20Workspace/Test%20Rack/maintenance-cost');
-        const expectedCost = 80.00;
+
+        const expectedCost = 82.00;
 
         expect(res.statusCode).toEqual(200);
         expect(res.body.totalMaintenanceCost).toBe(expectedCost.toFixed(2));

@@ -1,14 +1,58 @@
 import { db } from '../db/index.js';
 import { serverSchema } from '../schemas/serverSchema.js';
+import { mandatoryComponentTypes } from '../schemas/types.js';
+import { findComponentByName } from './componentController.js';
+import { findNetworkByName } from './networkController.js';
+//AUX
+const findExistingServer = (name, res) => {
+  const existingServer = db.servers.find(s => s.name === name);
+  if (existingServer) {
+    return res.status(409).json({ message: 'Ya existe un servidor con este nombre.' });
+  }
+};
 
-const validateComponents = (serverComponents) => {
-  const mandatoryTypes = ['Chasis', 'CPU', 'RAM', 'HardDisk', 'BiosConfig', 'Fan', 'PowerSupply'];
+export const findServerByName = (serverName, res) => {
+  const server = db.servers.find(s => s.name === serverName);
+  if (!server) {
+    return res.status(404).json({ message: 'Servidor no encontrado.' });
+  }
+  return server;
+};
+
+const findServerIndexByName = (serverName, res) => {
+  const serverIndex = db.servers.findIndex(s => s.name === serverName);
+  if (serverIndex === -1) {
+    return res.status(404).json({ message: 'Servidor no encontrado.' });
+  }
+  return serverIndex;
+};
+
+const validateServer = (server, res) => {
+  const { error } = serverSchema.validate(server);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+};
+
+const validateServerDetails = (details, res) => {
+  const { error } = serverSchema.optional().validate(details);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+};
+
+const validateComponents = (serverComponents, res) => {
+
   const serverComponentTypes = serverComponents.map(c => c.type);
 
   // 1. Validar componentes obligatorios
-  for (const type of mandatoryTypes) {
-    if (!serverComponentTypes.includes(type) && type !== 'HardDisk' && type !== 'RAM') {
-      return { valid: false, message: `Falta el componente obligatorio: ${type}.` };
+  // Usamos la lista mandatoryComponentTypes, asumiendo que incluye 'OS'
+  // Filtramos 'HardDisk' y 'RAM' ya que son opcionales en el mínimo requerido.
+  const requiredTypes = mandatoryComponentTypes.filter(type => type !== 'HardDisk' && type !== 'RAM');
+
+  for (const type of requiredTypes) {
+    if (!serverComponentTypes.includes(type)) {
+      return res.status(400).json({ message: `Falta el componente obligatorio: ${type}.` });
     }
   }
 
@@ -16,13 +60,12 @@ const validateComponents = (serverComponents) => {
   for (const component of serverComponents) {
     const dbComponent = db.components.find(c => c.name === component.name);
     if (!dbComponent) {
-      return { valid: false, message: `El componente "${component.name}" no existe en la base de datos.` };
+      return res.status(400).json({ message: `El componente "${component.name}" no existe en la base de datos.` });
     }
   }
-
-  return { valid: true };
 };
 
+//API
 export const calculateTotalCost = (serverComponents) => {
   return serverComponents.reduce((total, component) => {
     const dbComponent = db.components.find(c => c.name === component.name);
@@ -38,13 +81,20 @@ export const calculateTotalMaintenanceCost = (serverComponents) => {
 };
 
 export const createServer = (req, res) => {
-  const { name, description, components: rawComponents, rackName } = req.body;
+  const {
+    name,
+    components: rawComponents,
+    rackName,
+    ipAddress,
+    operatingSystem,
+    healthStatus // Permitir inicialización, aunque el default está en el esquema
+  } = req.body;
+
   let network;
 
+  // Determinar la red del servidor a partir del rack (si se proporciona)
   if (rackName) {
-    
     const workspace = db.workspaces.find(w => w.racks.includes(rackName));
-
     if (workspace) {
       network = workspace.network;
     }
@@ -59,43 +109,45 @@ export const createServer = (req, res) => {
     type: c.type
   }));
 
-  const existingNetwork = db.networks.find(n => n.name === network);
-  if (!existingNetwork) {
-    return res.status(400).json({ message: `La red "${network}" no existe.` });
-  }
+  // Encontrar el nombre del OS entre los componentes, usando el tipo 'OS'
+  const osComponent = components.find(c => c.type === 'OS');
+  const osName = osComponent ? osComponent.name : operatingSystem;
+
+
+  const existingNetwork = findNetworkByName(network, res);
 
   const serverToValidate = {
     name,
-    description,
+    // description ya no existe en el esquema Server
     components,
     totalPrice: calculateTotalCost(components),
     totalMaintenanceCost: calculateTotalMaintenanceCost(components),
-    network
+    network,
+    ipAddress, // Nuevo campo
+    operatingSystem: osName, // Nuevo campo
+    healthStatus: healthStatus || 'Unknown', // Nuevo campo
   };
 
-  const { error } = serverSchema.validate(serverToValidate);
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
-  }
 
-  const existingServer = db.servers.find(s => s.name === name);
-  if (existingServer) {
-    return res.status(409).json({ message: 'Ya existe un servidor con este nombre.' });
-  }
+  validateServer(serverToValidate, res);
 
-  const validation = validateComponents(components);
-  if (!validation.valid) {
-    return res.status(400).json({ message: validation.message });
-  }
+  findExistingServer(name, res);
+
+  validateComponents(components, res);
 
   const newServer = {
     id: `server-${db.servers.length + 1}`,
     name,
-    description: description || '',
     components: components,
     totalPrice: serverToValidate.totalPrice,
     totalMaintenanceCost: serverToValidate.totalMaintenanceCost,
-    network: existingNetwork.name
+    network: existingNetwork.name,
+
+    // Inicialización de los nuevos campos
+    ipAddress: ipAddress || 'N/A',
+    operatingSystem: osName || 'N/A',
+    healthStatus: healthStatus || 'Unknown',
+    rackId: rackName // Mantenemos la referencia al rack, útil para la navegación
   };
 
   db.servers.push(newServer);
@@ -117,10 +169,8 @@ export const updateServer = (req, res) => {
   const { name } = req.params;
   const { id, components, ...newDetails } = req.body; // Extraer y descartar 'id'
 
-  const serverIndex = db.servers.findIndex(s => s.name === name);
-  if (serverIndex === -1) {
-    return res.status(404).json({ message: 'Servidor no encontrado.' });
-  }
+  const serverIndex = findServerIndexByName(name, res);
+  const currentServer = db.servers[serverIndex];
 
   if (components) {
     const filteredComponents = components.map(c => ({
@@ -128,33 +178,32 @@ export const updateServer = (req, res) => {
       type: c.type
     }));
 
-    const componentValidation = validateComponents(filteredComponents);
-    if (!componentValidation.valid) {
-      return res.status(400).json({ message: componentValidation.message });
-    }
+    validateComponents(filteredComponents, res);
 
     newDetails.totalPrice = calculateTotalCost(filteredComponents);
     newDetails.totalMaintenanceCost = calculateTotalMaintenanceCost(filteredComponents);
     newDetails.components = filteredComponents;
-  }
 
-  // Si la red se actualiza, verificar que existe
-  if (newDetails.network) {
-    const existingNetwork = db.networks.find(n => n.name === newDetails.network);
-    if (!existingNetwork) {
-      return res.status(400).json({ message: `La red "${newDetails.network}" no existe.` });
+    // Asegurar que el OperatingSystem se actualiza si los componentes cambian, usando el tipo 'OS'
+    const osComponent = filteredComponents.find(c => c.type === 'OS');
+    if (osComponent) {
+      newDetails.operatingSystem = osComponent.name;
     }
   }
 
-  // Validar los detalles restantes de la solicitud con el esquema opcional
-  const updateSchema = serverSchema.optional();
-  const { error: validationError } = updateSchema.validate(newDetails);
-  if (validationError) {
-    return res.status(400).json({ message: validationError.details[0].message });
+  // Si la red se actualiza, verificar que existe (asumiendo que findExistingNetworkByName existe y usa findNetworkByName)
+  if (newDetails.network) {
+    findNetworkByName(newDetails.network, res);
   }
 
-  // Actualizar el servidor
-  const updatedServer = { ...db.servers[serverIndex], ...newDetails };
+  // Actualizar el servidor con los nuevos detalles antes de validar
+  const serverToValidate = { ...currentServer, ...newDetails };
+
+  // Validar los detalles restantes de la solicitud con el esquema
+  validateServerDetails(newDetails, res);
+
+  // Actualizar el servidor en la base de datos (usando el objeto validado o newDetails)
+  const updatedServer = { ...currentServer, ...newDetails };
   db.servers[serverIndex] = updatedServer;
 
   res.status(200).json({
@@ -170,20 +219,13 @@ export const getAllServers = (req, res) => {
 
 export const getServerByName = (req, res) => {
   const { name } = req.params;
-  const server = db.servers.find(s => s.name === name);
-  if (!server) {
-    return res.status(404).json({ message: 'Servidor no encontrado.' });
-  }
+  const server = findServerByName(name, res);
   res.status(200).json({ server });
-  return server;
 };
 
 export const getAllComponents = (req, res) => {
   const { name } = req.params;
-  const server = db.servers.find(s => s.name === name);
-  if (!server) {
-    return res.status(404).json({ message: 'Servidor no encontrado.' });
-  }
+  const server = findServerByName(name, res);
   res.status(200).json({ components: server.components });
 };
 
@@ -191,20 +233,20 @@ export const addComponentToServer = (req, res) => {
   const { serverName, componentName, componentType } = req.body;
 
   // 1. Encontrar el servidor
-  const serverIndex = db.servers.findIndex(s => s.name === serverName);
-  if (serverIndex === -1) {
-    return res.status(404).json({ message: 'Servidor no encontrado.' });
-  }
+  const serverIndex = findServerIndexByName(serverName, res);
 
   // 2. Validar que el componente exista
-  const component = db.components.find(c => c.name === componentName && c.type === componentType);
-  if (!component) {
-    return res.status(404).json({ message: 'Componente no encontrado.' });
-  }
+  const component = findComponentByName(componentName, res);
 
   // 3. Añadir el componente al servidor
   const server = db.servers[serverIndex];
   server.components.push({ name: component.name, type: component.type });
+
+  // Si el componente es un OS, actualizar el campo 'operatingSystem'
+  if (component.type === 'OS') {
+    server.operatingSystem = component.name;
+  }
+
 
   // 4. Recalcular costos
   server.totalPrice = calculateTotalCost(server.components);
@@ -218,33 +260,30 @@ export const addComponentToServer = (req, res) => {
 
 export const getMissingComponents = (req, res) => {
   const { name } = req.params;
-  const server = db.servers.find(s => s.name === name);
 
-  if (!server) {
-    return res.status(404).json({ message: 'Servidor no encontrado.' });
-  }
+  const server = findServerByName(name, res);
 
-  const mandatoryTypes = ['Chasis', 'CPU', 'RAM', 'HardDisk', 'BiosConfig', 'Fan', 'PowerSupply'];
+  // Usamos la lista mandatoryComponentTypes, asumiendo que incluye 'OS'
   const serverComponentTypes = server.components.map(c => c.type);
-  const missingComponents = mandatoryTypes.filter(type => !serverComponentTypes.includes(type));
+  const requiredTypes = mandatoryComponentTypes.filter(type => type !== 'HardDisk' && type !== 'RAM');
+
+  const missingComponents = requiredTypes.filter(type => !serverComponentTypes.includes(type));
 
   res.status(200).json({ missing: missingComponents });
 };
 
 export const getServerTotalCost = (req, res) => {
   const { name } = req.params;
-  const server = db.servers.find(s => s.name === name);
-  if (!server) {
-    return res.status(404).json({ message: 'Servidor no encontrado.' });
-  }
+
+  const server = findServerByName(name, res);
+
   res.status(200).json({ totalPrice: server.totalPrice });
 };
 
 export const getServerMaintenanceCost = (req, res) => {
   const { name } = req.params;
-  const server = db.servers.find(s => s.name === name);
-  if (!server) {
-    return res.status(404).json({ message: 'Servidor no encontrado.' });
-  }
+
+  const server = findServerByName(name, res);
+
   res.status(200).json({ totalMaintenanceCost: server.totalMaintenanceCost });
 };
