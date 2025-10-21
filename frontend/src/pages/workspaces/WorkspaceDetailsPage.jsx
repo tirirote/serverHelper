@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Home, Settings, Server, Package, PlusCircle, Wifi, Database, Users, TrendingUp, HeartPlus, Trash } from 'lucide-react';
+import { Home, Settings, Server, Package, PlusCircle, Wifi, Database, Trash, StickyNote, Eye } from 'lucide-react';
 import Button from '../../components/ui/button/Button.jsx';
 import DataTable from '../../components/ui/table/DataTable.jsx';
 import TableActions from '../../components/ui/table/TableActions.jsx';
@@ -8,10 +8,8 @@ import Dialog from '../../components/ui/dialog/Dialog.jsx';
 import Input from '../../components/ui/input/InputField.jsx';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import styles from './WorkspaceDetailsPage.module.css';
-
-// ===============================================
-// MOCK DATA
-// ===============================================
+import InfoPill from '../../components/ui/infopill/InfoPill.jsx';
+import Rack3DViewerCard from '../../components/3d/rack/Rack3DViewerCard.jsx';
 
 // Simulación de un Workspace completo
 const mockWorkspaceData = {
@@ -29,9 +27,10 @@ const mockWorkspaceData = {
     lastUpdated: 'Hace 2 horas',
     healthStatus: 'Excellent',
     racks: [
-        { id: 'r-1', name: 'Rack-01 (Front-End)', servers: 4, location: 'Row A', status: 'Online' },
-        { id: 'r-2', name: 'Rack-02 (Back-End)', servers: 6, location: 'Row B', status: 'Warning' },
-        { id: 'r-3', name: 'Rack-03 (Testing)', servers: 2, location: 'Row C', status: 'Offline' },
+        { id: 'r-1', name: 'Rack-01 (Front-End)', servers: 4, location: 'Row A', status: 'Online', cost: 1200.50, health: 'Excellent', power: 'ON' },
+        { id: 'r-2', name: 'Rack-02 (Back-End)', servers: 6, location: 'Row B', status: 'Warning', cost: 850.00, health: 'Degraded', power: 'ON' },
+        { id: 'r-3', name: 'Rack-03 (Testing)', servers: 2, location: 'Row C', status: 'Offline', cost: 400.75, health: 'Failure', power: 'OFF' },
+        { id: 'r-4', name: 'Rack-04 (Storage)', servers: 10, location: 'Row A', status: 'Online', cost: 1550.90, health: 'Default', power: 'ON' },
     ],
     inventory: [
         { id: 'i-1', name: 'CPU Intel i9-14900K', type: 'Processor', quantity: 10 },
@@ -41,9 +40,7 @@ const mockWorkspaceData = {
 };
 
 const WorkspaceDetailsPage = () => {
-    // Usamos useParams para simular la obtención del ID de la URL
     const { workspaceId } = useParams();
-    // Por simplicidad, usamos datos mock fijos, ignorando el ID de la URL
     const workspace = mockWorkspaceData;
 
     const { showToast } = useToast();
@@ -51,9 +48,6 @@ const WorkspaceDetailsPage = () => {
     const [isRackModalOpen, setIsRackModalOpen] = useState(false);
     const [newRackName, setNewRackName] = useState('');
 
-    // ===============================================
-    // LÓGICA DE GESTIÓN DE RACKS
-    // ===============================================
 
     const handleCreateRack = (e) => {
         e.preventDefault();
@@ -68,7 +62,6 @@ const WorkspaceDetailsPage = () => {
         setIsRackModalOpen(false);
     };
 
-    // Acciones de la tabla de Racks
     const handleRackAction = (action, id) => {
         const rack = workspace.racks.find(r => r.id === id);
         if (!rack) return;
@@ -77,106 +70,86 @@ const WorkspaceDetailsPage = () => {
         // Aquí se implementaría la navegación a RackDetailsPage o la lógica de edición/eliminación
     };
 
-    const rackColumns = useMemo(() => [
-        {
-            header: 'Nombre del Rack', key: 'name',
-            render: (item) => (
-                <div className={styles.nameCell} onClick={() => handleRackAction('view', item.id)}>
-                    <Server size={16} style={{ marginRight: '8px' }} />
-                    {item.name}
-                </div>
-            )
-        },
-        { header: 'Ubicación', key: 'location' },
-        { header: 'Servidores', key: 'servers', className: styles.centerAlign },
-        { header: 'Estado', key: 'status' },
-        {
-            header: 'Acciones',
-            key: 'actions',
-            className: styles.centerAlign,
-            render: (item) => (
-                <TableActions
-                    itemId={item.id}
-                    onViewDetails={(id) => handleRackAction('view', id)}
-                    onDelete={(id) => handleRackAction('delete', id)}
-                />
-            )
-        },
-    ], []);
-
     const renderHeaderInfo = () => (
-        <div className={styles.headerInfo}>
-            <div className={styles.infoGroup}>
-                <Wifi size={18} className={styles.iconPrimary} />
-                <p>Red Asignada: <strong>{workspace.network}</strong></p>
-            </div>
-            <div className={styles.infoGroup}>
-                <Database size={18} className={styles.iconPrimary} />
-                <p>Creado: <strong>{workspace.creationDate}</strong></p>
-            </div>
-            <div className={styles.infoGroup}>
-                <TrendingUp size={18} className={styles.iconPrimary} />
-                <p>Estado: <strong>{workspace.status}</strong></p>
-            </div>
-            <div className={styles.infoGroup}>
-                <HeartPlus size={18} className={styles.iconPrimary} />
-                <p>Salud: <strong>{workspace.healthStatus}</strong></p>
-            </div>
-        </div>
-    );
+        // Se aplica la clase .headerInfo definida en el CSS externo
+        <div>
+            <div className={styles.headerInfo}>
 
-    const renderDashboardTab = () => (
-        <div className={styles.dashboardGrid}>
-            <div className={`${styles.statsCard} ${styles.statServers}`}>
-                <h2>Servidores</h2>
-                <p className={styles.statNumber}>{workspace.totalServers}</p>
+                {/* Red Asignada */}
+                <InfoPill icon={Wifi} label="Red Asignada" value={workspace.network} color="blue" />
+
+                {/* Estado de Salud General */}
+                <InfoPill icon={Eye} label="Estado General" value={workspace.healthStatus} color={workspace.healthStatus === 'Excellent' ? 'green' : 'yellow'} />
+
+                {/* Fecha de Creación */}
+                <InfoPill icon={Database} label="Creado" value={workspace.creationDate} color="gray" />
+
             </div>
-            <div className={`${styles.statsCard} ${styles.statRacks}`}>
-                <h2>Racks</h2>
-                <p className={styles.statNumber}>{workspace.totalRacks}</p>
-            </div>
-            <div className={styles.statsCard}>
-                <h2>Descripción</h2>
-                <p>{workspace.description}</p>
+            <div className={styles.descriptionInfo}>
+                <InfoPill icon={StickyNote} label="Descripción" value={workspace.description} color="gray" isDescription={true} />
             </div>
         </div>
+
     );
 
     const renderRacksTab = () => (
         <>
             <div className={styles.tabActions}>
-                <Button variant="secondary" onClick={() => setIsRackModalOpen(true)}>
+                <Button variant="primary" onClick={() => setIsRackModalOpen(true)}>
                     <PlusCircle size={20} />
                     Añadir Nuevo Rack
                 </Button>
             </div>
-            <DataTable
-                data={workspace.racks}
-                columns={rackColumns}
-                initialSortBy="name"
-            />
+            {/* Se usa una cuadrícula simple (no definida en el CSS provisto, por lo que usaremos una clase genérica) */}
+            <div className={styles.rackGrid}>
+                {workspace.racks.map(rack => (
+                    // Uso del componente externo Rack3DViewerCard
+                    <Rack3DViewerCard key={rack.id} rack={rack} onAction={handleRackAction} />
+                ))}
+            </div>
+            {workspace.racks.length === 0 && (
+                <div className={styles.emptyRackGrid} >
+                    Aún no hay Racks creados en este Workspace. ¡Comienza añadiendo uno!
+                </div>
+            )}
         </>
     );
+
+    // Columnas de la tabla de Inventario (usa TableActions que también es externo)
+    const inventoryColumns = [
+        { header: 'Componente', key: 'name' },
+        { header: 'Tipo', key: 'type' },
+        { header: 'Cantidad Disponible', key: 'quantity', className: 'text-center' },
+        {
+            header: 'Acciones',
+            key: 'actions',
+            className: 'text-center',
+            render: (item) => (
+                <TableActions
+                    itemId={item.id}
+                    onViewDetails={() => showToast(`Ver detalles de ${item.name}`, 'info')}
+                    onDelete={() => showToast(`Eliminando ${item.name}`, 'danger')}
+                />
+            )
+        }
+    ];
 
     const renderInventoryTab = () => (
         <>
             <div className={styles.tabActions}>
+
+                <p className={styles.inventoryIntro}>
+                    Este inventario muestra los componentes físicos disponibles para construir servidores dentro de este Workspace.
+                </p>
                 <Button variant="secondary" onClick={() => showToast('Abriendo gestor de componentes...', 'info')}>
                     <Package size={20} />
                     Gestionar Componentes (WIP)
                 </Button>
             </div>
-            <p className={styles.inventoryIntro}>
-                Este inventario muestra los componentes físicos disponibles para construir servidores dentro de este Workspace.
-            </p>
             {/* Aquí se utilizaría un DataTable o ComponentGallery para mostrar el inventario */}
             <DataTable
                 data={workspace.inventory}
-                columns={[
-                    { header: 'Componente', key: 'name' },
-                    { header: 'Tipo', key: 'type' },
-                    { header: 'Cantidad Disponible', key: 'quantity'},
-                ]}
+                columns={inventoryColumns}
                 initialSortBy="name"
             />
         </>
@@ -184,14 +157,12 @@ const WorkspaceDetailsPage = () => {
 
     const renderContent = () => {
         switch (activeTab) {
-            case 'dashboard':
-                return renderDashboardTab();
             case 'racks':
                 return renderRacksTab();
             case 'inventory':
                 return renderInventoryTab();
             default:
-                return null;
+                return renderRacksTab();
         }
     };
 
@@ -208,12 +179,6 @@ const WorkspaceDetailsPage = () => {
             {renderHeaderInfo()}
             {/* Navegación por Pestañas */}
             <div className={styles.tabs}>
-                <button
-                    className={`${styles.tabButton} ${activeTab === 'dashboard' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('dashboard')}
-                >
-                    <Home size={18} /> Dashboard
-                </button>
                 <button
                     className={`${styles.tabButton} ${activeTab === 'racks' ? styles.activeTab : ''}`}
                     onClick={() => setActiveTab('racks')}
