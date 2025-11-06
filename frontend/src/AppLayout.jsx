@@ -11,7 +11,7 @@ import Workspaces from './pages/workspaces/WorkspacesPage.jsx';
 import WorkspaceDetailsPage from './pages/workspaces/WorkspaceDetailsPage.jsx';
 import ShopPage from './pages/shop/ShopPage.jsx';
 import ShopPageDetails from './pages/shop/ShopPageDetails.jsx';
-
+import ServersPage from './pages/servers/ServersPage.jsx';
 const AppLayout = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     // CAMBIO: Establecer a false para que esté contraído por defecto
@@ -60,7 +60,7 @@ const AppLayout = () => {
                             <Route path="/shop" element={<ShopPage handleLogout={handleLogout} />} />
                             <Route path="/shop/:itemId" element={<ShopPageDetails handleLogout={handleLogout} />} />
                             <Route path="/components" element={<Playground handleLogout={handleLogout} />} />
-                            <Route path="/servers" element={<Playground handleLogout={handleLogout} />} />
+                            <Route path="/servers" element={<ServersPage handleLogout={handleLogout} />} />
                             <Route path="/profile" element={<ProfilePage />} />
                             <Route path="*" element={<Playground handleLogout={handleLogout} />} />
                         </Routes>

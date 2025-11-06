@@ -114,7 +114,7 @@ const WorkspacesPage = () => {
             navigate(`/workspaces/${id}`);
         } else if (action === 'edit') {
             // Si la acción es 'edit', por ahora solo mostramos un toast
-             showToast(`Simulando la edición para Workspace: ${workspace.name}`, 'info');
+            showToast(`Simulando la edición para Workspace: ${workspace.name}`, 'info');
         }
     };
 
@@ -127,7 +127,7 @@ const WorkspacesPage = () => {
         {
             header: 'ID',
             key: 'id',
-            render: (item) => <span style={{ fontWeight: 'bold' }}>{item.id}</span>
+            render: (item) => <span className={styles.idCell}>{item.id}</span>
         },
         {
             header: 'Nombre del Workspace',
