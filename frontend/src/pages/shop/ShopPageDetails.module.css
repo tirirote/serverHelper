@@ -1,0 +1,215 @@
+/* src/pages/ShopPage/ShopPageDetails.module.css */
+
+.detailsPage {
+    padding: 50px;
+    width: 100%;
+    margin: 0 auto;
+    color: var(--color-white);
+}
+
+.backButtonContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.productContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+/* --- Columna Izquierda: Visor 3D --- */
+
+.viewerColumn {
+    padding-right: 20px;
+    border-right: 1px solid var(--color-gray-dark);
+}
+
+.viewerLgContainer {
+    height: 450px;
+    background-color: var(--color-gray-dark);
+    border-radius: 10px;
+    margin-top: 15px;
+    overflow: hidden;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.viewerTip {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--color-gray-light);
+    margin-top: 10px;
+}
+
+/* --- Columna Derecha: Información --- */
+
+.infoColumn {
+    display: flex;
+    flex-direction: column;
+}
+
+.productName {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 10px;
+    grid-column: 1 / -1; /* Ocupa todo el ancho en móvil */
+}
+
+.priceContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--color-gray-dark);
+}
+
+.priceTag {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--color-green);
+    margin-right: 20px;
+}
+
+.ratingTag {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-orange);
+    background-color: var(--color-gray-dark);
+    padding: 5px 12px;
+    border-radius: 6px;
+}
+
+.description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-gray-lightest);
+    margin-bottom: 30px;
+}
+
+.sectionTitle {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-white);
+    margin: 20px 0 15px 0;
+    border-bottom: 2px solid var(--color-primary-light);
+    padding-bottom: 5px;
+}
+
+/* --- Specs Grid --- */
+.specsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.specItem {
+    background-color: var(--color-gray-dark);
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.specIcon {
+    color: var(--color-primary);
+    margin-bottom: 5px;
+}
+
+.specLabel {
+    font-size: 0.8rem;
+    color: var(--color-gray-lightest);
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.specValue {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-white);
+}
+
+/* --- Compatibility List --- */
+
+.compatibilityList {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 40px;
+}
+
+.compatibilityItem {
+    background-color: var(--color-gray-dark);
+    color: var(--color-gray-lightest);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    border: 1px solid var(--color-primary-light);
+}
+
+/* --- Purchase Controls --- */
+
+.purchaseControls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: auto; /* Empuja los controles hacia abajo */
+    padding-top: 20px;
+    border-top: 1px solid var(--color-gray-dark);
+}
+
+.quantityControl {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.quantityLabel {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: var(--color-gray-light);
+}
+
+.quantityInput {
+    width: 80px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--color-gray-light);
+    background-color: var(--color-gray-dark);
+    color: var(--color-white);
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.addToCartButton {
+    flex-grow: 1; /* Permite que el botón se expanda */
+}
+
+/* Responsividad */
+@media (max-width: 1024px) {
+    .productContainer {
+        grid-template-columns: 1fr; /* Columna única en tabletas/móviles */
+    }
+    .viewerColumn {
+        border-right: none;
+        padding-right: 0;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--color-gray-dark);
+    }
+    .productName {
+        text-align: center;
+    }
+    .purchaseControls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .addToCartButton {
+        width: 100%;
+    }
+}

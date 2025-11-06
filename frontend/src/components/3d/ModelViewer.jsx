@@ -17,8 +17,8 @@ const VARIANT_CONFIGS = {
   },
   // 2. Variante 'static': Vista frontal estática (perfecto para tarjetas)
   static: {
-    cameraPosition: [0, 5, 30], // Posición centrada y ligeramente elevada para vista frontal
-    cameraFov: 2,
+    cameraPosition: [0, 0, 16], // Posición centrada y ligeramente elevada para vista frontal
+    cameraFov: 8,
     controlsEnabled: false,
     autoRotate: 0, // Rotación desactivada
   },

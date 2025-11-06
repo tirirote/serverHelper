@@ -10,6 +10,7 @@ import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import styles from './WorkspaceDetailsPage.module.css';
 import InfoPill from '../../components/ui/infopill/InfoPill.jsx';
 import Rack3DViewerCard from '../../components/3d/rack/Rack3DViewerCard.jsx';
+import ModelViewer from '../../components/3d/ModelViewer.jsx';
 
 // Simulación de un Workspace completo
 const mockWorkspaceData = {
@@ -77,7 +78,6 @@ const WorkspaceDetailsPage = () => {
 
                 {/* Red Asignada */}
                 <InfoPill icon={Wifi} label="Red Asignada" value={workspace.network} color="blue" />
-
                 {/* Estado de Salud General */}
                 <InfoPill icon={Eye} label="Estado General" value={workspace.healthStatus} color={workspace.healthStatus === 'Excellent' ? 'green' : 'yellow'} />
 
