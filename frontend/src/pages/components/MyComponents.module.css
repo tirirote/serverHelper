@@ -1,0 +1,213 @@
+/* --- Estilos Generales de la Página --- */
+.myComponentsPage {
+    padding: 30px;
+    background-color: var(--color-gray-dark); /* blue-50 */
+    min-height: 100vh;
+    color: #1f2937; /* gray-800 */
+}
+
+/* Encabezado */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.title {
+    font-size: 32px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    color: var(--color-white)
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+}
+
+.visualizerColumn {
+    /* Estilos del contenedor */
+}
+
+/* Columna de la Lista (a la derecha) */
+.listColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Contenedor de la Tabla */
+.tableContainer {
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    flex-grow: 1;
+}
+
+/* --- Estilos de ComponentCard (Visualizador 3D) --- */
+
+.componentCard {
+    background-color: var(--color-gray-darkest);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.visualizer {
+    background-color: var(--color-gray-darkest); /* gray-800 oscuro para el fondo 3D */
+    padding: 20px;
+    text-align: center;
+    color: #e5e7eb;
+}
+
+.visualizerTitle {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--color-white) /* teal-200 */
+}
+
+.threeDModelPlaceholder {
+    height: 250px;
+    background-color: #374151; /* gray-700 */
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 2px dashed #4b5563; /* gray-600 */
+}
+
+.componentCardPlaceholder {
+    height: 100%;
+    min-height: 450px; /* Asegura que la tarjeta vacía tenga una altura decente */
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 2px dashed #d1d5db;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.details {
+    padding: 20px;
+}
+
+.detailsTitle {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #0d9488;
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed #f3f4f6;
+}
+
+.detailLabel {
+    font-weight: 500;
+    color: #4b5563; /* gray-600 */
+}
+
+.detailValue {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.cardFooter {
+    margin-top: 20px;
+    text-align: right;
+}
+
+/* --- Estilos de Tabla y Celdas --- */
+
+.idCell {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280; /* gray-500 */
+}
+
+/* Celda de Nombre (con estilo de enlace/click) */
+.nameCellLink {
+    font-weight: 600;
+    color: #0d9488; /* teal-600 */
+    cursor: pointer;
+    transition: color 0.15s ease-in-out;
+    padding: 2px 0; /* Espaciado para mejorar el área de clic */
+}
+.nameCellLink:hover {
+    color: #0f766e; /* teal-700 */
+    text-decoration: underline;
+}
+
+.activeName {
+    color: #3b82f6 !important; /* blue-500 para indicar que está activo */
+    font-weight: 700;
+    border-left: 3px solid #3b82f6;
+    padding-left: 8px;
+}
+
+.centerAlign {
+    text-align: center;
+}
+
+/* --- Estilos de Estado --- */
+.statusActive {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    background-color: #d1fae5; /* green-100 */
+    color: #059669; /* green-600 */
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.statusMaintenance {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    background-color: #fef3c7; /* amber-100 */
+    color: #d97706; /* amber-600 */
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.statusRetired {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    background-color: #fee2e2; /* red-100 */
+    color: #dc2626; /* red-600 */
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* --- Estilos de Empty State --- */
+.emptyState {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+.emptyIcon {
+    color: #9ca3af; /* gray-400 */
+    margin-bottom: 10px;
+}
+
+.emptyState p {
+    font-size: 15px;
+    color: #6b7280;
+}

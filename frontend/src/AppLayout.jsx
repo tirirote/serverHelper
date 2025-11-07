@@ -13,6 +13,7 @@ import ShopPage from './pages/shop/ShopPage.jsx';
 import ShopPageDetails from './pages/shop/ShopPageDetails.jsx';
 import ServersPage from './pages/servers/ServersPage.jsx';
 import ServerDetailsPage from './pages/servers/ServerDetailsPage.jsx';
+import MyComponents from './pages/components/MyComponents.jsx';
 
 const AppLayout = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -61,7 +62,8 @@ const AppLayout = () => {
                             <Route path="/workspaces/:workspaceId" element={<WorkspaceDetailsPage />} />
                             <Route path="/shop" element={<ShopPage handleLogout={handleLogout} />} />
                             <Route path="/shop/:itemId" element={<ShopPageDetails handleLogout={handleLogout} />} />
-                            <Route path="/components" element={<Playground handleLogout={handleLogout} />} />
+                            <Route path="/components" element={<MyComponents handleLogout={handleLogout} />} />
+                            <Route path="/components/:componentId" element={<Playground handleLogout={handleLogout} />} />
                             <Route path="/servers" element={<ServersPage handleLogout={handleLogout} />} />
                             <Route path="/servers/:serverId" element={<ServerDetailsPage handleLogout={handleLogout} />} />
                             <Route path="/profile" element={<ProfilePage />} />
