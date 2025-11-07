@@ -1,19 +1,10 @@
 import React from 'react';
 import { Cpu, Server, HardDrive, Zap, Package } from 'lucide-react';
-import Button from '../../components/ui/button/Button.jsx'; 
+import Button from '../../components/ui/button/Button.jsx';
+import ModelViewer from '../../components/3d/ModelViewer.jsx';
 
 import styles from './MyComponents.module.css';
 
-// Función para determinar el ícono basado en el tipo de componente
-const getTypeIcon = (type) => {
-    switch (type) {
-        case 'CPU': return <Cpu size={24} />;
-        case 'GPU': return <Zap size={24} />;
-        case 'RAM': return <Server size={24} />;
-        case 'Storage': return <HardDrive size={24} />;
-        default: return <Package size={24} />;
-    }
-};
 
 const ComponentCard = ({ component }) => {
     if (!component) {
@@ -30,19 +21,17 @@ const ComponentCard = ({ component }) => {
         <div className={styles.componentCard}>
             <div className={styles.visualizer}>
                 <h2 className={styles.visualizerTitle}>Visualización 3D: {component.name}</h2>
-                <div className={styles.threeDModelPlaceholder}>
-                    {/* Placeholder del Visor 3D (Simulación) */}
-                    {getTypeIcon(component.type)}
-                    <span className="mt-2 text-xl font-mono text-indigo-200">
-                        {component.type} - MODELO
-                    </span>
-                    
+                <div>
+                    <ModelViewer
+                        modelPath={component.modelPath}
+                        variant="default"
+                    />
                 </div>
             </div>
-            
+
             <div className={styles.details}>
                 <h3 className={styles.detailsTitle}>{component.name}</h3>
-                
+
                 <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>ID Serial:</span>
                     <span className={styles.detailValue}>{component.serial}</span>

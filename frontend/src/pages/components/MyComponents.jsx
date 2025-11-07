@@ -4,10 +4,10 @@ import { ShoppingBag, Server, Trash2, Zap, AlertTriangle, ArrowRight, XCircle } 
 
 // Componentes externos simulados
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
-import DataTable from '../../components/ui/table/DataTable.jsx'; 
-import TableActions from '../../components/ui/table/TableActions.jsx'; 
-import Dialog from '../../components/ui/dialog/Dialog.jsx'; 
-import Button from '../../components/ui/button/Button.jsx'; 
+import DataTable from '../../components/ui/table/DataTable.jsx';
+import TableActions from '../../components/ui/table/TableActions.jsx';
+import Dialog from '../../components/ui/dialog/Dialog.jsx';
+import Button from '../../components/ui/button/Button.jsx';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 
 // Componentes internos
@@ -17,27 +17,24 @@ import styles from './MyComponents.module.css';
 // MOCK Data para Componentes
 const initialComponents = [
     {
-        id: 'comp-401', name: 'NVIDIA RTX 4090', type: 'GPU', status: 'Active', usage: 'High-Performance Gaming',
-        serial: 'RTX4090-A001', vendor: 'NVIDIA', 
-    },
-    {
-        id: 'comp-402', name: 'Intel Core i9-14900K', type: 'CPU', status: 'Maintenance', usage: 'Development Server',
-        serial: 'I914900K-002', vendor: 'Intel',
-    },
-    {
-        id: 'comp-403', name: 'Corsair Vengeance 32GB DDR5', type: 'RAM', status: 'Active', usage: 'General Compute',
-        serial: 'CV32GB-DDR5-003', vendor: 'Corsair',
-    },
-    {
-        id: 'comp-404', name: 'Samsung 990 Pro 2TB NVMe', type: 'Storage', status: 'Active', usage: 'Data Cache',
-        serial: 'S990PRO-2TB-004', vendor: 'Samsung',
-    },
+        id: 'i-101',
+        name: 'Servidor Base R-10',
+        category: 'Server',
+        description: 'Servidor genérico de 1U, ideal para desarrollo.',
+        price: 1200.00,
+        icon: Server,
+        maintenanceCost: 15.00,
+        estimatedConsumption: 150,
+        compatibleComponents: ['Rack 1U', 'Rack 2U'],
+        modelPath: '/assets/models/server-closed.glb'
+
+    }
 ];
 
 const MyComponents = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
-    
+
     const [components, setComponents] = useState(initialComponents);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -129,7 +126,7 @@ const MyComponents = () => {
             key: 'name',
             render: (item) => (
                 // Al hacer clic en el nombre, se activa la vista 3D
-                <div 
+                <div
                     className={`${styles.nameCellLink} ${item.id === activeComponent?.id ? styles.activeName : ''}`}
                     onClick={() => handleTableAction('view', item.id)}
                 >
