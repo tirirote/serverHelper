@@ -1,2 +1,2 @@
-#Prueba de comit desde el portatil
-Esto es una prueba desde mi portatil.
+#Prueba comit desde el pc de las prácticas
+Esto es una prueba desde el pc de las prácticas.
