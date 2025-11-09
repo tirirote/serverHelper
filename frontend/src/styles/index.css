@@ -2,13 +2,13 @@
  @import url('./colors.css');
 
  /* Fuentes */
- @import url('https://fonts.googleapis.com/css2?family=Chango&family=Genos:ital,wght@0,100..900;1,100..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Patrick+Hand&family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Varela+Round&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&family=Cascadia+Mono:ital,wght@0,200..700;1,200..700&family=Fira+Code:wght@300..700&family=Genos:ital,wght@0,100..900;1,100..900&family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
  /* Fuentes y estilos globales */
  :root {
-   --font-title: 'Genos';
-   --font-body: 'Nunito';
-   --font-code: 'Ubuntu Mono';
+   --font-title: 'Genos', sans-serif;
+   --font-body: 'Cascadia Mono', sans-serif;
+   --font-code: 'Cascadia Code', monospace;
    color: var(--color-white);
    font-family: var(--font-body);
    line-height: 1.5;
@@ -27,6 +27,7 @@
    background-color: var(--color-gray-dark);
    color: var(--color-white);
    font-weight: 400;
+   font-size: 1.05rem;
    /* Peso por defecto para el cuerpo del texto */
  }
 
@@ -36,7 +37,6 @@
    font-weight: 700;
    /* Negrita, el peso más alto para el título principal */
    color: var(--color-white);
-   margin: 8px;
  }
 
  h2 {
@@ -46,7 +46,6 @@
    font-weight: 700;
    /* Peso medio */
    color: var(--color-gray-lightest);
-   margin: 8px;
  }
 
  h3 {
@@ -55,7 +54,7 @@
    font-size: 1.75rem;
    font-weight: 700;
    /* Peso medio */
-   color: var(--color-orange);
+   color: var(--color-gray-lightest);
  }
 
  h4 {
@@ -85,9 +84,9 @@
  }
 
  span {
-   font-family: var(--font-body);
+   font-family: var(--font-code);
    font-weight: 400;
-   font-style: italic;
+   color: var(--color-white);
  }
 
  /* Enlaces */
@@ -110,7 +109,8 @@
  /* --- Estilos para Código --- */
  code {
    font-family: var(--font-code);
-   font-weight: 400;
+   font-weight: 500;
    background-color: var(--color-gray-light);
+   border-radius: 16px;
    color: var(--color-white);
  }

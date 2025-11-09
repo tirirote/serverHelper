@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, PlusCircle, Wifi, DollarSign, Zap, List } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Wifi, DollarSign, Zap, List, ChevronsLeftIcon, ChevronLeft, Plus } from 'lucide-react';
 import ModelViewer from '../../components/3d/ModelViewer.jsx';
 import Button from '../../components/ui/button/Button.jsx';
 import styles from './ShopPageDetails.module.css';
+import CompatibilityList from '../../components/form/component/CompatibilityList.jsx';
+import NumberSelector from '../../components/ui/numberSelector/NumberSelector.jsx';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const ShopPageDetails = ({ onAddToCart }) => {
@@ -20,7 +22,7 @@ const ShopPageDetails = ({ onAddToCart }) => {
             console.error("Error: 'selectedShopItemData' no se encontró en localStorage.");
             return null;
         }
-        
+
         try {
             const parsedItem = JSON.parse(storedData);
             // Crucial: Solo retorna el ítem si su ID coincide con el ID del URL.
@@ -55,18 +57,21 @@ const ShopPageDetails = ({ onAddToCart }) => {
     };
 
     const formatCurrency = (amount) => `$${(amount || 0).toFixed(2)}`;
-    
+
     const compatibleList = item.compatibleComponents || item.compatibleWith || [];
 
     return (
         <div className={styles.detailsPage}>
+            <div className={styles.headerContainer}>
+                {/* Botón de Regreso */}
+                <Button variant="secondary" size="medium">
+                    <ChevronLeft size={20} /> Volver
+                </Button>
 
-
+            </div>
             <div className={styles.productContainer}>
-
                 {/* Columna Izquierda: Visor 3D */}
                 <div className={styles.viewerColumn}>
-                    <h2 className={styles.productName}>{item.name}</h2>
                     <div className={styles.viewerLgContainer}>
                         <ModelViewer
                             modelPath={item.modelPath}
@@ -79,79 +84,54 @@ const ShopPageDetails = ({ onAddToCart }) => {
                     </p>
                 </div>
 
-                {/* Columna Derecha: Información del Producto */}
                 <div className={styles.infoColumn}>
 
-                    <div className={styles.priceContainer}>
+                    <div className={styles.namePriceContainer}>
+                        <h1 className={styles.productName}>{item.name}</h1>
                         <span className={styles.priceTag}>{formatCurrency(item.price)}</span>
                     </div>
 
                     <p className={styles.description}>{item.description}</p>
 
-                    {/* Metadatos y Especificaciones */}
-                    <div className={styles.specsGrid}>
+                    <div className={styles.specsSection}>
                         <div className={styles.specItem}>
                             <DollarSign size={20} className={styles.specIcon} />
-                            <span className={styles.specLabel}>Costo Mantenimiento/Mes:</span>
-                            <span className={styles.specValue}>{formatCurrency(item.maintenanceCost)}</span>
+                            <span className={styles.specLabel}>Costo Mantenimiento</span>
+                            <span className={styles.specValue}>{formatCurrency(item.maintenanceCost)}/mes</span>
                         </div>
 
                         <div className={styles.specItem}>
                             <Zap size={20} className={styles.specIcon} />
-                            <span className={styles.specLabel}>Consumo Estimado:</span>
-                            <span className={styles.specValue}>{item.estimatedConsumption}</span>
-                        </div>
-
-                        <div className={styles.specItem}>
-                            <List size={20} className={styles.specIcon} />
-                            <span className={styles.specLabel}>Categoría:</span>
-                            <span className={styles.specValue}>{item.category}</span>
+                            <span className={styles.specLabel}>Consumo Estimado</span>
+                            <span className={styles.specValue}>{item.estimatedConsumption}W /mes</span>
                         </div>
                     </div>
 
-                    {/* Compatibilidad */}
-                    <h3 className={styles.sectionTitle}>Componentes Compatibles</h3>
-                    <ul className={styles.compatibilityList}>
-                        {item.compatibleComponents.map((comp, index) => (
-                            <li key={index} className={styles.compatibilityItem}>
-                                {comp}
-                            </li>
-                        ))}
-                    </ul>
+                    <div className={styles.compatibilityHeader}>
+                        <CompatibilityList items={item.compatibleWith} />
+                    </div>
 
-                    {/* Control de Cantidad y Botón de Compra */}
                     <div className={styles.purchaseControls}>
                         <div className={styles.quantityControl}>
-                            <label htmlFor="quantity" className={styles.quantityLabel}>Cantidad:</label>
-                            <input
-                                id="quantity"
-                                type="number"
-                                min="1"
+                            <label htmlFor="quantity" className={styles.quantityLabel}>Cantidad</label>
+                            <NumberSelector
                                 value={quantity}
+                                min={1}
+                                max={255}
                                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                className={styles.quantityInput}
                             />
                         </div>
 
                         <Button
-                            variant="success"
-                            size="large"
+                            variant="primary"
                             onClick={handleAdd}
-                            className={styles.addToCartButton}
                         >
-                            <PlusCircle size={24} />
-                            Añadir al Carrito ({quantity})
+                            <Plus size={24} />
+                            Añadir ({quantity})
                         </Button>
                     </div>
 
                 </div>
-            </div>
-            
-            {/* Botón de Regreso */}
-            <div className={styles.backButtonContainer}>
-                <Button variant="secondary" size="medium">
-                    <ArrowLeft size={20} /> Volver a la Tienda
-                </Button>
             </div>
         </div>
     );

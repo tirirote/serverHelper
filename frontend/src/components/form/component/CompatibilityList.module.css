@@ -16,7 +16,7 @@
     box-shadow: inset 4px 4px 0px var(--color-gray-darkest);
     border-radius: 8px;
     border: solid;
-    border-color: var(--color-gray-lightest);
+    border-color: var(--color-gray-light);
     padding: 12px;
     max-height: 150px;
     overflow-y: auto;
@@ -46,7 +46,7 @@
     
     /* Estilo del thumb al pasar el cursor por encima */
     &::-webkit-scrollbar-thumb:hover {
-        background-color: var(--color-gray-lightest);
+        background-color: var(--color-white);
         border-color: var(--color-white);
     }
 }

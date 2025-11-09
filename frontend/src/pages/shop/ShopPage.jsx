@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ShoppingCart, Server, Package, Cpu, HardDrive, PlusCircle, MemoryStick } from 'lucide-react';
+import { ShoppingCart, Server, Package, Cpu, HardDrive, PlusCircle, MemoryStick, Eye } from 'lucide-react';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 import Button from '../../components/ui/button/Button.jsx';
@@ -17,12 +17,15 @@ const initialShopItems = [
         category: 'Server',
         description: 'Servidor genérico de 1U, ideal para desarrollo.',
         price: 1200.00,
-        icon: Server,
         maintenanceCost: 15.00,
         estimatedConsumption: 150,
-        compatibleComponents: ['Rack 1U', 'Rack 2U'],
+        compatibleWith: [
+            { id: 1, name: 'Rack-1', count: 1 },
+            { id: 2, name: 'Server-1', count: 1 },
+            { id: 3, name: 'Cable-2', count: 1 },
+        ],
         modelPath: '/assets/models/server-closed.glb'
-        
+
     }
 ];
 
@@ -77,7 +80,7 @@ const ShopPage = () => {
         try {
             // 1. Guardar el objeto completo en localStorage
             localStorage.setItem('selectedShopItemData', JSON.stringify(item));
-            
+
             // 2. Navegar al componente de detalles usando el ID
             navigate(`/shop/${item.id}`);
         } catch (error) {
@@ -92,7 +95,7 @@ const ShopPage = () => {
 
         return (
             <div key={item.id} className={styles.itemCard}>
-
+                <h4 className={styles.itemName} title={item.name}>{item.name}</h4>
                 {/* 1. Visor 3D: Ocupa la mayor parte del espacio visual */}
                 <div className={styles.viewer3DContainer}>
                     <ModelViewer
@@ -104,14 +107,11 @@ const ShopPage = () => {
                 {/* 2. Información del Item */}
                 <div className={styles.itemInfo}>
                     <div className={styles.itemNameContainer}>
-                        <h3 className={styles.itemName} title={item.name}>{item.name}</h3>
+                        <span className={styles.itemCategory}>{item.category}</span>
                     </div>
-
                     <p className={styles.itemDescription}>{item.description}</p>
 
                     <div className={styles.itemMeta}>
-                        <ItemIcon size={14} className={styles.metaIcon} />
-                        <span className={styles.itemCategory}>{item.category}</span>
                     </div>
                 </div>
 
@@ -124,9 +124,8 @@ const ShopPage = () => {
                         onClick={(e) => {
                             e.stopPropagation();
                             handleViewDetails(item);
-                        }}
-                    >
-                        <PlusCircle size={18} /> Ver Detalles
+                        }}                    >
+                        <Eye size={24} /> Ver
                     </Button>
                 </div>
             </div>
@@ -134,28 +133,27 @@ const ShopPage = () => {
     };
 
     return (
-        <div className={styles.shopPage}>
-            <header className={styles.header}>
-                <h1 className={styles.title}>
-                    <ShoppingCart size={28} style={{ marginRight: '10px' }} />
-                    Tienda de Componentes
+        <div>
+            <header>
+                <h1>
+                    Tienda
                 </h1>
+            </header>
+
+            <div className={styles.headerContainer}>
+                <SearchFilterBar
+                    onSearchChange={setSearchTerm}
+                    searchPlaceholder="Buscar servidores, CPUs, RAM o componentes..."
+                />
                 <Button
-                    variant="secondary"
+                    variant="icon-only"
                     onClick={handleCheckout}
                     disabled={totalItemsInCart === 0}
                     className={styles.cartButton}
                 >
                     <ShoppingCart size={20} />
-                    Carrito ({totalItemsInCart})
+                    {totalItemsInCart}
                 </Button>
-            </header>
-
-            <div className={styles.searchBarContainer}>
-                <SearchFilterBar
-                    onSearchChange={setSearchTerm}
-                    searchPlaceholder="Buscar servidores, CPUs, RAM o componentes..."
-                />
             </div>
 
             <div className={styles.itemsGrid}>

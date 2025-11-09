@@ -1,8 +1,6 @@
 /* src/pages/Workspaces/WorkspacesPage.module.css */
 
 .workspacesPage {
-    padding: 50px;
-    color: var(--color-white);
 }
 
 .headerContainer {

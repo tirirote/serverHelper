@@ -59,9 +59,9 @@
 }
 
 .mainContent {
-    flex-grow: 1;
-    padding: 32px;
-    margin-top: -72px;
+    padding: 64px;
+    width: 98%;
+    align-self: center;
 }
 
 /* 1. Definir el ancho de la barra */
