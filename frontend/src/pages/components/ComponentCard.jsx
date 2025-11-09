@@ -20,7 +20,7 @@ const ComponentCard = ({ component }) => {
     return (
         <div className={styles.componentCard}>
             <div className={styles.visualizer}>
-                <h2 className={styles.visualizerTitle}>Visualización 3D: {component.name}</h2>
+                <h2 className={styles.visualizerTitle}>{component.name}</h2>
                 <div>
                     <ModelViewer
                         modelPath={component.modelPath}
@@ -33,20 +33,17 @@ const ComponentCard = ({ component }) => {
                 <h3 className={styles.detailsTitle}>{component.name}</h3>
 
                 <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>ID Serial:</span>
-                    <span className={styles.detailValue}>{component.serial}</span>
-                </div>
-                <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>Proveedor:</span>
-                    <span className={styles.detailValue}>{component.vendor}</span>
-                </div>
-                <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>Tipo:</span>
-                    <span className={styles.detailValue}>{component.type}</span>
+                    <span className={styles.detailValue}>{component.category}</span>
+                </div>
+
+                <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Consumo:</span>
+                    <span className={styles.detailValue}>{component.estimatedConsumption}</span>
                 </div>
                 <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>Uso Principal:</span>
-                    <span className={styles.detailValue}>{component.usage}</span>
+                    <span className={styles.detailLabel}>Coste de Mantenimiento:</span>
+                    <span className={styles.detailValue}>{component.maintenanceCost}</span>
                 </div>
                 <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>Estado:</span>

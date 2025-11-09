@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBag, Server, Trash2, Zap, AlertTriangle, ArrowRight, XCircle } from 'lucide-react';
+import { ShoppingBag, Server, Trash2, Zap, AlertTriangle, ArrowRight, XCircle, ChevronRight } from 'lucide-react';
 
 // Componentes externos simulados
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
@@ -173,15 +173,14 @@ const MyComponents = () => {
     return (
         <div className={styles.myComponentsPage}>
             <header className={styles.header}>
-                <h1 className={styles.title}>
-                    <Zap size={28} style={{ marginRight: '10px' }} />
-                    Mi Inventario de Componentes
+                <h1>
+                    Inventario de Componentes
                 </h1>
                 <Button
-                    variant="primary"
+                    variant="secondary"
                     onClick={handleGoToStore}
                 >
-                    Ir a la Tienda <ArrowRight size={20} style={{ marginLeft: '8px' }} />
+                    Ir a la Tienda <ChevronRight size={20} />
                 </Button>
             </header>
 
