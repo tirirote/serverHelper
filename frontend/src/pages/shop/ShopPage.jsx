@@ -9,8 +9,8 @@ import styles from './ShopPage.module.css';
 import { useNavigate } from 'react-router-dom';
 
 // MOCK DATA para artículos de la tienda
-const initialShopItems = [
-    // Se añade modelPath a cada item
+export const initialShopItems = [
+    // --- Componente 1: Servidor Base (Proporcionado por el usuario) ---
     {
         id: 'i-101',
         name: 'Servidor Base R-10',
@@ -18,15 +18,94 @@ const initialShopItems = [
         description: 'Servidor genérico de 1U, ideal para desarrollo.',
         price: 1200.00,
         maintenanceCost: 15.00,
-        estimatedConsumption: 150,
+        estimatedConsumption: 150, // Consumo en Watts (W)
         compatibleWith: [
+            // Esto asume que estos IDs (1, 2, 3) corresponden a otros componentes/accesorios
             { id: 1, name: 'Rack-1', count: 1 },
             { id: 2, name: 'Server-1', count: 1 },
             { id: 3, name: 'Cable-2', count: 1 },
         ],
         modelPath: '/assets/models/server-closed.glb'
+    },
 
-    }
+    // --- Componente 2: Array de Almacenamiento SSD ---
+    {
+        id: 'i-102',
+        name: 'Array Almacenamiento SSD-T',
+        category: 'Storage',
+        description: 'Unidad de almacenamiento de estado sólido (NVMe) de alta velocidad, 10TB en configuración RAID.',
+        price: 3500.00,
+        maintenanceCost: 45.50,
+        estimatedConsumption: 80, // Consumo en Watts (W)
+        compatibleWith: [
+            { id: 1, name: 'Rack-1', count: 2 }, // Ocupa 2 unidades de Rack
+            { id: 4, name: 'Cable SFP+', count: 4 }, // Necesita 4 cables de fibra
+        ],
+        modelPath: '/assets/models/nas.glb'
+    },
+
+    // --- Componente 3: Switch de Red Core ---
+    {
+        id: 'i-103',
+        name: 'Switch Core 48-Port',
+        category: 'Network',
+        description: 'Switch de agregación de capa 3 con 48 puertos 10GbE y 4 uplinks 40GbE.',
+        price: 5800.00,
+        maintenanceCost: 60.00,
+        estimatedConsumption: 220, // Consumo en Watts (W)
+        compatibleWith: [
+            { id: 1, name: 'Rack-1', count: 1 },
+            { id: 5, name: 'Cable CAT6', count: 48 }, // Puertos de cobre
+            { id: 4, name: 'Cable SFP+', count: 4 },  // Puertos de fibra
+        ],
+        modelPath: '/assets/models/switch.glb'
+    },
+
+    // --- Componente 4: Unidad de Distribución de Energía (PDU) ---
+    {
+        id: 'i-104',
+        name: 'PDU Inteligente 1U',
+        category: 'Accessory',
+        description: 'Unidad de distribución de energía con medición de consumo por puerto y control remoto.',
+        price: 750.00,
+        maintenanceCost: 5.00,
+        estimatedConsumption: 5, // Consumo de la propia unidad
+        compatibleWith: [
+            { id: 1, name: 'Rack-1', count: 1 },
+            { id: 6, name: 'Cable C13/C14', count: 12 }, // Máximo 12 dispositivos conectados
+        ],
+        modelPath: '/assets/models/ups.glb'
+    },
+
+    // --- Componente 5: Módulo de Memoria RAM ECC ---
+    {
+        id: 'i-105',
+        name: 'Memoria RAM 64GB ECC',
+        category: 'Memory',
+        description: 'Módulo de 64GB DDR4 ECC. Esencial para servidores y workstations.',
+        price: 450.00,
+        maintenanceCost: 0.00,
+        estimatedConsumption: 10, // Por módulo
+        compatibleWith: [
+            { id: 'i-101', name: 'Servidor Base R-10', count: 1 }, // Compatible con el Servidor R-10
+            { id: 7, name: 'Workstation T-200', count: 1 },
+        ],
+        modelPath: '/assets/models/ram.glb'
+    },
+    {
+        id: 'i-106',
+        name: 'NVIDIA GForce 4090',
+        category: 'GPU',
+        description: 'Tarjeta gráfica de alto rendimineto, para Gráficos, diseño y CUDA.',
+        price: 1299.00,
+        maintenanceCost: 0.00,
+        estimatedConsumption: 10, // Por módulo
+        compatibleWith: [
+            { id: 'i-101', name: 'Servidor Base R-10', count: 1 }, // Compatible con el Servidor R-10
+            { id: 7, name: 'Workstation T-200', count: 1 },
+        ],
+        modelPath: '/assets/models/gpu.glb'
+    },
 ];
 
 const ShopPage = () => {
@@ -95,7 +174,10 @@ const ShopPage = () => {
 
         return (
             <div key={item.id} className={styles.itemCard}>
-                <h4 className={styles.itemName} title={item.name}>{item.name}</h4>
+                <div className={styles.itemNameContainer}>
+                    <h4 className={styles.itemName} title={item.name}>{item.name}</h4>
+                    <span className={styles.itemCategory}>{item.category}</span>
+                </div>
                 {/* 1. Visor 3D: Ocupa la mayor parte del espacio visual */}
                 <div className={styles.viewer3DContainer}>
                     <ModelViewer
@@ -106,13 +188,7 @@ const ShopPage = () => {
 
                 {/* 2. Información del Item */}
                 <div className={styles.itemInfo}>
-                    <div className={styles.itemNameContainer}>
-                        <span className={styles.itemCategory}>{item.category}</span>
-                    </div>
                     <p className={styles.itemDescription}>{item.description}</p>
-
-                    <div className={styles.itemMeta}>
-                    </div>
                 </div>
 
                 {/* 3. Footer: Precio y Botón de Compra */}

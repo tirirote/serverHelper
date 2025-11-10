@@ -15,12 +15,14 @@
     grid-template-columns: auto;
     grid-template-columns: repeat(var(--column-count), 1fr);
     background-color: var(--color-gray-dark);
-    padding: 10px 15px;
+    padding: 4px 8px;
     font-family: var(--font-body);
     font-size: 1rem;
     font-weight: 600;
     color: var(--color-white);
     text-transform: uppercase;
+    text-align: center;
+    align-items: center;
     border-bottom: 4px solid var(--color-gray-light);
 }
 
@@ -30,7 +32,7 @@
 }
 
 .tableBody {
-    max-height: 400px;
+    max-height: 100vh;
     overflow-y: auto;
     border-radius: 8px;
     border: solid 4px var(--color-gray-darkest);
@@ -79,6 +81,10 @@
 .dataRow:hover {
     background-color: var(--color-gray-light);
     cursor: pointer;
+}
+
+.dataRow:active {
+    background-color: var(--color-gray-light);
 }
 
 .dataCell {

@@ -2,9 +2,9 @@ import React from 'react';
 import { Cpu, Server, HardDrive, Zap, Package } from 'lucide-react';
 import Button from '../../components/ui/button/Button.jsx';
 import ModelViewer from '../../components/3d/ModelViewer.jsx';
+import CompatibilityList from '../../components/form/component/CompatibilityList.jsx';
 
 import styles from './MyComponents.module.css';
-
 
 const ComponentCard = ({ component }) => {
     if (!component) {
@@ -30,33 +30,30 @@ const ComponentCard = ({ component }) => {
             </div>
 
             <div className={styles.details}>
-                <h3 className={styles.detailsTitle}>{component.name}</h3>
+                <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Descripción</span>
+                    <span className={styles.detailValue}>{component.description}</span>
+                </div>
 
                 <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>Tipo:</span>
+                    <span className={styles.detailLabel}>Tipo</span>
                     <span className={styles.detailValue}>{component.category}</span>
                 </div>
 
                 <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>Consumo:</span>
+                    <span className={styles.detailLabel}>Consumo Estimado</span>
                     <span className={styles.detailValue}>{component.estimatedConsumption}</span>
                 </div>
                 <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>Coste de Mantenimiento:</span>
+                    <span className={styles.detailLabel}>Coste de Mantenimiento</span>
                     <span className={styles.detailValue}>{component.maintenanceCost}</span>
                 </div>
-                <div className={styles.detailRow}>
-                    <span className={styles.detailLabel}>Estado:</span>
-                    <span className={`${styles.detailValue} ${component.status === 'Active' ? 'text-green-600 font-bold' : 'text-yellow-600 font-bold'}`}>
-                        {component.status}
-                    </span>
+
+                <div className={styles.compatibilityHeader}>
+                    <CompatibilityList items={component.compatibleWith} />
                 </div>
 
-                <div className={styles.cardFooter}>
-                    <Button variant="secondary" size="small" onClick={() => alert(`Simulando test para ${component.name}`)}>
-                        Ejecutar Test
-                    </Button>
-                </div>
+                <div className={styles.cardFooter} />
             </div>
         </div>
     );
