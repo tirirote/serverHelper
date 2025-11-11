@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import styles from './Tooltip.module.css';
+import ModelViewer from '../../3d/ModelViewer.jsx'; 
 
 /**
  * Componente Tooltip que se muestra tras un retardo (delay) al hacer hover.
@@ -39,18 +40,34 @@ const Tooltip = ({ data, content, delay = 300, children }) => {
             return <p className={styles.tooltipNoData}>No hay detalles disponibles.</p>;
         }
 
+        const hasModelViewer = data.modelPath;
+
         // Excluir claves internas (como las usadas para el componente padre)
         const displayData = { ...data };
         delete displayData.id;
         delete displayData.name;
         delete displayData.count;
+        delete displayData.modelPath; // 💡 Excluimos modelPath de la lista de detalles
+
 
         // Convertir el objeto a pares clave-valor
         const entries = Object.entries(displayData);
 
         return (
             <div className={styles.tooltipBox}>
+                
                 {data.name && (<h4 className={styles.tooltipTitle}>{data.name}</h4>)}
+                
+                {/* 💡 RENDERIZADO CONDICIONAL DE MODELVIEWER */}
+                {hasModelViewer && (
+                    <div className={styles.tooltipModelViewerContainer}>
+                        <ModelViewer
+                            modelPath={data.modelPath}
+                            // Usamos el nombre del ítem como variante/título para el modelo
+                            variant='default'
+                        />
+                    </div>
+                )}
 
                 <div className={styles.tooltipContent}>
                     {entries.length > 0 ? (
