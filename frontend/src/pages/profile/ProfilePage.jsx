@@ -12,7 +12,7 @@ const initialProfileData = {
     email: 'usuario.demo@serverhelper.com',
     nickname: 'MasterServer',
     avatarUrl: 'https://placehold.co/100x100/4c566a/ffffff?text=U', // Placeholder inicial
-    newPassword: '',
+    newPassword: 'samplePassword',
 };
 
 const ProfilePage = () => {
@@ -72,7 +72,6 @@ const ProfilePage = () => {
         <div className={styles.profilePage}>
             <div className={styles.header}>
                 <h1>Configuración de Perfil</h1>
-                <p>Gestiona tu información personal, avatar y credenciales.</p>
                 {/* Mensajes de estado */}
                 {statusMessage.text && (
                     <div className={`${styles.status} ${styles[statusMessage.type]}`}>
@@ -80,7 +79,7 @@ const ProfilePage = () => {
                     </div>
                 )}
             </div>
-            <form className={styles.profileForm} onSubmit={handleSave}>
+            <div className={styles.profileContainer} onSubmit={handleSave}>
                 {/* Sección 1: Avatar y Display Name */}
                 <div className={styles.avatarSection}>
                     <div className={styles.avatarContainer}>
@@ -103,7 +102,10 @@ const ProfilePage = () => {
                             />
                         </label>
                     </div>
+                </div>
 
+                {/* Sección 2: Credenciales */}
+                <div className={styles.infoLayout}>
                     <div className={styles.inputGroup}>
                         <InputField
                             label="Username"
@@ -119,45 +121,38 @@ const ProfilePage = () => {
                             onChange={handleChange}
                             startAdornment={null}
                         />
+                        <InputField
+                            label="Email"
+                            type="text"
+                            value={profileData.email}
+                            onChange={handleChange}
+                            startAdornment={<Mail size={20} />}
+                        />
+                        <InputField
+                            label="Password"
+                            type="text"
+                            value={profileData.newPassword}
+                            onChange={handleChange}
+                            startAdornment={<Lock size={20} />}
+                        />
+                    </div>
+                    {/* Botones de acción */}
+                    <div className={styles.buttonGroup}>
+                        <Button
+                            variant="primary"
+                            onClick={() => navigate('/dashboard')}>
+                            <ChevronLeft size={20} />
+                            Volver
+                        </Button>
+                        <Button
+                            variant="primary"
+                            onClick={() => navigate('/dashboard')}>
+                            <Save size={20} />
+                            Guardar
+                        </Button>
                     </div>
                 </div>
-
-                {/* Sección 2: Credenciales */}
-                <h2>Credenciales de Acceso (Simulación)</h2>
-                <div className={styles.inputGroup}>
-                    <InputField
-                        label="Email"
-                        type="text"
-                        value={profileData.email}
-                        onChange={handleChange}
-                        startAdornment={<Mail size={20} />}
-                    />
-                    <InputField
-                        label="Password"
-                        type="text"
-                        value={profileData.email}
-                        onChange={handleChange}
-                        startAdornment={<Lock size={20} />}
-                    />
-
-                </div>
-
-                {/* Botones de acción */}
-                <div className={styles.buttonGroup}>
-                    <Button
-                        variant="secondary"
-                        onClick={() => navigate('/dashboard')}>
-                        <ChevronLeft size={20} />
-                        Volver
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={() => navigate('/dashboard')}>
-                        <Save size={20} />
-                        Guardar
-                    </Button>
-                </div>
-            </form>
+            </div>
         </div>
     );
 };

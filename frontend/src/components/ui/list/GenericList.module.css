@@ -1,0 +1,59 @@
+.listContainer {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    background-color: var(--color-gray-darkest);
+    border-radius: 8px;
+    width: inherit;
+}
+
+.listTitle {
+    font-weight: 400;
+    color: var(--color-white);
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.emptyList {
+    display: flex;
+    align-items: center;
+    color: var(--color-gray-darkest);
+    font-style: italic;
+    font-size: 13px;
+    padding: 4px 0;
+}
+
+.emptyIcon {
+    margin-right: 8px;
+    color: var(--color-gray-light);
+}
+
+/* Estilo del ítem individual de la lista (Target para el Tooltip) */
+.listItem {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: var(--color-gray-dark);
+    transition: background-color 0.2s, border-color 0.2s;
+    cursor: default;
+}
+
+.listItem:hover {
+    background-color: var(--color-gray-light);
+}
+
+.itemName {
+    font-weight: 400;
+    color: var(--color-white);
+}
+
+.itemCount {
+    font-weight: 400;
+    color: #6b7280;
+    font-size: 13px;
+}

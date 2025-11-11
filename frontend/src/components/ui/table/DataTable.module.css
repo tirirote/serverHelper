@@ -11,7 +11,8 @@
 }
 
 .tableHeader {
-    display: grid;
+    display: flex;
+    justify-content: space-around;
     grid-template-columns: auto;
     grid-template-columns: repeat(var(--column-count), 1fr);
     background-color: var(--color-gray-dark);
@@ -22,12 +23,11 @@
     color: var(--color-white);
     text-transform: uppercase;
     text-align: center;
-    align-items: center;
     border-bottom: 4px solid var(--color-gray-light);
 }
 
 .headerCell {
-    padding: 5px;
+    padding: 4px;
     text-align: left;
 }
 
@@ -67,15 +67,17 @@
 /* Estilo de Filas */
 
 .dataRow {
-    display: grid;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
     grid-template-columns: repeat(var(--column-count), 1fr);
-    padding: 15px;
     border-bottom: 4px solid var(--color-gray-darkest);
     background-color: var(--color-gray-dark);
     font-family: var(--font-body);
-    font-size: 16px;
     color: var(--color-white);
-    transition: background-color 0.2s;
+    transition: all 0.2s ease-in-out;
 }
 
 .dataRow:hover {
@@ -89,12 +91,15 @@
 
 .dataCell {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    padding: 2px;
-    text-align: center;
+    justify-content: center;
+    padding: 4px;
+    width: inherit;
+    text-align: start;
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .emptyState {

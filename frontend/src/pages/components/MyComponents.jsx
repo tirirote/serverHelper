@@ -10,7 +10,9 @@ import Dialog from '../../components/ui/dialog/Dialog.jsx';
 import Button from '../../components/ui/button/Button.jsx';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 
+import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
 // Componentes internos
+
 import ComponentCard from './ComponentCard.jsx';
 import styles from './MyComponents.module.css';
 
@@ -187,23 +189,8 @@ const MyComponents = () => {
         }
     };
 
-    // Función para obtener la clase de estilo según el estado
-    const getStatusClass = (status) => {
-        switch (status) {
-            case 'Active': return styles.statusActive;
-            case 'Maintenance': return styles.statusMaintenance;
-            case 'Retired': return styles.statusRetired;
-            default: return 'text-gray-400';
-        }
-    };
-
     // Definición de las columnas para el componente DataTable
     const columns = useMemo(() => [
-        {
-            header: 'ID',
-            key: 'id',
-            render: (item) => <span className={styles.idCell}>{item.id}</span>
-        },
         {
             header: 'Nombre del Componente',
             key: 'name',
@@ -245,7 +232,7 @@ const MyComponents = () => {
             <div className={styles.contentGrid}>
                 {/* Columna de Visualización 3D */}
                 <div className={styles.visualizerColumn}>
-                    <ComponentCard component={activeComponent} />
+                    <DetailViewerCard item={activeComponent} />
                 </div>
 
                 {/* Columna de la Lista y Búsqueda */}
