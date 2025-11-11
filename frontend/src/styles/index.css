@@ -30,10 +30,17 @@
    /* Peso por defecto para el cuerpo del texto */
  }
 
- h1, h2, h3, h4, h5, h6 {
+ h1 {
+   font-family: var(--font-title);
+   font-size: 2rem;
+   font-weight: 800;
+   /* Negrita, el peso más alto para el título principal */
+   color: var(--color-white);
+ }
+h2, h3, h4, h5, h6 {
    font-family: var(--font-title);
    font-size: 1rem;
-   font-weight: 700;
+   font-weight: 600;
    /* Negrita, el peso más alto para el título principal */
    color: var(--color-white);
  }

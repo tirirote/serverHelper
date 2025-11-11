@@ -265,9 +265,9 @@ const ServersPage = () => {
     ], [servers, activeServer]); // Dependencia del useMemo para que las funciones de acción usen el estado actual
 
     return (
-        <div className={styles.serversPage}>
+        <div>
             <header className={styles.header}>
-                <h1 className={styles.title}>
+                <h1>
                     Mis Servidores
                 </h1>
             </header>

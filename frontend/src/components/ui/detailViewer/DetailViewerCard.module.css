@@ -12,7 +12,7 @@
 }
 
 /* --- Sección del Visualizador 3D --- */
-.visualizer {
+.visualizerContainer {
     padding: 16px;
     text-align: center;
 }
@@ -41,6 +41,10 @@
 .details {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    padding: 16px;
+    height: 100%;
 }
 
 .descriptionSection {
@@ -94,13 +98,6 @@
 .statusRunning { color: var(--color-green); }
 .statusStopped { color: var(--color-red); }
 .statusStarting { color: var(--color-yellow); }
-
-/* --- Footer and Placeholder --- */
-
-.cardFooter {
-    margin-top: 16px;
-    text-align: right;
-}
 
 .viewerCardPlaceholder {
     height: 100%;

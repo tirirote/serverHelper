@@ -10,24 +10,18 @@
     margin-bottom: 25px;
 }
 
-.title {
-    font-size: 32px;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    color: var(--color-white)
-}
-
 .contentGrid {
     display: flex;
     flex-direction: row;
-    justify-content: center;
     align-items: start;
-    width: 100%;
 }
 
 .visualizerColumn {
-    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+    align-items: center;
+    width: 60%;
 }
 
 /* Columna de la Lista (a la derecha) */
@@ -43,7 +37,6 @@
     margin-top: 32px;
     align-self: flex-end;
     align-items: end;
-    width: 50%;
 }
 
 /* Contenedor de la Tabla */

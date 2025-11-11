@@ -171,11 +171,9 @@ const WorkspacesPage = () => {
     ], [workspaces]);
 
     return (
-        <div className={styles.workspacesPage}>
+        <div>
             <header>
-                <h1>
-                    Mis Workspaces
-                </h1>
+                <h1>Mis Workspaces</h1>
             </header>
 
             <div className={styles.headerContainer}>

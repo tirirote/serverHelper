@@ -89,7 +89,7 @@ const DetailViewerCard = ({ item }) => {
 
     return (
         <div className={styles.viewerCard}>
-            <div className={styles.visualizer}>
+            <div className={styles.visualizerContainer}>
                 <h2 className={styles.visualizerTitle}>{displayItem.name}</h2>
 
                 {/* Visualizador 3D (Mocked) */}
@@ -161,7 +161,6 @@ const DetailViewerCard = ({ item }) => {
                         <CompatibilityList items={displayItem.compatibleWith} />
                     </div>
                 )}
-                <div className={styles.cardFooter}/>
             </div>
         </div>
     );

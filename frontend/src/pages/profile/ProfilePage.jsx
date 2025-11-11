@@ -69,7 +69,7 @@ const ProfilePage = () => {
     };
 
     return (
-        <div className={styles.profilePage}>
+        <div>
             <div className={styles.header}>
                 <h1>Configuración de Perfil</h1>
                 {/* Mensajes de estado */}

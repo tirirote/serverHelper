@@ -211,9 +211,7 @@ const ShopPage = () => {
     return (
         <div>
             <header>
-                <h1>
-                    Tienda
-                </h1>
+                <h1>Tienda</h1>
             </header>
 
             <div className={styles.headerContainer}>
