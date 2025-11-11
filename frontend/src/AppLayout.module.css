@@ -6,7 +6,7 @@
     min-height: 100vh;
     background-color: var(--color-gray-dar); 
     position: relative;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .contentWrapper {
@@ -58,31 +58,12 @@
 }
 
 .mainContent {
-    padding: 64px;
-    width: 98%;
-    align-self: center;
-}
-
-/* 1. Definir el ancho de la barra */
-body::-webkit-scrollbar, html::-webkit-scrollbar {
-    width: 8px;
-    background-color: var(--color-gray-darker);
-    outline: 4px solid var(--color-gray-light);
-}
-
-/* 2. Definir el fondo o "track" */
-body::-webkit-scrollbar-track, html::-webkit-scrollbar-track {
-    background: var(--color-gray-darkest);
-}
-
-/* 3. Definir el "thumb" (la pieza que se mueve) */
-body::-webkit-scrollbar-thumb, html::-webkit-scrollbar-thumb {
-    /* Usamos un gris muy sutil para el agarre */
-    background: var(--color-gray-light);
-    border: none; 
-}
-
-/* 4. Estilo hover para el "thumb" */
-body::-webkit-scrollbar-thumb:hover, html::-webkit-scrollbar-thumb:hover {
-    background: var(--color-white);
+    width: 94%;
+    height: 100vh;
+    align-self: start;
+    margin-left: 32px;
+    margin-top: 8px;
+    justify-content: start;
+    overflow-y: hidden;
+    scrollbar-width: none;
 }

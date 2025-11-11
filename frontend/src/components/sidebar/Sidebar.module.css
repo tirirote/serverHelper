@@ -27,31 +27,7 @@
     transform: translateX(0);
 }
 
-.toggleButton {
-    background-color: var(--color-gray-dark);
-    border: 4px solid var(--color-gray-light);
-    border-left: 4px solid var(--color-gray-dark);
-    border-radius: 0px 8px 8px 0px;
-    color: var(--color-white);
-    cursor: pointer;
-    position: absolute;
-    right: -42px;
-    top: 40vh;
-    height: 64px;
-    width: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1001;
-    transition: transform 0.3s ease-in-out;
-}
-.toggleButton:hover {
-    background-color: var(--color-gray-light);
-    border-color: var(--color-white);
-    border-left: 4px solid var(--color-gray-dark);
-
-}
-¡.closed .toggleButton {
+.closed .toggleButton {
     right: -28px;
     /* Ajuste para que la flecha quede visible en el borde */
 }
@@ -83,6 +59,9 @@
     margin: 16px;
     white-space: nowrap;
 }
+.iconImage:hover {
+    cursor: pointer;
+}
 
 .logoImage {
     height: 108px;
@@ -90,6 +69,10 @@
     object-fit: contain;
     padding: 8px;
     white-space: nowrap;
+}
+
+.logoImage:hover {
+    cursor: pointer;
 }
 
 .closed .logo,

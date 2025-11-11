@@ -102,7 +102,7 @@ const DetailViewerCard = ({ item }) => {
             <div className={styles.details}>
                 <div className={styles.descriptionSection}>
                     <span className={styles.detailLabel}>Descripción</span>
-                    <p>{displayItem.description || 'Sin descripción detallada.'}</p>
+                    <p className={styles.description}>{displayItem.description || 'Sin descripción detallada.'}</p>
                 </div>
 
                 <div className={styles.detailsGrid}>
@@ -115,7 +115,7 @@ const DetailViewerCard = ({ item }) => {
                             if (rawValue.length === 0) return null;
 
                             return (
-                                <div className={styles.detailRow}>
+                                <div className={styles.detailList}>
                                     <GenericList
                                         title={detail.label}
                                         items={rawValue}
@@ -161,6 +161,7 @@ const DetailViewerCard = ({ item }) => {
                         <CompatibilityList items={displayItem.compatibleWith} />
                     </div>
                 )}
+                <div className={styles.cardFooter}/>
             </div>
         </div>
     );

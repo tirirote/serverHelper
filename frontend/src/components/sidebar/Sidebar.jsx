@@ -47,21 +47,15 @@ const Sidebar = ({ isOpen, handleLogout, onToggle }) => {
           {isOpen && <img
             src={Logo}
             alt="Icono de Server Helper"
-            className={styles.logoImage}
+            className={styles.logoImage}            
+            onClick={onToggle}
           />}
           {!isOpen && <img
             src={Icon}
             alt="Icono de Server Helper"
-            className={styles.iconImage}
-          />}
-          {/* Botón de Toggle DENTRO del Sidebar */}
-          <button
-            className={styles.toggleButton}
+            className={styles.iconImage}            
             onClick={onToggle}
-            aria-label={isOpen ? "Contraer menú" : "Expandir menú"}
-          >
-            <ToggleIcon size={20} />
-          </button>
+          />}
         </div>
 
         <ul className={styles.navList}>

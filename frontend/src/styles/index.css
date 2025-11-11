@@ -26,59 +26,21 @@
    font-family: var(--font-body);
    background-color: var(--color-gray-dark);
    color: var(--color-white);
-   font-weight: 400;
-   font-size: 1.05rem;
+   font-size: 0.9rem;
    /* Peso por defecto para el cuerpo del texto */
  }
 
- h1 {
+ h1, h2, h3, h4, h5, h6 {
    font-family: var(--font-title);
-   font-size: 2rem;
+   font-size: 1rem;
    font-weight: 700;
    /* Negrita, el peso más alto para el título principal */
    color: var(--color-white);
  }
 
- h2 {
-   padding: 4px;
-   font-family: var(--font-title);
-   font-size: 1.75rem;
-   font-weight: 700;
-   /* Peso medio */
-   color: var(--color-gray-lightest);
- }
-
- h3 {
-   padding: 4px;
-   font-family: var(--font-title);
-   font-size: 1.75rem;
-   font-weight: 700;
-   /* Peso medio */
-   color: var(--color-gray-lightest);
- }
-
- h4 {
-   padding: 4px;
-   font-family: var(--font-title);
-   font-size: 1.75rem;
-   font-weight: 700;
-   /* Peso medio */
-   color: var(--color-white);
- }
-
- h5,
- h6 {
-   padding: 4px;
-   font-family: var(--font-title);
-   font-style: italic;
-   font-size: 1.75rem;
-   font-weight: 700;
-   /* Peso medio */
-   color: var(--color-gray-lightest);
- }
-
  p {
    font-family: var(--font-body);
+   font-size: 0.8rem;
    color: var(--color-gray-lightest);
    font-weight: 400;
  }
