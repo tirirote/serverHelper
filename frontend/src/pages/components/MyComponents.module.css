@@ -37,6 +37,15 @@
     width: 100%;
 }
 
+.listColumnFooter {
+    display: flex;
+    flex-direction: column;
+    margin-top: 32px;
+    align-self: flex-end;
+    align-items: end;
+    width: 50%;
+}
+
 /* Contenedor de la Tabla */
 .tableContainer {
     width: 100%;
@@ -151,6 +160,7 @@
     border-radius: 8px;
     padding: 4px 8px;
 }
+
 .centerAlign {
     text-align: center;
 }

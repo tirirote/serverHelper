@@ -146,7 +146,7 @@ const MyComponents = () => {
     // Navegación simulada a la tienda
     const handleGoToStore = () => {
         showToast('Navegando a la tienda de componentes.', 'info');
-        navigate('/store'); // Simulación de ruta
+        navigate('/shop'); // Simulación de ruta
     };
 
     // Abre el Dialog de confirmación de eliminación
@@ -240,12 +240,6 @@ const MyComponents = () => {
                 <h1>
                     Inventario de Componentes
                 </h1>
-                <Button
-                    variant="secondary"
-                    onClick={handleGoToStore}
-                >
-                    Tienda <ChevronRight size={20}/>
-                </Button>
             </header>
 
             <div className={styles.contentGrid}>
@@ -279,6 +273,14 @@ const MyComponents = () => {
                                 initialSortBy="name"
                             />
                         )}
+                    </div>
+                    <div className={styles.listColumnFooter}>
+                        <Button
+                            variant="primary"
+                            onClick={handleGoToStore}
+                        >
+                            <ShoppingBag size={20} />Tienda
+                        </Button>
                     </div>
                 </div>
             </div>

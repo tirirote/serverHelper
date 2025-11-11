@@ -2,12 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Trash2, AlertTriangle, Server, Cpu, Save } from 'lucide-react';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
-import DataTable from '../../components/ui/table/DataTable.jsx'; 
-import TableActions from '../../components/ui/table/TableActions.jsx'; 
-import Dialog from '../../components/ui/dialog/Dialog.jsx'; 
-import Input from '../../components/ui/input/InputField.jsx'; 
-import Button from '../../components/ui/button/Button.jsx'; 
+import DataTable from '../../components/ui/table/DataTable.jsx';
+import TableActions from '../../components/ui/table/TableActions.jsx';
+import Dialog from '../../components/ui/dialog/Dialog.jsx';
+import Input from '../../components/ui/input/InputField.jsx';
+import Button from '../../components/ui/button/Button.jsx';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
+import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
 
 import styles from './ServersPage.module.css'; // 🚨 Importación del módulo de estilos
 
@@ -34,14 +35,15 @@ const initialServers = [
 const ServersPage = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
-    
+
     const [servers, setServers] = useState(initialServers);
+    const [activeServer, setActiveServer] = useState(initialServers[0] || null);
 
     // Estados para la creación
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newServerName, setNewServerName] = useState('');
     const [newServerOS, setNewServerOS] = useState('Ubuntu 22.04');
-    
+
     // Estados para la eliminación
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [serverToDelete, setServerToDelete] = useState(null);
@@ -76,7 +78,7 @@ const ServersPage = () => {
             os: newServerOS,
             status: 'Starting',
             cpu: '4 Cores',
-            ram: '16 GB', 
+            ram: '16 GB',
             description: `Servidor customizado creado por el usuario.`,
             region: 'local-zone',
         };
@@ -113,8 +115,9 @@ const ServersPage = () => {
         if (action === 'delete') {
             handleDeleteServer(server);
         } else if (action === 'view') {
-            // Navega a la ruta de detalle: /servers/srv-101
-            navigate(`/servers/${id}`);
+            // 3. ✨ Actualizamos el estado del visor en lugar de navegar
+            setActiveServer(server);
+            showToast(`Visualizando detalles de ${server.name}.`, 'info');
         }
     };
 
@@ -138,14 +141,16 @@ const ServersPage = () => {
         {
             header: 'ID',
             key: 'id',
-            render: (item) => <span className={styles.idCell}>{item.id}</span>
+            render: (item) => <span>{item.id}</span>
         },
         {
             header: 'Nombre del Servidor',
             key: 'name',
             render: (item) => (
                 // Asumiendo que el componente DataTable no requiere la importación de estilos de celda
-                <div className={styles.nameCell} onClick={() => handleTableAction('view', item.id)}>
+                <div
+                    className={`${styles.nameCellLink} ${item.id === activeServer?.id ? styles.activeName : ''}`}
+                    onClick={() => handleTableAction('view', item.id)}>
                     {item.name}
                 </div>
             )
@@ -154,25 +159,6 @@ const ServersPage = () => {
             header: 'OS',
             key: 'os',
             render: (item) => <span>{item.os}</span>
-        },
-        {
-            header: 'CPU/RAM',
-            key: 'specs',
-            render: (item) => <span>{item.cpu} / {item.ram}</span>
-        },
-        {
-            header: 'Región',
-            key: 'region',
-            render: (item) => <span>{item.region}</span>
-        },
-        {
-            header: 'Estado',
-            key: 'status',
-            render: (item) => (
-                <span className={getStatusClass(item.status)}>
-                    {item.status}
-                </span>
-            )
         },
         {
             header: 'Acciones',
@@ -187,67 +173,76 @@ const ServersPage = () => {
                 />
             )
         },
-    ], [servers]); // Dependencia del useMemo para que las funciones de acción usen el estado actual
+    ], [servers, activeServer]); // Dependencia del useMemo para que las funciones de acción usen el estado actual
 
     return (
         <div className={styles.serversPage}>
-            <header>
+            <header className={styles.header}>
                 <h1 className={styles.title}>
-                    <Server size={28} style={{ marginRight: '10px' }} />
                     Mis Servidores
                 </h1>
             </header>
 
-            <div className={styles.headerContainer}>
-                {/* SearchFilterBar es un componente externo */}
-                <SearchFilterBar
-                    onSearchChange={setSearchTerm}
-                    onFilterClick={handleFilterClick}
-                    searchPlaceholder="Buscar por nombre, OS, región o ID..."
-                />
-                {/* Button es un componente externo */}
-                <Button
-                    variant="primary"
-                    onClick={() => setIsCreateModalOpen(true)}
-                >
-                    <PlusCircle size={20} style={{ marginRight: '5px' }} />
-                    Crear Servidor
-                </Button>
-            </div>
-            
-            {/* Renderizado Condicional de la Tabla o Empty State */}
-            {filteredServers.length === 0 && searchTerm ? (
-                <div className={styles.emptyState}>
-                    <AlertTriangle size={48} className={styles.emptyIcon} />
-                    <p>No se encontraron servidores que coincidan con "{searchTerm}".</p>
-                </div>
-            ) : filteredServers.length === 0 && !searchTerm ? (
-                <div className={styles.emptyState}>
-                    <Server size={48} className={styles.emptyIcon} />
-                    <p>No tienes servidores activos. ¡Crea el primero para desplegar tu infraestructura!</p>
-                </div>
-            ) : (
-                <div className={styles.tableContainer}>
-                    {/* DataTable es un componente externo */}
-                    <DataTable
-                        data={filteredServers}
-                        columns={columns}
-                        initialSortBy="name"
+            {/* 4. 📐 Implementación de la cuadrícula de dos columnas */}
+            <div className={styles.contentGrid}>
+
+                {/* Columna de Visualización / Detalles */}
+                <div className={styles.visualizerColumn}>
+                    <DetailViewerCard
+                        item={activeServer} // ⬅️ Le pasamos el servidor activo
                     />
                 </div>
-            )}
 
-            {/* Dialogo de Creación de Servidor (Componente externo 'Dialog') */}
-            <Dialog
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-            >
-                {/* NOTA: Asumimos que Input y Button son componentes externos */}
+                {/* Columna de la Lista y Acciones */}
+                <div className={styles.listColumn}>
+                    {/* Contenedor de Búsqueda y Botón */}
+                    <SearchFilterBar
+                        onSearchChange={setSearchTerm}
+                        onFilterClick={handleFilterClick}
+                        searchPlaceholder="Buscar por nombre, OS, región o ID..."
+                    />
+
+                    {/* Renderizado Condicional de la Tabla o Empty State */}
+                    {filteredServers.length === 0 && searchTerm ? (
+                        <div className={styles.emptyState}>
+                            <AlertTriangle size={48} className={styles.emptyIcon} />
+                            <p>No se encontraron servidores que coincidan con "{searchTerm}".</p>
+                        </div>
+                    ) : filteredServers.length === 0 && !searchTerm ? (
+                        <div className={styles.emptyState}>
+                            <Server size={48} className={styles.emptyIcon} />
+                            <p>No tienes servidores activos. ¡Crea el primero para desplegar tu infraestructura!</p>
+                        </div>
+                    ) : (
+                        <div className={styles.tableContainer}>
+                            <DataTable
+                                data={filteredServers}
+                                columns={columns}
+                                initialSortBy="name"
+                            />
+                        </div>
+                    )}
+                    
+                    <div className={styles.listColumnFooter}>
+                        <Button
+                            variant="primary"
+                            onClick={() => setIsCreateModalOpen(true)}
+                        >
+                            <PlusCircle size={20} style={{ marginRight: '5px' }} />
+                            Crear Servidor
+                        </Button>
+                    </div>
+
+
+                </div>
+            </div>
+
+            {/* Diálogos (Creación y Eliminación) - Se mantienen sin cambios */}
+            <Dialog isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
                 <form onSubmit={handleCreateServer} className={styles.dialogForm}>
                     <header className={styles.dialogHeader}>
                         <h2 className={styles.dialogTitle}>Crear Nuevo Servidor</h2>
                     </header>
-
                     <div className={styles.dialogBody}>
                         <Input
                             id="serverName"
@@ -258,13 +253,12 @@ const ServersPage = () => {
                             placeholder="Ej: Prod API Gateway"
                             required
                         />
-                        {/* Control de selección de OS */}
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-300 mb-1">Sistema Operativo</label>
-                            <select 
-                                value={newServerOS} 
+                            <select
+                                value={newServerOS}
                                 onChange={(e) => setNewServerOS(e.target.value)}
-                                className={styles.selectInput} // Usando clase de estilos CSS
+                                className={styles.selectInput}
                             >
                                 <option value="Ubuntu 22.04">Ubuntu 22.04 (Recomendado)</option>
                                 <option value="Debian 12">Debian 12</option>
@@ -272,41 +266,21 @@ const ServersPage = () => {
                                 <option value="Windows Server 2022">Windows Server 2022</option>
                             </select>
                         </div>
-                        <p className="text-sm text-gray-400 mt-2">
-                            * Se crearán con recursos estándar (4 Cores / 16 GB RAM).
-                        </p>
+                        <p className="text-sm text-gray-400 mt-2">* Se crearán con recursos estándar (4 Cores / 16 GB RAM).</p>
                     </div>
-
                     <footer className={styles.dialogFooter}>
-                        <Button
-                            variant="secondary"
-                            onClick={() => setIsCreateModalOpen(false)}
-                            type="button"
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            variant="primary"
-                            type="submit"
-                        >
-                            <Save size={18} style={{ marginRight: '5px' }}/>
-                            Crear e Iniciar
-                        </Button>
+                        <Button variant="secondary" onClick={() => setIsCreateModalOpen(false)} type="button">Cancelar</Button>
+                        <Button variant="primary" type="submit"><Save size={18} style={{ marginRight: '5px' }} />Crear e Iniciar</Button>
                     </footer>
                 </form>
             </Dialog>
 
-            {/* Dialogo de Confirmación de Eliminación (Componente externo 'Dialog') */}
-            <Dialog
-                isOpen={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-            >
+            <Dialog isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>
                 <div className={styles.dialogContent}>
                     <header className={`${styles.dialogHeader} ${styles.dialogDanger}`}>
                         <AlertTriangle size={24} style={{ marginRight: '10px' }} />
                         <h2 className={styles.dialogTitle}>Confirmar Eliminación: {serverToDelete?.name}</h2>
                     </header>
-
                     <div className={styles.dialogBody}>
                         <p className="text-gray-300">
                             Estás a punto de eliminar el servidor <strong>{serverToDelete?.name}</strong>.
@@ -314,21 +288,9 @@ const ServersPage = () => {
                             ¿Estás seguro de que quieres terminar la instancia?
                         </p>
                     </div>
-
                     <footer className={styles.dialogFooter}>
-                        <Button
-                            variant="secondary"
-                            onClick={() => setIsDeleteModalOpen(false)}
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            variant="danger"
-                            onClick={handleConfirmDelete}
-                        >
-                            <Trash2 size={18} style={{ marginRight: '5px' }}/>
-                            Eliminar Servidor
-                        </Button>
+                        <Button variant="secondary" onClick={() => setIsDeleteModalOpen(false)}>Cancelar</Button>
+                        <Button variant="danger" onClick={handleConfirmDelete}><Trash2 size={18} style={{ marginRight: '5px' }} />Eliminar Servidor</Button>
                     </footer>
                 </div>
             </Dialog>
