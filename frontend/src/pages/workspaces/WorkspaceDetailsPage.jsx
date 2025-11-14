@@ -10,7 +10,6 @@ import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import styles from './WorkspaceDetailsPage.module.css';
 import InfoPill from '../../components/ui/infopill/InfoPill.jsx';
 import Rack3DViewerCard from '../../components/3d/rack/Rack3DViewerCard.jsx';
-import ModelViewer from '../../components/3d/ModelViewer.jsx';
 
 // Simulación de un Workspace completo
 const mockWorkspaceData = {
@@ -26,7 +25,6 @@ const mockWorkspaceData = {
     totalRacks: 3,
     inventoryCount: 55,
     lastUpdated: 'Hace 2 horas',
-    healthStatus: 'Excellent',
     racks: [
         { id: 'r-1', name: 'Rack-01 (Front-End)', servers: 4, location: 'Row A', status: 'Online', cost: 1200.50, health: 'Excellent', power: 'ON' },
         { id: 'r-2', name: 'Rack-02 (Back-End)', servers: 6, location: 'Row B', status: 'Warning', cost: 850.00, health: 'Degraded', power: 'ON' },

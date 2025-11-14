@@ -1,43 +1,32 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom'; // 🚨 Nuevo Import
-import { PlusCircle, Trash2, AlertTriangle, Save } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { PlusCircle, Trash2, AlertTriangle, Save, FolderOpen, Zap, Archive, Globe, Plus } from 'lucide-react';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
-import DataTable from '../../components/ui/table/DataTable.jsx'; // 🚨 Ruta estandarizada
-import TableActions from '../../components/ui/table/TableActions.jsx'; // 🚨 Componente de Acciones de Tabla
-import Dialog from '../../components/ui/dialog/Dialog.jsx'; // Componente de Dialog
-import Input from '../../components/ui/input/InputField.jsx'; // Componente de Input estandarizado
-import Button from '../../components/ui/button/Button.jsx'; // Componente de Botón estandarizado
+import DataTable from '../../components/ui/table/DataTable.jsx';
+import TableActions from '../../components/ui/table/TableActions.jsx';
+import Dialog from '../../components/ui/dialog/Dialog.jsx';
+import Input from '../../components/ui/input/InputField.jsx';
+import Button from '../../components/ui/button/Button.jsx';
 import styles from './WorkspacesPage.module.css';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
+import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
+
 // Datos de ejemplo
 const initialWorkspaces = [
     {
-        id: 'ws-1', name: 'Project Chimera', status: 'Active', members: 4, lastUpdated: 'Hace 2 horas', owner: 'Alice',
-        description: 'Entorno para el desarrollo principal de la API.', network: 'Default-VPC',
-    },
-    {
-        id: 'ws-2', name: 'Server Deployment V2', status: 'Pending', members: 1, lastUpdated: 'Hace 1 día', owner: 'Bob',
-        description: 'Configuración y pruebas de la infraestructura del nuevo servidor.', network: 'Staging-Net',
-    },
-    {
-        id: 'ws-3', name: 'Marketing Campaign 2024', status: 'Archived', members: 7, lastUpdated: 'Hace 1 semana', owner: 'Charlie',
-        description: 'Espacio histórico de la campaña Q1.', network: 'External-Access',
-    },
-    {
-        id: 'ws-4', name: 'Infraestructura Dev', status: 'Active', members: 2, lastUpdated: 'Hace 5 horas', owner: 'Alice',
-        description: 'Sandbox para pruebas rápidas de infraestructura.', network: 'Default-VPC',
-    },
-    {
-        id: 'ws-5', name: 'Documentación API', status: 'Pending', members: 3, lastUpdated: 'Hace 2 días', owner: 'Eve',
-        description: 'Borradores de la documentación técnica de la V3.', network: 'Docs-Net',
-    },
+        id: 'ws-1',
+        name: 'Project Chimera',
+        description: ' Proyecto Chimera, destinado a la estructura del backend.',
+        network: 'Default-VPC'
+    }
 ];
 
+
 const WorkspacesPage = () => {
-    const navigate = useNavigate(); // 🚨 Hook de navegación
 
     const { showToast } = useToast();
     const [workspaces, setWorkspaces] = useState(initialWorkspaces);
+    const [activeWorkspace, setActiveWorkspace] = useState(initialWorkspaces[0] || null);
 
     // Estado para el dialog de creación
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -57,6 +46,7 @@ const WorkspacesPage = () => {
         return workspaces.filter(ws =>
             ws.name.toLowerCase().includes(lowerCaseSearch) ||
             ws.owner.toLowerCase().includes(lowerCaseSearch) ||
+            ws.description.toLowerCase().includes(lowerCaseSearch) ||
             ws.id.toLowerCase().includes(lowerCaseSearch)
         );
     }, [workspaces, searchTerm]);
@@ -72,10 +62,12 @@ const WorkspacesPage = () => {
         const newWorkspace = {
             id: `ws-${Date.now()}`,
             name: newWorkspaceName.trim(),
-            status: 'Active',
+            status: 'Pending', // Nuevo workspace comienza en pending
             members: 1,
             lastUpdated: 'Justo ahora',
             owner: 'Tú',
+            description: 'Nueva descripción por defecto.',
+            network: 'Temp-Net',
         };
 
         setWorkspaces(prev => [newWorkspace, ...prev]);
@@ -110,10 +102,10 @@ const WorkspacesPage = () => {
         if (action === 'delete') {
             handleDeleteWorkspace(workspace);
         } else if (action === 'view') {
-            // Navega a la ruta de detalle: /workspaces/ws-1
-            navigate(`/workspaces/${id}`);
+            // 3. ✨ Actualizamos el estado del visor en lugar de navegar
+            setActiveWorkspace(workspace);
+            showToast(`Visualizando detalles de ${workspace.name}.`, 'info');
         } else if (action === 'edit') {
-            // Si la acción es 'edit', por ahora solo mostramos un toast
             showToast(`Simulando la edición para Workspace: ${workspace.name}`, 'info');
         }
     };
@@ -125,33 +117,24 @@ const WorkspacesPage = () => {
     // Definición de las columnas para el componente DataTable
     const columns = useMemo(() => [
         {
-            header: 'ID',
-            key: 'id',
-            render: (item) => <span className={styles.idCell}>{item.id}</span>
-        },
-        {
             header: 'Nombre del Workspace',
             key: 'name',
+            sortable: true,
             render: (item) => (
-                <div className={styles.nameCell} onClick={() => handleTableAction('view', item.id)}>
+                <div
+                    className={`${styles.nameCellLink} ${item.id === activeWorkspace?.id ? styles.activeName : ''}`}
+                    onClick={() => handleTableAction('view', item.id)}>
                     {item.name}
                 </div>
             )
         },
         {
-            header: 'Descripción',
-            key: 'description',
-            render: (item) => (
-                <span className={styles.descriptionCell} title={item.description}>
-                    {item.description}
-                </span>
-            )
-        },
-        {
             header: 'Red',
             key: 'network',
+            sortable: true,
             render: (item) => (
                 <span className={styles.networkCell}>
+                    <Globe size={14} style={{ marginRight: '6px' }} />
                     {item.network}
                 </span>
             )
@@ -164,58 +147,84 @@ const WorkspacesPage = () => {
                 <TableActions
                     itemId={item.id}
                     onViewDetails={(id) => handleTableAction('view', id)}
+                    onEdit={(id) => handleTableAction('edit', id)}
                     onDelete={(id) => handleTableAction('delete', id)}
                 />
             )
         },
-    ], [workspaces]);
+    ], [workspaces, activeWorkspace]); // La dependencia 'workspaces' no es necesaria si solo definimos columnas
 
     return (
         <div>
-            <header>
-                <h1>Mis Workspaces</h1>
-            </header>
-
-            <div className={styles.headerContainer}>
-                <SearchFilterBar
-                    onSearchChange={setSearchTerm}
-                    onFilterClick={handleFilterClick}
-                    searchPlaceholder="Buscar por nombre, dueño o ID..."
-                />
-                <Button
-                    variant="primary"
-                    onClick={() => setIsCreateModalOpen(true)}
-                >
-                    <PlusCircle size={20} />
-                    Crear Workspace
-                </Button>
+            {/* Título y Barra de Acciones */}
+            <div className={styles.header}>
+                <h1>
+                    Workspaces
+                </h1>
             </div>
-            {filteredWorkspaces.length === 0 && searchTerm ? (
-                <div className={styles.emptyState}>
-                    <AlertTriangle size={48} className={styles.emptyIcon} />
-                    <p>No se encontraron Workspaces que coincidan con "{searchTerm}".</p>
-                </div>
-            ) : filteredWorkspaces.length === 0 && !searchTerm ? (
-                <div className={styles.emptyState}>
-                    <AlertTriangle size={48} className={styles.emptyIcon} />
-                    <p>No tienes Workspaces activos. ¡Crea el primero para empezar!</p>
-                </div>
-            ) : (
-                <div className={styles.tableContainer}>
-                    <DataTable
-                        data={filteredWorkspaces} // 🚨 Usamos la data filtrada
-                        columns={columns}
-                        initialSortBy="name"
+
+            <div className={styles.contentGrid}>
+                {/* Columna de Visualización / Detalles */}
+                <div className={styles.visualizerColumn}>
+                    <DetailViewerCard
+                        item={activeWorkspace} // ⬅️ Le pasamos el servidor activo
                     />
                 </div>
-            )}
+
+                {/* Implementación de la cuadrícula de dos columnas */}
+                <div className={styles.listColumn}>
+
+                    {/* Barra de Búsqueda y Filtros */}
+                    <SearchFilterBar
+                        onSearchChange={setSearchTerm}
+                        onFilterClick={handleFilterClick}
+                        searchPlaceholder="Buscar por nombre, dueño, ID o descripción..."
+                    />
+
+                    {/* Contenedor de la Tabla */}
+                    <div className={styles.tableContainer}>
+                        {filteredWorkspaces.length === 0 && searchTerm ? (
+                            <div className={styles.emptyState}>
+                                <AlertTriangle size={48} className={styles.emptyIcon} />
+                                <p>No se encontraron Workspaces que coincidan con "{searchTerm}".</p>
+                            </div>
+                        ) : filteredWorkspaces.length === 0 && !searchTerm ? (
+                            <div className={styles.emptyState}>
+                                <AlertTriangle size={48} className={styles.emptyIcon} />
+                                <p>No tienes Workspaces activos. ¡Crea el primero para empezar!</p>
+                            </div>
+                        ) : (
+                            <div className={styles.tableContainer}>
+                                <DataTable
+                                    data={filteredWorkspaces}
+                                    columns={columns}
+                                    initialSortBy="name"
+                                    initialSortDirection="asc"
+                                />
+                            </div>
+                        )}
+
+                    </div>
+
+                    <div className={styles.listColumnFooter}>
+                        <Button
+                            variant="primary"
+                            onClick={() => setIsCreateModalOpen(true)}
+                        >
+                            <Plus size={20} style={{ marginRight: '5px' }} />
+                            Crear Workspace
+                        </Button>
+                    </div>
+
+                </div>
+
+            </div>
 
             {/* Dialogo de Creación de Workspace */}
             <Dialog
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
             >
-                {/* Usamos un formulario nativo para el submit */}
                 <form onSubmit={handleCreateWorkspace} className={styles.dialogForm}>
                     <header className={styles.dialogHeader}>
                         <h2 className={styles.dialogTitle}>Crear Nuevo Workspace</h2>
@@ -231,6 +240,7 @@ const WorkspacesPage = () => {
                             placeholder="Ej: Proyecto Server v3.0"
                             required
                         />
+                        {/* Aquí se añadirían más campos (descripción, red, etc.) */}
                     </div>
 
                     <footer className={styles.dialogFooter}>
@@ -264,7 +274,7 @@ const WorkspacesPage = () => {
                     </header>
 
                     <div className={styles.dialogBody}>
-                        <p>
+                        <p className={styles.dialogWarningText}>
                             Estás a punto de eliminar el workspace <strong>{workspaceToDelete?.name}</strong>.
                             Esta acción es irreversible y toda la información asociada se perderá.
                             ¿Estás seguro de continuar?

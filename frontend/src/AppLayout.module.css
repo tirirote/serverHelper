@@ -3,9 +3,9 @@
 .appLayout {
     display: flex; 
     flex-direction: column; /* Asegura que el contentWrapper ocupe el espacio */
-    min-height: 100vh;
     background-color: var(--color-gray-dar); 
     position: relative;
+    height: 100vh;
     overflow: hidden;
 }
 
@@ -15,6 +15,8 @@
     width: 100%;
     margin-left: 60px; 
     transition: margin-left 0.3s ease-in-out;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .contentWrapper.contentShift {
@@ -59,11 +61,11 @@
 
 .mainContent {
     width: 94%;
-    height: 100vh;
     align-self: start;
     margin-left: 32px;
     margin-top: 8px;
     justify-content: start;
-    overflow-y: hidden;
     scrollbar-width: none;
+    height: 100vh;
+    overflow: hidden;
 }

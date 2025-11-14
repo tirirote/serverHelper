@@ -21,20 +21,25 @@
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 15px;
-    color: var(--color-white) /* teal-200 */
+    color: var(--color-white)
+        /* teal-200 */
 }
 
 /* Placeholder para ModelViewer component */
 .threeDModelPlaceholder {
-    height: 300px; /* Altura para el visualizador 3D */
-    background-color: #374151;
-    border-radius: 8px 8px 0 0; 
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border: 2px dashed #4b5563;
-    margin: 0 -20px; /* Extiende a los bordes de la sección visualizer */
+    height: inherit;
+    background-color: var(--color-gray-darkest);
+    border-radius: 16px;
+    border: 4px dashed var(--color-gray-light);
+    padding: 32px;
+    gap: 8px;
+    width: inherit;
+    margin-bottom: 16px;
+    color: var(--color-gray-lightest);
 }
 
 /* --- Sección de Detalles --- */
@@ -76,7 +81,7 @@
 .detailList {
     display: flex;
     flex-direction: column;
-    
+
 }
 
 .detailLabel {
@@ -90,18 +95,26 @@
 }
 
 .detailValueSmall {
-    font-weight: 400;    
+    font-weight: 400;
     color: var(--color-gray-lightest);
 }
 
 /* --- Estado --- */
-.statusRunning { color: var(--color-green); }
-.statusStopped { color: var(--color-red); }
-.statusStarting { color: var(--color-yellow); }
+.statusGreen {
+    color: var(--color-green);
+}
+
+.statusRed {
+    color: var(--color-red);
+}
+
+.statusYellow {
+    color: var(--color-yellow);
+}
 
 .viewerCardPlaceholder {
     height: 100%;
-    min-height: 450px; 
+    min-height: 450px;
     background-color: #ffffff;
     border-radius: 12px;
     border: 2px dashed #d1d5db;

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Trash2, AlertTriangle, Server, Cpu, Save } from 'lucide-react';
+import { PlusCircle, Trash2, AlertTriangle, Server, Cpu, Save, Plus } from 'lucide-react';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../components/ui/table/DataTable.jsx';
 import TableActions from '../../components/ui/table/TableActions.jsx';
@@ -15,119 +15,118 @@ import styles from './ServersPage.module.css'; // 🚨 Importación del módulo 
 // MOCK Data para servidores
 const initialServers = [
     {
-        id: 'srv-101', 
-        name: 'Web Server Prod EU', 
+        id: 'srv-101',
+        name: 'Web Server Prod EU',
         description: 'Servidor de producción principal para la web.',
         components: [
-    // --- Componente 1: Servidor Base (Proporcionado por el usuario) ---
-    {
-        id: 'i-101',
-        name: 'Servidor Base R-10',
-        category: 'Server',
-        description: 'Servidor genérico de 1U, ideal para desarrollo.',
-        price: 1200.00,
-        maintenanceCost: 15.00,
-        estimatedConsumption: 150, // Consumo en Watts (W)
-        compatibleWith: [
-            // Esto asume que estos IDs (1, 2, 3) corresponden a otros componentes/accesorios
-            { id: 1, name: 'Rack-1', count: 1 },
-            { id: 2, name: 'Server-1', count: 1 },
-            { id: 3, name: 'Cable-2', count: 1 },
-        ],
-        modelPath: '/assets/models/server-closed.glb'
-    },
+            // --- Componente 1: Servidor Base (Proporcionado por el usuario) ---
+            {
+                id: 'i-101',
+                name: 'Servidor Base R-10',
+                category: 'Server',
+                description: 'Servidor genérico de 1U, ideal para desarrollo.',
+                price: 1200.00,
+                maintenanceCost: 15.00,
+                estimatedConsumption: 150, // Consumo en Watts (W)
+                compatibleWith: [
+                    // Esto asume que estos IDs (1, 2, 3) corresponden a otros componentes/accesorios
+                    { id: 1, name: 'Rack-1', count: 1 },
+                    { id: 2, name: 'Server-1', count: 1 },
+                    { id: 3, name: 'Cable-2', count: 1 },
+                ],
+                modelPath: '/assets/models/server-closed.glb'
+            },
 
-    // --- Componente 2: Array de Almacenamiento SSD ---
-    {
-        id: 'i-102',
-        name: 'Array Almacenamiento SSD-T',
-        category: 'Storage',
-        description: 'Unidad de almacenamiento de estado sólido (NVMe) de alta velocidad, 10TB en configuración RAID.',
-        price: 3500.00,
-        maintenanceCost: 45.50,
-        estimatedConsumption: 80, // Consumo en Watts (W)
-        compatibleWith: [
-            { id: 1, name: 'Rack-1', count: 2 }, // Ocupa 2 unidades de Rack
-            { id: 4, name: 'Cable SFP+', count: 4 }, // Necesita 4 cables de fibra
-        ],
-        modelPath: '/assets/models/nas.glb'
-    },
+            // --- Componente 2: Array de Almacenamiento SSD ---
+            {
+                id: 'i-102',
+                name: 'Array Almacenamiento SSD-T',
+                category: 'Storage',
+                description: 'Unidad de almacenamiento de estado sólido (NVMe) de alta velocidad, 10TB en configuración RAID.',
+                price: 3500.00,
+                maintenanceCost: 45.50,
+                estimatedConsumption: 80, // Consumo en Watts (W)
+                compatibleWith: [
+                    { id: 1, name: 'Rack-1', count: 2 }, // Ocupa 2 unidades de Rack
+                    { id: 4, name: 'Cable SFP+', count: 4 }, // Necesita 4 cables de fibra
+                ],
+                modelPath: '/assets/models/nas.glb'
+            },
 
-    // --- Componente 3: Switch de Red Core ---
-    {
-        id: 'i-103',
-        name: 'Switch Core 48-Port',
-        category: 'Network',
-        description: 'Switch de agregación de capa 3 con 48 puertos 10GbE y 4 uplinks 40GbE.',
-        price: 5800.00,
-        maintenanceCost: 60.00,
-        estimatedConsumption: 220, // Consumo en Watts (W)
-        compatibleWith: [
-            { id: 1, name: 'Rack-1', count: 1 },
-            { id: 5, name: 'Cable CAT6', count: 48 }, // Puertos de cobre
-            { id: 4, name: 'Cable SFP+', count: 4 },  // Puertos de fibra
-        ],
-        modelPath: '/assets/models/switch.glb'
-    },
+            // --- Componente 3: Switch de Red Core ---
+            {
+                id: 'i-103',
+                name: 'Switch Core 48-Port',
+                category: 'Network',
+                description: 'Switch de agregación de capa 3 con 48 puertos 10GbE y 4 uplinks 40GbE.',
+                price: 5800.00,
+                maintenanceCost: 60.00,
+                estimatedConsumption: 220, // Consumo en Watts (W)
+                compatibleWith: [
+                    { id: 1, name: 'Rack-1', count: 1 },
+                    { id: 5, name: 'Cable CAT6', count: 48 }, // Puertos de cobre
+                    { id: 4, name: 'Cable SFP+', count: 4 },  // Puertos de fibra
+                ],
+                modelPath: '/assets/models/switch.glb'
+            },
 
-    // --- Componente 4: Unidad de Distribución de Energía (PDU) ---
-    {
-        id: 'i-104',
-        name: 'PDU Inteligente 1U',
-        category: 'Accessory',
-        description: 'Unidad de distribución de energía con medición de consumo por puerto y control remoto.',
-        price: 750.00,
-        maintenanceCost: 5.00,
-        estimatedConsumption: 5, // Consumo de la propia unidad
-        compatibleWith: [
-            { id: 1, name: 'Rack-1', count: 1 },
-            { id: 6, name: 'Cable C13/C14', count: 12 }, // Máximo 12 dispositivos conectados
-        ],
-        modelPath: '/assets/models/ups.glb'
-    },
+            // --- Componente 4: Unidad de Distribución de Energía (PDU) ---
+            {
+                id: 'i-104',
+                name: 'PDU Inteligente 1U',
+                category: 'Accessory',
+                description: 'Unidad de distribución de energía con medición de consumo por puerto y control remoto.',
+                price: 750.00,
+                maintenanceCost: 5.00,
+                estimatedConsumption: 5, // Consumo de la propia unidad
+                compatibleWith: [
+                    { id: 1, name: 'Rack-1', count: 1 },
+                    { id: 6, name: 'Cable C13/C14', count: 12 }, // Máximo 12 dispositivos conectados
+                ],
+                modelPath: '/assets/models/ups.glb'
+            },
 
-    // --- Componente 5: Módulo de Memoria RAM ECC ---
-    {
-        id: 'i-105',
-        name: 'Memoria RAM 64GB ECC',
-        category: 'Memory',
-        description: 'Módulo de 64GB DDR4 ECC. Esencial para servidores y workstations.',
-        price: 450.00,
-        maintenanceCost: 0.00,
-        estimatedConsumption: 10, // Por módulo
-        compatibleWith: [
-            { id: 'i-101', name: 'Servidor Base R-10', count: 1 }, // Compatible con el Servidor R-10
-            { id: 7, name: 'Workstation T-200', count: 1 },
+            // --- Componente 5: Módulo de Memoria RAM ECC ---
+            {
+                id: 'i-105',
+                name: 'Memoria RAM 64GB ECC',
+                category: 'Memory',
+                description: 'Módulo de 64GB DDR4 ECC. Esencial para servidores y workstations.',
+                price: 450.00,
+                maintenanceCost: 0.00,
+                estimatedConsumption: 10, // Por módulo
+                compatibleWith: [
+                    { id: 'i-101', name: 'Servidor Base R-10', count: 1 }, // Compatible con el Servidor R-10
+                    { id: 7, name: 'Workstation T-200', count: 1 },
+                ],
+                modelPath: '/assets/models/ram.glb'
+            },
+            {
+                id: 'i-106',
+                name: 'NVIDIA GForce 4090',
+                category: 'GPU',
+                description: 'Tarjeta gráfica de alto rendimineto, para Gráficos, diseño y CUDA.',
+                price: 1299.00,
+                maintenanceCost: 0.00,
+                estimatedConsumption: 10, // Por módulo
+                compatibleWith: [
+                    { id: 'i-101', name: 'Servidor Base R-10', count: 1 }, // Compatible con el Servidor R-10
+                    { id: 7, name: 'Workstation T-200', count: 1 },
+                ],
+                modelPath: '/assets/models/gpu.glb'
+            },
         ],
-        modelPath: '/assets/models/ram.glb'
-    },
-    {
-        id: 'i-106',
-        name: 'NVIDIA GForce 4090',
-        category: 'GPU',
-        description: 'Tarjeta gráfica de alto rendimineto, para Gráficos, diseño y CUDA.',
-        price: 1299.00,
-        maintenanceCost: 0.00,
-        estimatedConsumption: 10, // Por módulo
-        compatibleWith: [
-            { id: 'i-101', name: 'Servidor Base R-10', count: 1 }, // Compatible con el Servidor R-10
-            { id: 7, name: 'Workstation T-200', count: 1 },
-        ],
-        modelPath: '/assets/models/gpu.glb'
-    },
-],
         totalPrice: '2,340',
         totalMaintenanceCost: '63',
-        healthStatus:'Excellent',
+        healthStatus: 'Excellent',
         network: '',
-        ipAddress:'',
+        ipAddress: '',
         os: 'Ubuntu 22.04',
         status: 'Running',
     }
 ];
 
 const ServersPage = () => {
-    const navigate = useNavigate();
     const { showToast } = useToast();
 
     const [servers, setServers] = useState(initialServers);
@@ -272,7 +271,7 @@ const ServersPage = () => {
                 </h1>
             </header>
 
-            {/* 4. 📐 Implementación de la cuadrícula de dos columnas */}
+            {/* Implementación de la cuadrícula de dos columnas */}
             <div className={styles.contentGrid}>
 
                 {/* Columna de Visualización / Detalles */}
@@ -311,13 +310,13 @@ const ServersPage = () => {
                             />
                         </div>
                     )}
-                    
+
                     <div className={styles.listColumnFooter}>
                         <Button
                             variant="primary"
                             onClick={() => setIsCreateModalOpen(true)}
                         >
-                            <PlusCircle size={20} style={{ marginRight: '5px' }} />
+                            <Plus size={20} style={{ marginRight: '5px' }} />
                             Crear Servidor
                         </Button>
                     </div>
@@ -327,7 +326,10 @@ const ServersPage = () => {
             </div>
 
             {/* Diálogos (Creación y Eliminación) - Se mantienen sin cambios */}
-            <Dialog isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
+            <Dialog
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}>
+
                 <form onSubmit={handleCreateServer} className={styles.dialogForm}>
                     <header className={styles.dialogHeader}>
                         <h2 className={styles.dialogTitle}>Crear Nuevo Servidor</h2>
