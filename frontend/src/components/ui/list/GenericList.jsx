@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Package } from 'lucide-react';
+import { Package, ChevronDown, ChevronUp } from 'lucide-react';
 import Tooltip from '../tooltip/Tooltip.jsx'; // Importamos el Tooltip
 import styles from './GenericList.module.css';
 
@@ -12,6 +12,13 @@ import styles from './GenericList.module.css';
  * @param {Array<Object>} items - Lista de objetos a renderizar.
  */
 const GenericList = ({ title, items }) => {
+    // Estado para controlar si la lista está colapsada. Por defecto, colapsada (true).
+    const [isCollapsed, setIsCollapsed] = React.useState(true);
+
+    const toggleCollapse = () => {
+        setIsCollapsed(!isCollapsed);
+    };
+
     if (!items || items.length === 0) {
         return (
             <div className={styles.listContainer}>
@@ -26,8 +33,21 @@ const GenericList = ({ title, items }) => {
 
     return (
         <div className={styles.listContainer}>
-            <label className={styles.listTitle}>{title}</label>
-            <div className={styles.list}>
+
+            <button
+                onClick={toggleCollapse}
+                className={styles.toggleButton}
+                aria-expanded={!isCollapsed}
+            >
+                <label className={styles.listTitle}>{title} ({items.length})</label>
+                {/* Icono de flecha que indica el estado actual */}
+                {isCollapsed ? (
+                    <ChevronDown size={18} />
+                ) : (
+                    <ChevronUp size={18} />
+                )}
+            </button>
+            <div className={isCollapsed ? styles.listCollapsed : styles.list}>
                 {items.map((item, index) => (
                     // 💡 Cada ítem se envuelve en el Tooltip
                     <Tooltip key={item.id || index} data={item} delay={500}>

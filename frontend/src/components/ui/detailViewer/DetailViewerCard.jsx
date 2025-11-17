@@ -7,14 +7,17 @@ import ModelViewer from '../../3d/ModelViewer.jsx'
 import GenericList from '../../ui/list/GenericList.jsx'
 // Helper para determinar el tipo de ítem y metadatos (puede expandirse con más tipos)
 const getItemMetadata = (item) => {
-    if (item.os) {
+    if (item.operatingSystem) {
         return { type: 'server', icon: Server, title: 'Servidor Cloud' };
     }
-    if (item.category !== undefined) {
+    if (item.type) {
         return { type: 'component', icon: Package, title: 'Componente de Hardware' };
     }
-    if (item.maxCapacityU !== undefined) {
+    if (item.units) {
         return { type: 'rack', icon: Warehouse, title: 'Rack de Servidores' };
+    }
+    if (item.network) {
+        return { type: 'workspace', icon: Warehouse, title: 'Workspace' };
     }
     return { type: 'unknown', icon: Package, title: 'Detalle Genérico' };
 };
@@ -22,25 +25,31 @@ const getItemMetadata = (item) => {
 // Mapa de campos de detalle para renderizar dinámicamente
 const DetailMapping = {
     server: [
-        { label: 'Sistema Operativo', key: 'os' },
+        { label: 'Sistema Operativo', key: 'operatingSystem' },
         { label: 'Estado', key: 'status', status: true },
         { label: 'Componentes', key: 'components', isList: true },
         { label: 'Precio total', key: 'totalPrice' },
-        { label: 'Salud', key: 'healthStatus' },
-        { label: 'Dirección Ip', key: 'ipAddress' },
+        { label: 'Salud del servidor:', key: 'healthStatus' },
+        { label: 'Coste de Mantenimiento:', key: 'totalMaintenanceCost' },
+        { label: 'Red', key: 'network' },
+        { label: 'Dirección Ip', key: 'ipAddress' }
     ],
     component: [
-        { label: 'Categoría', key: 'category' },
+        { label: 'Categoría', key: 'type' },
         { label: 'Precio Unitario', key: 'price', format: (v) => `${v.toFixed(2)} €` },
         { label: 'Costo Mantenimiento', key: 'maintenanceCost', format: (v) => `${v.toFixed(2)} €/Mes` },
         { label: 'Consumo Estimado', key: 'estimatedConsumption', format: (v) => `${v} W` }
     ],
     rack: [
-        { label: 'Capacidad Máxima (U)', key: 'maxCapacityU' },
-        { label: 'Uso Actual (U)', key: 'currentUsageU' },
-        { label: 'Ubicación Física', key: 'location' },
-        { label: 'Tipo de Energía', key: 'powerType' }
+        { label: 'Capacidad Máxima (U)', key: 'units' },
+        { label: 'Estado', key: 'powerStatus' },
+        { label: 'Salud del Rack', key: 'healthStatus' },
+        { label: 'Coste total de Mantenimiento', key: 'totalMaintenanceCost' }
     ],
+    workspace: [
+        { label: 'Nombre', key: 'name' },
+        { label: 'Red', key: 'network' }
+    ]
 };
 
 const getStatusClass = (status) => {

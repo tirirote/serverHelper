@@ -6,7 +6,16 @@
     border-radius: 8px;
     width: inherit;
 }
-
+.toggleButton {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: var(--color-gray-dark);
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    color: var(--color-white);
+}
 .listTitle {
     font-weight: 400;
     color: var(--color-white);
@@ -16,6 +25,19 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    overflow: none;
+    margin-top: 8px;
+    background-color: var(--color-gray-dark);
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+.listCollapsed {
+    display: flex;
+    flex-direction: column;
+    height: 0px;
+    overflow: hidden;    
+    transition: all 0.2s ease-in-out;
 }
 
 .emptyList {
@@ -37,8 +59,8 @@
     display: flex;
     justify-content: space-between;
     padding: 4px 8px;
-    border-radius: 4px;
-    background-color: var(--color-gray-dark);
+    border-radius: 8px;
+    background-color: var(--color-gray-darkest);
     transition: background-color 0.2s, border-color 0.2s;
     cursor: default;
 }

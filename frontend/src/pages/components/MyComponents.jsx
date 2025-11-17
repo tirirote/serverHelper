@@ -22,7 +22,7 @@ export const initialComponents = [
     {
         id: 'i-101',
         name: 'Servidor Base R-10',
-        category: 'Server',
+        type: 'Server',
         description: 'Servidor genérico de 1U, ideal para desarrollo.',
         price: 1200.00,
         maintenanceCost: 15.00,
@@ -40,7 +40,7 @@ export const initialComponents = [
     {
         id: 'i-102',
         name: 'Array Almacenamiento SSD-T',
-        category: 'Storage',
+        type: 'Storage',
         description: 'Unidad de almacenamiento de estado sólido (NVMe) de alta velocidad, 10TB en configuración RAID.',
         price: 3500.00,
         maintenanceCost: 45.50,
@@ -56,7 +56,7 @@ export const initialComponents = [
     {
         id: 'i-103',
         name: 'Switch Core 48-Port',
-        category: 'Network',
+        type: 'Network',
         description: 'Switch de agregación de capa 3 con 48 puertos 10GbE y 4 uplinks 40GbE.',
         price: 5800.00,
         maintenanceCost: 60.00,
@@ -73,7 +73,7 @@ export const initialComponents = [
     {
         id: 'i-104',
         name: 'PDU Inteligente 1U',
-        category: 'Accessory',
+        type: 'Accessory',
         description: 'Unidad de distribución de energía con medición de consumo por puerto y control remoto.',
         price: 750.00,
         maintenanceCost: 5.00,
@@ -89,7 +89,7 @@ export const initialComponents = [
     {
         id: 'i-105',
         name: 'Memoria RAM 64GB ECC',
-        category: 'Memory',
+        type: 'Memory',
         description: 'Módulo de 64GB DDR4 ECC. Esencial para servidores y workstations.',
         price: 450.00,
         maintenanceCost: 0.00,
@@ -103,7 +103,7 @@ export const initialComponents = [
     {
         id: 'i-106',
         name: 'NVIDIA GForce 4090',
-        category: 'GPU',
+        type: 'GPU',
         description: 'Tarjeta gráfica de alto rendimineto, para Gráficos, diseño y CUDA.',
         price: 1299.00,
         maintenanceCost: 0.00,

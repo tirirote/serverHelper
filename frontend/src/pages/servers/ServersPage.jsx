@@ -119,10 +119,10 @@ const initialServers = [
         totalPrice: '2,340',
         totalMaintenanceCost: '63',
         healthStatus: 'Excellent',
-        network: '',
-        ipAddress: '',
-        os: 'Ubuntu 22.04',
-        status: 'Running',
+        network: '192.168.0.0',
+        ipAddress: '192.168.0.2',
+        operatingSystem: 'Ubuntu 22.04',
+        status: 'Running'
     }
 ];
 
@@ -245,8 +245,8 @@ const ServersPage = () => {
         },
         {
             header: 'OS',
-            key: 'os',
-            render: (item) => <span>{item.os}</span>
+            key: 'operatingSystem',
+            render: (item) => <span>{item.operatingSystem}</span>
         },
         {
             header: 'Acciones',
