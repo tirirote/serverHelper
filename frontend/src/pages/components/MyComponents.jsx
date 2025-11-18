@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBag, Server, Trash2, Zap, AlertTriangle, ArrowRight, XCircle, ChevronRight, Loader2 } from 'lucide-react';
+import { ShoppingBag, Server, Trash2, Zap, AlertTriangle, ArrowRight, XCircle, ChevronRight, Loader2, Plus } from 'lucide-react';
 
 // Componentes externos simulados
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
@@ -11,6 +11,7 @@ import Button from '../../components/ui/button/Button.jsx';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 
 import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
+import NewComponentForm from '../../components/form/component/NewComponentForm.jsx';
 //API Services
 import { getAllComponents } from '../../api/services/componentService.js';
 
@@ -30,6 +31,8 @@ const MyComponents = () => {
     // Estados para la eliminación
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [componentToDelete, setComponentToDelete] = useState(null);
+
+    const [isNewComponentModalOpen, setIsNewComponentModalOpen] = useState(false);
 
     // Estado para el componente visualizado en 3D
     const [activeComponent, setActiveComponent] = useState(null);
@@ -102,6 +105,17 @@ const MyComponents = () => {
 
         setIsDeleteModalOpen(false);
         setComponentToDelete(null);
+    };
+
+    const handleOpenNewComponentModal = () => setIsNewComponentModalOpen(true);
+
+    const handleCloseNewComponentModal = (refresh = false) => {
+        setIsNewComponentModalOpen(false);
+        // Opcional: Si el formulario de creación fue exitoso, recargar datos
+        if (refresh) {
+            // En un entorno real, aquí harías fetchComponents()
+            showToast('Nuevo componente añadido (Simulación).', 'success');
+        }
     };
 
     // Maneja las acciones de la tabla
@@ -214,6 +228,13 @@ const MyComponents = () => {
                     <div className={styles.listColumnFooter}>
                         <Button
                             variant="primary"
+                            onClick={handleOpenNewComponentModal}
+                        >
+                            <Plus size={20} />
+                            Nuevo Componente
+                        </Button>
+                        <Button
+                            variant="primary"
                             onClick={handleGoToStore}
                         >
                             <ShoppingBag size={20} />Tienda
@@ -241,6 +262,18 @@ const MyComponents = () => {
                         </p>
                     </div>
                 </div>
+            </Dialog>
+            <Dialog
+                isOpen={isNewComponentModalOpen}
+                onClose={() => handleCloseNewComponentModal(false)}
+                title="Añadir Nuevo Componente"
+                hideConfirmButton={true}
+            >
+                {/* El formulario gestiona su propio envío y cierre */}
+                <NewComponentForm 
+                    // Pasamos la función de cierre para que el formulario la llame tras el envío exitoso
+                    onClose={() => handleCloseNewComponentModal(true)} 
+                />
             </Dialog>
         </div>
     );

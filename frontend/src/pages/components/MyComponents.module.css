@@ -29,7 +29,8 @@
 
 .listColumnFooter {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    gap: 32px;
     margin-top: 32px;
     align-self: flex-end;
     align-items: end;
@@ -63,11 +64,6 @@
 .detailValue {
     font-weight: 400;
     color: var(--color-gray-lightest);
-}
-
-.cardFooter {
-    margin-top: 20px;
-    text-align: right;
 }
 
 /* --- Estilos de Tabla y Celdas --- */
