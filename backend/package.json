@@ -1,5 +1,5 @@
 {
-  "name": "Server Helper",
+  "name": "Serverhelper-backend",
   "version": "0.1.0",
   "description": "A server management workspace",
   "main": "index.js",
