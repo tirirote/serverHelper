@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBag, Server, Trash2, Zap, AlertTriangle, ArrowRight, XCircle, ChevronRight } from 'lucide-react';
+import { ShoppingBag, Server, Trash2, Zap, AlertTriangle, ArrowRight, XCircle, ChevronRight, Loader2 } from 'lucide-react';
 
 // Componentes externos simulados
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
@@ -11,116 +11,20 @@ import Button from '../../components/ui/button/Button.jsx';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 
 import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
+//API Services
+import { getAllComponents } from '../../api/services/componentService.js';
+
 // Componentes internos
 
-import ComponentCard from './ComponentCard.jsx';
 import styles from './MyComponents.module.css';
-
-// MOCK Data para Componentes
-export const initialComponents = [
-    // --- Componente 1: Servidor Base (Proporcionado por el usuario) ---
-    {
-        id: 'i-101',
-        name: 'Servidor Base R-10',
-        type: 'Server',
-        description: 'Servidor genérico de 1U, ideal para desarrollo.',
-        price: 1200.00,
-        maintenanceCost: 15.00,
-        estimatedConsumption: 150, // Consumo en Watts (W)
-        compatibleWith: [
-            // Esto asume que estos IDs (1, 2, 3) corresponden a otros componentes/accesorios
-            { id: 1, name: 'Rack-1', count: 1 },
-            { id: 2, name: 'Server-1', count: 1 },
-            { id: 3, name: 'Cable-2', count: 1 },
-        ],
-        modelPath: '/assets/models/server-closed.glb'
-    },
-
-    // --- Componente 2: Array de Almacenamiento SSD ---
-    {
-        id: 'i-102',
-        name: 'Array Almacenamiento SSD-T',
-        type: 'Storage',
-        description: 'Unidad de almacenamiento de estado sólido (NVMe) de alta velocidad, 10TB en configuración RAID.',
-        price: 3500.00,
-        maintenanceCost: 45.50,
-        estimatedConsumption: 80, // Consumo en Watts (W)
-        compatibleWith: [
-            { id: 1, name: 'Rack-1', count: 2 }, // Ocupa 2 unidades de Rack
-            { id: 4, name: 'Cable SFP+', count: 4 }, // Necesita 4 cables de fibra
-        ],
-        modelPath: '/assets/models/nas.glb'
-    },
-
-    // --- Componente 3: Switch de Red Core ---
-    {
-        id: 'i-103',
-        name: 'Switch Core 48-Port',
-        type: 'Network',
-        description: 'Switch de agregación de capa 3 con 48 puertos 10GbE y 4 uplinks 40GbE.',
-        price: 5800.00,
-        maintenanceCost: 60.00,
-        estimatedConsumption: 220, // Consumo en Watts (W)
-        compatibleWith: [
-            { id: 1, name: 'Rack-1', count: 1 },
-            { id: 5, name: 'Cable CAT6', count: 48 }, // Puertos de cobre
-            { id: 4, name: 'Cable SFP+', count: 4 },  // Puertos de fibra
-        ],
-        modelPath: '/assets/models/switch.glb'
-    },
-
-    // --- Componente 4: Unidad de Distribución de Energía (PDU) ---
-    {
-        id: 'i-104',
-        name: 'PDU Inteligente 1U',
-        type: 'Accessory',
-        description: 'Unidad de distribución de energía con medición de consumo por puerto y control remoto.',
-        price: 750.00,
-        maintenanceCost: 5.00,
-        estimatedConsumption: 5, // Consumo de la propia unidad
-        compatibleWith: [
-            { id: 1, name: 'Rack-1', count: 1 },
-            { id: 6, name: 'Cable C13/C14', count: 12 }, // Máximo 12 dispositivos conectados
-        ],
-        modelPath: '/assets/models/ups.glb'
-    },
-
-    // --- Componente 5: Módulo de Memoria RAM ECC ---
-    {
-        id: 'i-105',
-        name: 'Memoria RAM 64GB ECC',
-        type: 'Memory',
-        description: 'Módulo de 64GB DDR4 ECC. Esencial para servidores y workstations.',
-        price: 450.00,
-        maintenanceCost: 0.00,
-        estimatedConsumption: 10, // Por módulo
-        compatibleWith: [
-            { id: 'i-101', name: 'Servidor Base R-10', count: 1 }, // Compatible con el Servidor R-10
-            { id: 7, name: 'Workstation T-200', count: 1 },
-        ],
-        modelPath: '/assets/models/ram.glb'
-    },
-    {
-        id: 'i-106',
-        name: 'NVIDIA GForce 4090',
-        type: 'GPU',
-        description: 'Tarjeta gráfica de alto rendimineto, para Gráficos, diseño y CUDA.',
-        price: 1299.00,
-        maintenanceCost: 0.00,
-        estimatedConsumption: 10, // Por módulo
-        compatibleWith: [
-            { id: 'i-101', name: 'Servidor Base R-10', count: 1 }, // Compatible con el Servidor R-10
-            { id: 7, name: 'Workstation T-200', count: 1 },
-        ],
-        modelPath: '/assets/models/gpu.glb'
-    },
-];
 
 const MyComponents = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
 
-    const [components, setComponents] = useState(initialComponents);
+    const [components, setComponents] = useState([]);
+    const [loading, setLoading] = useState(true); // Inicia cargando
+    const [error, setError] = useState(null); // Estado para errores de API
     const [searchTerm, setSearchTerm] = useState('');
 
     // Estados para la eliminación
@@ -128,8 +32,33 @@ const MyComponents = () => {
     const [componentToDelete, setComponentToDelete] = useState(null);
 
     // Estado para el componente visualizado en 3D
-    const [activeComponent, setActiveComponent] = useState(initialComponents[0]);
+    const [activeComponent, setActiveComponent] = useState(null);
 
+    const fetchComponents = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            // Llama a la función de API que usa apiClient.get('/components')
+            const data = await getAllComponents();
+            setComponents(data);
+
+            // Establecer el primer componente cargado como activo
+            if (data && data.length > 0) {
+                setActiveComponent(data[0]);
+            }
+
+        } catch (err) {
+            console.error('Error al cargar componentes:', err);
+            setError('Error al obtener los datos del servidor. Asegúrate de que el backend esté funcionando.');
+            showToast('Error de conexión con el servidor.', 'error');
+        } finally {
+            setLoading(false);
+        }
+    }, [showToast]); // Dependencia del Toast
+
+    useEffect(() => {
+        fetchComponents();
+    }, [fetchComponents]);
 
     // Lógica de filtrado
     const filteredComponents = useMemo(() => {
@@ -176,8 +105,8 @@ const MyComponents = () => {
     };
 
     // Maneja las acciones de la tabla
-    const handleTableAction = (action, id) => {
-        const component = components.find(comp => comp.id === id);
+    const handleTableAction = (action, name) => {
+        const component = components.find(comp => comp.name === name);
         if (!component) return;
 
         if (action === 'delete') {
@@ -197,8 +126,8 @@ const MyComponents = () => {
             render: (item) => (
                 // Al hacer clic en el nombre, se activa la vista 3D
                 <div
-                    className={`${styles.nameCellLink} ${item.id === activeComponent?.id ? styles.activeName : ''}`}
-                    onClick={() => handleTableAction('view', item.id)}
+                    className={`${styles.nameCellLink} ${item.name === activeComponent?.name ? styles.activeName : ''}`}
+                    onClick={() => handleTableAction('view', item.name)}
                 >
                     {item.name}
                 </div>
@@ -243,22 +172,43 @@ const MyComponents = () => {
                     />
 
                     <div className={styles.tableContainer}>
-                        {filteredComponents.length === 0 && searchTerm ? (
-                            <div className={styles.emptyState}>
-                                <XCircle size={40} className={styles.emptyIcon} />
-                                <p>No se encontraron componentes que coincidan con "{searchTerm}".</p>
+                        {/* NUEVOS ESTADOS DE CARGA Y ERROR */}
+                        {loading && (
+                            <div className={styles.loadingState}>
+                                <Loader2 size={40} className="animate-spin" />
+                                <p>Cargando componentes desde el servidor...</p>
                             </div>
-                        ) : filteredComponents.length === 0 && !searchTerm ? (
+                        )}
+
+                        {error && !loading && (
                             <div className={styles.emptyState}>
-                                <ShoppingBag size={40} className={styles.emptyIcon} />
-                                <p>Tu inventario está vacío. ¡Visita la tienda para empezar!</p>
+                                <XCircle size={40} />
+                                <p>{error}</p>
+                                <p>Intenta recargar la página o revisa la consola para más detalles.</p>
                             </div>
-                        ) : (
-                            <DataTable
-                                data={filteredComponents}
-                                columns={columns}
-                                initialSortBy="name"
-                            />
+                        )}
+
+                        {/* Lógica de Lista (Solo si no está cargando y no hay error) */}
+                        {!loading && !error && (
+                            <>
+                                {filteredComponents.length === 0 && searchTerm ? (
+                                    <div className={styles.emptyState}>
+                                        <XCircle size={40} className={styles.emptyIcon} />
+                                        <p>No se encontraron componentes que coincidan con "{searchTerm}".</p>
+                                    </div>
+                                ) : filteredComponents.length === 0 && !searchTerm ? (
+                                    <div className={styles.emptyState}>
+                                        <ShoppingBag size={40} className={styles.emptyIcon} />
+                                        <p>Tu inventario está vacío. ¡Visita la tienda para empezar!</p>
+                                    </div>
+                                ) : (
+                                    <DataTable
+                                        data={filteredComponents}
+                                        columns={columns}
+                                        initialSortBy="name"
+                                    />
+                                )}
+                            </>
                         )}
                     </div>
                     <div className={styles.listColumnFooter}>

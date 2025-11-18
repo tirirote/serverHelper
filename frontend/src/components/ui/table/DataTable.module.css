@@ -7,7 +7,7 @@
     overflow-y: auto;
     background-color: var(--color-gray-darkest);
     box-shadow: 0px 8px 0px var(--color-gray-darkest);
-
+    overflow: hidden;
 }
 
 .tableHeader {
@@ -32,7 +32,7 @@
 }
 
 .tableBody {
-    max-height: 100vh;
+    max-height: 70vh;
     overflow-y: auto;
     border-radius: 8px;
     border: solid 4px var(--color-gray-darkest);
@@ -65,7 +65,6 @@
 }
 
 /* Estilo de Filas */
-
 .dataRow {
     display: flex;
     flex-direction: row;

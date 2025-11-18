@@ -8,7 +8,7 @@ export const components = [
     compatibleList: ['Placa Base 1', 'Placa Base 2'],
     details: 'Chasis para servidores de 1U de altura.',
     isSelled: false,
-    modelPath: './assets/models/chasis.glb', // Ruta del modelo 3D
+    modelPath: '/assets/models/server-closed.glb', // Ruta del modelo 3D
   },
   {
     type: 'CPU',
@@ -19,7 +19,7 @@ export const components = [
     compatibleList: ['Placa Base 1'],
     details: 'CPU de alto rendimiento para servidores.',
     isSelled: false,
-    modelPath: './assets/models/cpu.glb',
+    modelPath: '/assets/models/cpu.glb',
   },
   {
     type: 'RAM',
@@ -30,7 +30,7 @@ export const components = [
     compatibleList: ['Placa Base 1', 'Placa Base 2'],
     details: 'Módulo de memoria RAM de 32GB.',
     isSelled: false,
-    modelPath: './assets/models/ram.glb',
+    modelPath: '/assets/models/ram.glb',
   },
   {
     type: 'HardDisk',
@@ -41,7 +41,7 @@ export const components = [
     compatibleList: ['Placa Base 1', 'Placa Base 2'],
     details: 'Disco de estado sólido de 1TB.',
     isSelled: false,
-    modelPath: './assets/models/ssd.glb',
+    modelPath: '/assets/models/ssd.glb',
   },
   {
     type: 'BiosConfig',
@@ -52,7 +52,7 @@ export const components = [
     compatibleList: ['Placa Base 1', 'Placa Base 2'],
     details: 'Configuración de BIOS estándar.',
     isSelled: false,
-    modelPath: './assets/models/bios.glb',
+    modelPath: '/assets/models/os.glb',
   },
   {
     type: 'Fan',
@@ -63,7 +63,7 @@ export const components = [
     compatibleList: ['Chasis 1U', 'Chasis 2U'],
     details: 'Ventilador de 80mm para refrigeración.',
     isSelled: false,
-    modelPath: './assets/models/fan.glb',
+    modelPath: '/assets/models/fan.glb',
   },
   {
     type: 'PowerSupply',
@@ -74,7 +74,7 @@ export const components = [
     compatibleList: ['Chasis 1U', 'Chasis 2U'],
     details: 'Fuente de alimentación de 500W.',
     isSelled: false,
-    modelPath: './assets/models/psu.glb',
+    modelPath: '/assets/models/psu.glb',
   },
   {
     type: 'GPU',
@@ -85,7 +85,7 @@ export const components = [
     compatibleList: ['Placa Base 1'],
     details: 'GPU de alto rendimiento para cargas de trabajo de IA.',
     isSelled: false,
-    modelPath: './assets/models/gpu.glb',
+    modelPath: '/assets/models/gpu.glb',
   },
   {
     type: 'MotherBoard',
@@ -96,7 +96,7 @@ export const components = [
     compatibleList: ['Intel Xeon E5-2690', 'DDR4 32GB', 'SSD 1TB', 'BIOS Standard', 'NVIDIA A100'],
     details: 'Placa base compatible con el chasis 1U.',
     isSelled: false,
-    modelPath: './assets/models/motherboard.glb',
+    modelPath: '/assets/models/motherboard.glb',
   },
   {
     type: 'NetworkInterface',
@@ -107,7 +107,7 @@ export const components = [
     compatibleList: ['Placa Base 1', 'Placa Base 2'],
     details: 'Interfaz de red con capacidad de 10 Gigabit.',
     isSelled: false,
-    modelPath: './assets/models/nic.glb', // Modelo para Network Interface Card
+    modelPath: '/assets/models/network-interface.glb', // Modelo para Network Interface Card
   },
   {
     type: 'OS',
@@ -118,6 +118,6 @@ export const components = [
     compatibleList: ['Intel Xeon E5-2690'], // Asume compatibilidad con la CPU
     details: 'Sistema Operativo de servidor Linux, estable y de largo soporte.',
     isSelled: false,
-    modelPath: './assets/models/os.glb',
+    modelPath: '/assets/models/os.glb',
   },
 ];

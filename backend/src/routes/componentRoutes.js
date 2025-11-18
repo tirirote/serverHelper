@@ -1,11 +1,12 @@
 import { Router } from 'express';
-import { 
-  createComponent, 
-  deleteComponent, 
-  updateComponent, 
-  getComponentPrice, 
-  getComponentCompatibleList, 
-  getComponentDetails, 
+import {
+  createComponent,
+  deleteComponent,
+  updateComponent,
+  getAllComponents,
+  getComponentPrice,
+  getComponentCompatibleList,
+  getComponentDetails,
   getComponentType,
   getComponentByName,
   getComponentMaintenanceCost,
@@ -17,6 +18,7 @@ const router = Router();
 router.post('/', createComponent);
 router.delete('/:name', deleteComponent);
 router.put('/:name', updateComponent);
+router.get('/', getAllComponents);
 router.get('/:name', getComponentByName);
 router.get('/:name/price', getComponentPrice);
 router.get('/:name/compatible', getComponentCompatibleList);

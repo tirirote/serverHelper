@@ -21,7 +21,6 @@ router.get('/', getAllServers);
 router.get('/:name', getServerByName);
 router.get('/:name/components', getAllComponents);
 router.get('/:name/missing', getMissingComponents);
-router.get('/:name/missing', getMissingComponents);
 router.get('/:name/total-cost', getServerTotalCost);
 router.get('/:name/maintenance-cost', getServerMaintenanceCost);
 router.post('/add-component', addComponentToServer);

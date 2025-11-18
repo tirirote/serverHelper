@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { healthStatus, powerStatus } from './types';
+import { healthStatus, powerStatus } from './types.js';
 
 export const rackSchema = Joi.object({
   name: Joi.string().min(3).max(50).required(),

@@ -15,10 +15,10 @@ describe('Component API (Simplified)', () => {
 
     it('should successfully create a new component', async () => {
         // Los datos de prueba deben coincidir con el nuevo esquema
-        const newComponent = { 
-            type: 'RAM', 
-            name: 'Test RAM', 
-            price: 100, 
+        const newComponent = {
+            type: 'RAM',
+            name: 'Test RAM',
+            price: 100,
             compatibleList: [],
             maintenanceCost: 2.5,
             estimatedConsumption: 10,
@@ -68,6 +68,15 @@ describe('Component API (Simplified)', () => {
         expect(res.body.message).toBe('Componente eliminado con éxito.');
         // Esperamos que la longitud del array sea uno menos
         expect(db.components.length).toBe(initialCount - 1);
+    });
+
+    it('should return all components in the database', async () => {
+        const res = await request(app).get('/api/components');
+
+        expect(res.statusCode).toBe(200);
+        expect(Array.isArray(res.body.components)).toBe(true);
+        expect(res.body.components.length).toBe(initialComponents.length);
+        expect(res.body.components[0]).toHaveProperty('name');
     });
 
     it('should return 404 when trying to delete a non-existent component', async () => {

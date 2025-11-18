@@ -70,6 +70,11 @@ export const updateComponent = (req, res) => {
   res.status(200).json({ message: 'Componente actualizado con éxito', component: db.components[componentIndex] });
 };
 
+export const getAllComponents = (req, res) => {
+  const components = db.components;
+  res.status(200).json({ components });
+};
+
 export const getComponentByName = (req, res) => {
   const { name } = req.params;
 

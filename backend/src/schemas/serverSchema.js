@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { healthStatus } from './types';
+import { healthStatus } from './types.js';
 
 export const serverSchema = Joi.object({
   name: Joi.string().min(3).max(50).required(),
