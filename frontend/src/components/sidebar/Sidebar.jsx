@@ -43,22 +43,25 @@ const Sidebar = ({ isOpen, handleLogout, onToggle }) => {
   return (
     <nav className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}>
       <div className={styles.topSection}>
+
         <div className={styles.header}>
+
           {isOpen && <img
             src={Logo}
             alt="Icono de Server Helper"
-            className={styles.logoImage}            
+            className={styles.logoImage}
             onClick={onToggle}
           />}
           {!isOpen && <img
             src={Icon}
             alt="Icono de Server Helper"
-            className={styles.iconImage}            
+            className={styles.iconImage}
             onClick={onToggle}
           />}
+
         </div>
 
-        <ul className={styles.navList}>
+        <ul className={styles.navList}>          
           {navItems.map((item) => (
             <li key={item.name} className={styles.navItemContainer}>
               <NavLink
@@ -74,26 +77,7 @@ const Sidebar = ({ isOpen, handleLogout, onToggle }) => {
             </li>
           ))}
         </ul>
-      </div>
 
-      <div className={styles.bottomSection}>
-        <hr className={styles.divider} />
-        <div className={styles.logoutSection}>
-          <NavLink
-            to="/profile"
-            className={({ isActive }) =>
-              `${styles.navItem} ${isActive ? styles.active : ''}`
-            }
-            onClick={handleNavigation}
-          >
-            <User size={20} />
-            {isOpen && <span className={styles.navLabel}>Perfil y Config.</span>}
-          </NavLink>
-          <button className={styles.logoutBtn} onClick={handleLogout}>
-            <LogOut size={20} />
-            {isOpen && <span className={styles.navLabel}>Log Out</span>}
-          </button>
-        </div>
       </div>
     </nav>
   );

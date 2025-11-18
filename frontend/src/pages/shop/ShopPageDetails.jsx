@@ -9,7 +9,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 const ShopPageDetails = ({ onAddToCart }) => {
 
-    const { itemId } = useParams();
+    const { itemName } = useParams();
     const navigate = useNavigate();
 
     // Estado local para la cantidad
@@ -25,18 +25,16 @@ const ShopPageDetails = ({ onAddToCart }) => {
 
         try {
             const parsedItem = JSON.parse(storedData);
-            // Crucial: Solo retorna el ítem si su ID coincide con el ID del URL.
-            // Esto evita que se muestre el ítem incorrecto si el usuario navega a otro ID sin pasar por la lista.
-            if (parsedItem && parsedItem.id === itemId) {
+            if (parsedItem && parsedItem.name === itemName) {
                 return parsedItem;
             }
-            console.warn(`Error de coincidencia: ID del URL (${itemId}) no coincide con ID almacenado (${parsedItem.id}).`);
+            console.warn(`Error de coincidencia: ID del URL (${itemName}) no coincide con ID almacenado (${parsedItem.id}).`);
             return null;
         } catch (e) {
             console.error("Error al parsear JSON desde localStorage:", e);
             return null;
         }
-    }, [itemId]);
+    }, [itemName]);
 
 
     if (!item) {
@@ -47,7 +45,7 @@ const ShopPageDetails = ({ onAddToCart }) => {
                     <ArrowLeft size={20} style={{ marginRight: '10px' }} /> Volver a la Tienda
                 </Button>
                 <h2 style={{ fontSize: '2rem', color: '#ef4444' }}>Error 404: Producto no encontrado</h2>
-                <p style={{ color: '#9ca3af' }}>El ítem con ID **{itemId}** no pudo ser cargado (Puede que se haya perdido el dato de `localStorage` o el URL es inválido).</p>
+                <p style={{ color: '#9ca3af' }}>El ítem con ID **{itemName}** no pudo ser cargado (Puede que se haya perdido el dato de `localStorage` o el URL es inválido).</p>
             </div>
         );
     }

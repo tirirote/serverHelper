@@ -24,15 +24,36 @@
 
 .itemsGrid {
     display: flex;
-    flex-wrap: wrap;
     align-self: center;
     justify-content: space-between;
     align-items: center;
     width: 100%;
     height: 50%;
     gap: 16px;
+    padding-bottom: 64px;
+    overflow-x: scroll;
+    /* Estilos de la barra de desplazamiento para WebKit */
+    /* Ancho de la barra de desplazamiento */
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
 
+    /* Fondo del track de la barra de desplazamiento */
+    &::-webkit-scrollbar-track {
+        background: var(--color-gray-dark);
+        border-radius: 4px;
+    }
 
+    /* El "thumb" o la parte arrastrable de la barra */
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--color-gray-darkest);
+        border-radius: 16px;
+    }
+
+    /* Estilo del thumb al pasar el cursor por encima */
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: var(--color-white);
+    }
 }
 
 .itemCard {

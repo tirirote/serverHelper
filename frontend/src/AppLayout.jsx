@@ -16,71 +16,44 @@ import ServerDetailsPage from './pages/servers/ServerDetailsPage.jsx';
 import MyComponents from './pages/components/MyComponents.jsx';
 
 const AppLayout = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    // CAMBIO: Establecer a false para que esté contraído por defecto
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const navigate = useNavigate();
-
-    const handleLogin = () => {
-        setIsAuthenticated(true);
-        navigate('/dashboard');
-    };
-
-    const handleLogout = () => {
-        setIsAuthenticated(false);
-        navigate('/');
-    };
-
     const handleSidebarToggle = () => {
         setIsSidebarOpen(prev => !prev);
     };
 
-    if (isAuthenticated) {
-        return (
-            <div className={styles.appLayout}>
-
-                {/* OVERLAY: Visible cuando el sidebar está abierto */}
-                {isSidebarOpen && (
-                    <div
-                        className={styles.overlay}
-                        onClick={() => setIsSidebarOpen(false)} // Cierra el sidebar al pulsar el overlay
-                        aria-label="Cerrar menú lateral"
-                    />
-                )}
-
-                <Sidebar
-                    isOpen={isSidebarOpen}
-                    handleLogout={handleLogout}
-                    onToggle={handleSidebarToggle} // Pasamos la función de toggle al Sidebar
-                />
-
-                <div className={`${styles.contentWrapper} ${isSidebarOpen ? styles.contentShift : ''}`}>
-                    <main className={styles.mainContent}>
-                        <Routes>
-                            <Route path="/dashboard" element={<Playground handleLogout={handleLogout} />} />
-                            <Route path="/workspaces" element={<Workspaces />} />
-                            <Route path="/workspaces/:workspaceId" element={<WorkspaceDetailsPage />} />
-                            <Route path="/shop" element={<ShopPage handleLogout={handleLogout} />} />
-                            <Route path="/shop/:itemId" element={<ShopPageDetails handleLogout={handleLogout} />} />
-                            <Route path="/components" element={<MyComponents handleLogout={handleLogout} />} />
-                            <Route path="/components/:componentId" element={<Playground handleLogout={handleLogout} />} />
-                            <Route path="/servers" element={<ServersPage handleLogout={handleLogout} />} />
-                            <Route path="/servers/:serverId" element={<ServerDetailsPage handleLogout={handleLogout} />} />
-                            <Route path="/profile" element={<ProfilePage />} />
-                            <Route path="*" element={<Playground handleLogout={handleLogout} />} />
-                        </Routes>
-                    </main>
-                </div>
-            </div>
-        );
-    }
-
-    // Estructura para usuarios no autenticados
     return (
-        <Routes>
-            <Route path="/" element={<WelcomePage onLoginSuccess={handleLogin} />} />
-            <Route path="*" element={<WelcomePage onLoginSuccess={handleLogin} />} />
-        </Routes>
+        <div className={styles.appLayout}>
+            {isSidebarOpen && (
+                <div
+                    className={styles.overlay}
+                    onClick={() => setIsSidebarOpen(false)}
+                    aria-label="Cerrar menú lateral"
+                />
+            )}
+
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onToggle={handleSidebarToggle}
+            />
+
+            <div className={`${styles.contentWrapper} ${isSidebarOpen ? styles.contentShift : ''}`}>
+                <main className={styles.mainContent}>
+                    <Routes>
+                        <Route path="/dashboard" element={<Playground />} />
+                        <Route path="/workspaces" element={<Workspaces />} />
+                        <Route path="/workspaces/:workspaceId" element={<WorkspaceDetailsPage />} />
+                        <Route path="/shop" element={<ShopPage />} />
+                        <Route path="/shop/:itemId" element={<ShopPageDetails />} />
+                        <Route path="/components" element={<MyComponents />} />
+                        <Route path="/components/:componentId" element={<Playground />} />
+                        <Route path="/servers" element={<ServersPage />} />
+                        <Route path="/servers/:serverId" element={<ServerDetailsPage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="*" element={<Playground />} />
+                    </Routes>
+                </main>
+            </div>
+        </div>
     );
 };
 
