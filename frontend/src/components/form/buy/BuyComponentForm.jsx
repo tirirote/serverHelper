@@ -5,7 +5,7 @@ import Button from '../../ui/button/Button.jsx';
 import DetailsField from '../../ui/details/DetailsField.jsx';
 import CompatibilityList from '../component/CompatibilityList.jsx';
 import ModelViewer from '../../3d/ModelViewer.jsx';
-import styles from './BuyComponentForm.module.css';
+import styles from '../Forms.module.css'; // Reutilizaremos los estilos del formulario de componente
 import { X, Search } from 'lucide-react';
 
 const BuyComponentForm = ({ onClose }) => {

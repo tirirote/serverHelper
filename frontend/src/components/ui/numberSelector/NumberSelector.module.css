@@ -3,30 +3,45 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 48px;
-  padding: 4px;
-  /* Ajusta el padding para el contenedor principal */
+  height: 32px;
   border-radius: 8px;
-  background-color: var(--color-gray-dark);
-  border: solid;
-  border-color: var(--color-gray-light);
-  box-shadow: 0px 8px 0px var(--color-gray-darkest);
+  border: 4px solid var(--color-gray-light);
+  padding: 4px 0px;
+
 }
 
-.buttonLeft, .buttonRight {
+.buttonLeft {
   /* Estilos base de los botones de icono */
-  background: none;
   border: none;
+  border-radius: 4px 0px 0px 4px;
   cursor: pointer;
-  padding: 4px;
+  width: 20px;
+  height: 24px;
   /* Padding interno para los botones */
   color: var(--color-gray-lightest);
   transition: all 0.2s ease-in-out;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 16px;
   background-color: var(--color-gray-dark);
+  margin-left: -1px;
+}
+
+.buttonRight {
+  /* Estilos base de los botones de icono */
+  border: none;
+  border-radius: 0px 4px 4px 0px;
+  cursor: pointer;
+  width: 20px;
+  height: 24px;
+  /* Padding interno para los botones */
+  color: var(--color-gray-lightest);
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-gray-dark);
+  margin-right: -1px;
 }
 
 .buttonLeft:hover,
@@ -54,14 +69,11 @@
 
 .valueDisplay {
   /* Estilo para el número central */
-  font-family: var(--font-body);
-  font-size: 24px;
+  font-family: var(--font-code);
   font-weight: 600;
   color: var(--color-white);
-  margin: 8px;
   /* Espacio para separar del número */
   background-color: var(--color-gray-darkest);
   text-align: center;
-  border-radius: 8px;
-  flex-grow: 1;
+  width: 100%;
 }

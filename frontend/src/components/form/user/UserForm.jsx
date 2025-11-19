@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import InputField from '../../ui/input/InputField.jsx';
 import Button from '../../ui/button/Button.jsx';
-import styles from './UserForm.module.css';
+import styles from '../Forms.module.css'; // Reutilizaremos los estilos del formulario de componente
 import { Eye, EyeOff } from 'lucide-react';
 
 const UserForm = ({ onClose }) => {

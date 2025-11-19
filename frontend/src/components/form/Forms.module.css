@@ -1,15 +1,17 @@
 .formContainer {
     position: relative;
-    padding: 8px;
+    padding: 16px 8px;
     max-width: 450px;
     width: 100%;
 }
 
 .header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid var(--color-gray-dark);
+    flex-direction: row;
+    align-self: center;
+    width: 100%;
+    justify-content: center;
+    border-bottom: 4px solid var(--color-gray-light);
     padding-bottom: 12px;
     margin-bottom: 24px;
 }
@@ -55,6 +57,8 @@
 
 .doneButton {
     display: flex;
-    justify-content: end;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
     margin-top: 16px;
 }

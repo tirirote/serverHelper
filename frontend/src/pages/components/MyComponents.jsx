@@ -263,6 +263,7 @@ const MyComponents = () => {
                     </div>
                 </div>
             </Dialog>
+            
             <Dialog
                 isOpen={isNewComponentModalOpen}
                 onClose={() => handleCloseNewComponentModal(false)}

@@ -9,8 +9,8 @@ import Input from '../../components/ui/input/InputField.jsx';
 import Button from '../../components/ui/button/Button.jsx';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
-
-import styles from './ServersPage.module.css'; // 🚨 Importación del módulo de estilos
+import styles from './ServersPage.module.css';
+import NewServerForm from '../../components/form/server/NewServerForm.jsx';
 
 // MOCK Data para servidores
 const initialServers = [
@@ -143,6 +143,16 @@ const ServersPage = () => {
 
     const [searchTerm, setSearchTerm] = useState('');
 
+    // [NUEVA FUNCIÓN] Manejador para cerrar el modal de creación y mostrar el toast si fue exitoso
+    const handleCloseNewServerModal = (creationSuccessful = false) => {
+        setIsCreateModalOpen(false);
+        if (creationSuccessful) {
+            // NewServerForm ya muestra su propio toast de éxito tras la simulación de envío,
+            // pero si tuviéramos que añadir los datos del servidor a la lista padre, 
+            // la lógica iría aquí. Por ahora, solo cerramos el modal.
+        }
+    };
+
     // Lógica de filtrado
     const filteredServers = useMemo(() => {
         if (!searchTerm) {
@@ -156,33 +166,6 @@ const ServersPage = () => {
             srv.id.toLowerCase().includes(lowerCaseSearch)
         );
     }, [servers, searchTerm]);
-
-    // Maneja la creación de un nuevo servidor (MOCKS de lógica)
-    const handleCreateServer = (e) => {
-        e.preventDefault();
-        if (newServerName.trim() === '') {
-            showToast('El nombre del Servidor no puede estar vacío.', 'warning');
-            return;
-        }
-
-        const newServer = {
-            id: `srv-${Date.now()}`,
-            name: newServerName.trim(),
-            os: newServerOS,
-            status: 'Starting',
-            cpu: '4 Cores',
-            ram: '16 GB',
-            description: `Servidor customizado creado por el usuario.`,
-            region: 'local-zone',
-        };
-
-        setServers(prev => [newServer, ...prev]);
-        showToast(`Servidor "${newServer.name}" creado y está iniciando.`, 'success');
-
-        setNewServerName('');
-        setNewServerOS('Ubuntu 22.04');
-        setIsCreateModalOpen(false);
-    };
 
     // Abre el Dialog de confirmación de eliminación
     const handleDeleteServer = (server) => {
@@ -329,41 +312,10 @@ const ServersPage = () => {
             <Dialog
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}>
-
-                <form onSubmit={handleCreateServer} className={styles.dialogForm}>
-                    <header className={styles.dialogHeader}>
-                        <h2 className={styles.dialogTitle}>Crear Nuevo Servidor</h2>
-                    </header>
-                    <div className={styles.dialogBody}>
-                        <Input
-                            id="serverName"
-                            label="Nombre del Servidor"
-                            type="text"
-                            value={newServerName}
-                            onChange={(e) => setNewServerName(e.target.value)}
-                            placeholder="Ej: Prod API Gateway"
-                            required
-                        />
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Sistema Operativo</label>
-                            <select
-                                value={newServerOS}
-                                onChange={(e) => setNewServerOS(e.target.value)}
-                                className={styles.selectInput}
-                            >
-                                <option value="Ubuntu 22.04">Ubuntu 22.04 (Recomendado)</option>
-                                <option value="Debian 12">Debian 12</option>
-                                <option value="CentOS 8">CentOS 8</option>
-                                <option value="Windows Server 2022">Windows Server 2022</option>
-                            </select>
-                        </div>
-                        <p className="text-sm text-gray-400 mt-2">* Se crearán con recursos estándar (4 Cores / 16 GB RAM).</p>
-                    </div>
-                    <footer className={styles.dialogFooter}>
-                        <Button variant="secondary" onClick={() => setIsCreateModalOpen(false)} type="button">Cancelar</Button>
-                        <Button variant="primary" type="submit"><Save size={18} style={{ marginRight: '5px' }} />Crear e Iniciar</Button>
-                    </footer>
-                </form>
+                <NewServerForm 
+                    // Pasamos la función de cierre para que el formulario la llame tras el envío exitoso
+                    onClose={handleCloseNewServerModal} 
+                />                
             </Dialog>
 
             <Dialog isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>

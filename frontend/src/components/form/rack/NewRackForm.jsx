@@ -4,7 +4,7 @@ import InputField from '../../ui/input/InputField.jsx';
 import DetailsField from '../../ui/details/DetailsField.jsx';
 import NumberSelector from '../../ui/numberSelector/NumberSelector.jsx';
 import Button from '../../ui/button/Button.jsx';
-import styles from './NewRackForm.module.css';
+import styles from '../Forms.module.css'; // Reutilizaremos los estilos del formulario de componente
 import { PlusCircle } from 'lucide-react';
 
 const NewRackForm = ({ onClose }) => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Package, ChevronDown, ChevronUp } from 'lucide-react';
+import { Package, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import Tooltip from '../tooltip/Tooltip.jsx'; // Importamos el Tooltip
 import styles from './GenericList.module.css';
 
@@ -11,7 +11,7 @@ import styles from './GenericList.module.css';
  * * @param {string} title - Título de la lista (Ej: "Compatible con", "Puertos disponibles").
  * @param {Array<Object>} items - Lista de objetos a renderizar.
  */
-const GenericList = ({ title, items }) => {
+const GenericList = ({ title, items, onRemoveItem }) => {
     // Estado para controlar si la lista está colapsada. Por defecto, colapsada (true).
     const [isCollapsed, setIsCollapsed] = React.useState(true);
 
@@ -62,6 +62,20 @@ const GenericList = ({ title, items }) => {
                                 </span>
                             )}
                         </div>
+                        {/* Botón de Eliminación: Agregado para cumplir con la funcionalidad de asignación/eliminación */}
+                        {onRemoveItem && (
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Previene la activación del Tooltip al hacer clic
+                                    onRemoveItem(item.id);
+                                }}
+                                className={styles.removeButton}
+                                aria-label={`Eliminar ${item.name}`}
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        )}
                     </Tooltip>
                 ))}
             </div>
@@ -76,6 +90,7 @@ GenericList.propTypes = {
         name: PropTypes.string.isRequired,
         count: PropTypes.number,
     })).isRequired,
+    onRemoveItem: PropTypes.func
 };
 
 export default GenericList;

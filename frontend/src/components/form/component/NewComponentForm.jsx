@@ -4,7 +4,7 @@ import NumberSelector from '../../ui/numberSelector/NumberSelector.jsx';
 import Button from '../../ui/button/Button.jsx';
 import CompatibilityList from './CompatibilityList.jsx';
 import DetailsField from '../../ui/details/DetailsField.jsx'; // Importar el nuevo componente
-import styles from './NewComponentForm.module.css';
+import styles from '../Forms.module.css'; // Reutilizaremos los estilos del formulario de componente
 
 const NewComponentForm = ({ onClose }) => {
     const [componentName, setComponentName] = useState('');

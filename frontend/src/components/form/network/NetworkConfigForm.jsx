@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import InputField from '../../ui/input/InputField.jsx'; // Usamos tu InputField con lupa/ícono
 import Button from '../../ui/button/Button.jsx';
 import DetailsField from '../../ui/details/DetailsField.jsx'; // Usamos tu campo de texto grande
-import styles from './NetworkConfigForm.module.css';
+import styles from '../Forms.module.css'; // Reutilizaremos los estilos del formulario de componente
 import { Network, Server, Info } from 'lucide-react'; // Íconos para adornos
 
 const NetworkConfigForm = ({ onClose, onSubmit }) => {

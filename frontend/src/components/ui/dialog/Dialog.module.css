@@ -25,15 +25,15 @@
 
 .closeButton {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 16px;
+  right: 16px;
   background: none;
   border: none;
   color: var(--color-gray-darkest);
   cursor: pointer;
-  padding: 24px;
+  padding: 28px;
   transition: color 0.2s;
-  margin: -24px;
+  margin: -28px;
 }
 
 .closeButton:hover {
