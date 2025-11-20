@@ -1,43 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import InputField from '../../ui/input/InputField.jsx';
 import NumberSelector from '../../ui/numberSelector/NumberSelector.jsx';
 import Button from '../../ui/button/Button.jsx';
 import DetailsField from '../../ui/details/DetailsField.jsx';
-import ComponentSelector from '../component/ComponentSelector.jsx';
+import GenericSelector from '../../ui/selector/GenericSelector.jsx';
+import { useToast } from '../../ui/toasts/ToastProvider.jsx';
 import styles from '../Forms.module.css'; // Reutilizaremos los estilos del formulario de componente
-
+//API Services
+import { getAllComponents } from '../../../api/services/componentService.js';
 const NewServerForm = ({ onClose }) => {
+    const { showToast } = useToast();
     const [serverName, setServerName] = useState('');
     const [details, setDetails] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
     // NUEVOS ESTADOS ESPECÍFICOS DE SERVIDOR
     const [rackUnits, setRackUnits] = useState(1); // Unidades de rack (U)
     const [consumption, setConsumption] = useState(100); // Consumo estimado en Watts (W)
 
     // Lista de compatibilidad simulada (puede ser Components, Racks, etc.)
+    const [availableItems, setAvailableItems] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([]);
     const [compatibleItems, setCompatibleItems] = useState([]);
+    const [itemLoading, setItemLoading] = useState(true);
+
+    // Fetch de items disponibles
+    useEffect(() => {
+        const fetchItems = async () => {
+            setItemLoading(true);
+            try {
+                // Usamos el servicio de redes para obtener los ítems disponibles
+                const data = await getAllComponents();
+                setAvailableItems(data);
+            } catch (error) {
+                console.error('Error al cargar items:', error);
+                showToast('Error al cargar la lista de items disponibles.', 'error');
+            } finally {
+                setItemLoading(false);
+            }
+        };
+        fetchItems();
+    }, [showToast]);
 
     // Función para manejar la adición de un componente desde el selector
-    const handleAddComponent = (newItem) => {
-        setCompatibleItems(prevItems => {
-            // Verificar si el componente ya existe
-            const existingItemIndex = prevItems.findIndex(item => item.id === newItem.id);
-
-            if (existingItemIndex > -1) {
-                // Si existe, actualizar la cantidad
-                return prevItems.map((item, index) =>
-                    index === existingItemIndex
-                        ? { ...item, count: item.count + newItem.count }
-                        : item
-                );
-            } else {
-                // Si no existe, añadir el nuevo componente
-                return [...prevItems, newItem];
-            }
-        });
+    const handleAddItem = (newItem) => {
+        setSelectedItems(prev => [...prev, newItem]);
     };
 
-    const handleRemoveComponent = (itemId) => {
-        setCompatibleItems(prevItems => prevItems.filter(item => item.id !== itemId));
+    const handleRemoveItem = (itemId) => {
+        setSelectedItems(prev => prev.filter(item => item.id !== itemId));
     };
 
     const handleSubmit = (e) => {
@@ -107,11 +118,15 @@ const NewServerForm = ({ onClose }) => {
                     />
                     <span className={styles.currency}>W</span>
                 </div>
-                <ComponentSelector
-                    onAddComponent={handleAddComponent}
+                <GenericSelector
+                    availableItems={availableItems}
                     compatibleItems={compatibleItems}
-                    onRemoveComponent={handleRemoveComponent} 
-                    />
+                    onAddComponent={handleAddItem}
+                    onRemoveComponent={handleRemoveItem}
+                    isLoading={itemLoading || isLoading}
+                    selectorTitle="Busca Componentes"
+                    listTitle='Componentes Seleccionados'
+                />
 
                 <div className={styles.doneButton}>
                     <Button type="submit" variant="primary">Crear Servidor</Button>

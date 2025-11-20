@@ -8,7 +8,7 @@ const CompatibilityList = ({ items }) => {
             <label>Compatible with:</label>
             <div className={styles.list}>
                 {items.map(item => (
-                    <div key={item.id} className={styles.listItem}>
+                    <div key={item.name} className={styles.listItem}>
                         <span>{item.name}</span>
                         <span>({item.count})</span>
                     </div>

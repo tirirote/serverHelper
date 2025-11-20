@@ -11,6 +11,8 @@ import styles from './WorkspacesPage.module.css';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
 
+import NewWorkspaceForm from '../../components/form/workspace/NewWorkspaceForm.jsx';
+
 // Datos de ejemplo
 const initialWorkspaces = [
     {
@@ -37,6 +39,15 @@ const WorkspacesPage = () => {
     const [workspaceToDelete, setWorkspaceToDelete] = useState(null);
 
     const [searchTerm, setSearchTerm] = useState('');
+
+    const handleCloseNewWorkspaceModal = (creationSuccessful = false) => {
+        setIsCreateModalOpen(false);
+        if (creationSuccessful) {
+            // NewWorkspaceForm ya muestra su propio toast de éxito tras la simulación de envío,
+            // pero si tuviéramos que añadir los datos del servidor a la lista padre, 
+            // la lógica iría aquí. Por ahora, solo cerramos el modal.
+        }
+    };
 
     const filteredWorkspaces = useMemo(() => {
         if (!searchTerm) {
@@ -225,41 +236,9 @@ const WorkspacesPage = () => {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
             >
-                <form onSubmit={handleCreateWorkspace} className={styles.dialogForm}>
-                    <header className={styles.dialogHeader}>
-                        <h2 className={styles.dialogTitle}>Crear Nuevo Workspace</h2>
-                    </header>
-
-                    <div className={styles.dialogBody}>
-                        <Input
-                            id="workspaceName"
-                            label="Nombre del Workspace"
-                            type="text"
-                            value={newWorkspaceName}
-                            onChange={(e) => setNewWorkspaceName(e.target.value)}
-                            placeholder="Ej: Proyecto Server v3.0"
-                            required
-                        />
-                        {/* Aquí se añadirían más campos (descripción, red, etc.) */}
-                    </div>
-
-                    <footer className={styles.dialogFooter}>
-                        <Button
-                            variant="secondary"
-                            onClick={() => setIsCreateModalOpen(false)}
-                            type="button"
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            variant="primary"
-                            type="submit"
-                        >
-                            <Save size={18} />
-                            Crear
-                        </Button>
-                    </footer>
-                </form>
+                <NewWorkspaceForm
+                    onClose={handleCloseNewWorkspaceModal}
+                />
             </Dialog>
 
             {/* Dialogo de Confirmación de Eliminación */}

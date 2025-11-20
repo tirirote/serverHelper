@@ -1,1 +1,8 @@
-export let networks = [];
+export let networks = [
+    {
+        name: 'TestNet',
+        ipAddress: '10.0.0.0',
+        subnetMask: '255.255.255.0/24',
+        gateway: '10.0.0.1',
+    }
+];

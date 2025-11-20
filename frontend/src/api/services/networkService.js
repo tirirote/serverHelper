@@ -3,7 +3,7 @@ import { apiClient } from '../api';
 export const getAllNetworks = async () => {
     try {
         const response = await apiClient.get('/networks');
-        return response.data;
+        return response.data.networks;
     } catch (error) {
         throw error;
     }

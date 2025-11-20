@@ -91,7 +91,7 @@ const ShopPage = () => {
             localStorage.setItem('selectedShopItemData', JSON.stringify(item));
 
             // 2. Navegar al componente de detalles usando el ID
-            navigate(`/shop/${item.id}`);
+            navigate(`/shop/${item.name}`);
         } catch (error) {
             console.error("Error al guardar el ítem en localStorage:", error);
             showToast('No se pudo abrir los detalles del producto.', 'error');

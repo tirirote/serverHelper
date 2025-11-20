@@ -4,6 +4,7 @@ import ModelViewer from '../../components/3d/ModelViewer.jsx';
 import Button from '../../components/ui/button/Button.jsx';
 import styles from './ShopPageDetails.module.css';
 import CompatibilityList from '../../components/form/component/CompatibilityList.jsx';
+import GenericList from '../../components/ui/list/GenericList.jsx'
 import NumberSelector from '../../components/ui/numberSelector/NumberSelector.jsx';
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -28,7 +29,7 @@ const ShopPageDetails = ({ onAddToCart }) => {
             if (parsedItem && parsedItem.name === itemName) {
                 return parsedItem;
             }
-            console.warn(`Error de coincidencia: ID del URL (${itemName}) no coincide con ID almacenado (${parsedItem.id}).`);
+            console.warn(`Error de coincidencia: ID del URL (${itemName}) no coincide con Nombre almacenado (${parsedItem.name}).`);
             return null;
         } catch (e) {
             console.error("Error al parsear JSON desde localStorage:", e);
@@ -89,24 +90,24 @@ const ShopPageDetails = ({ onAddToCart }) => {
                         <span className={styles.priceTag}>{formatCurrency(item.price)}</span>
                     </div>
 
-                    <p className={styles.description}>{item.description}</p>
+                    <p className={styles.description}>{item.details}</p>
 
                     <div className={styles.specsSection}>
                         <div className={styles.specItem}>
-                            <DollarSign size={20} className={styles.specIcon} />
                             <span className={styles.specLabel}>Costo Mantenimiento</span>
                             <span className={styles.specValue}>{formatCurrency(item.maintenanceCost)}/mes</span>
                         </div>
 
                         <div className={styles.specItem}>
-                            <Zap size={20} className={styles.specIcon} />
                             <span className={styles.specLabel}>Consumo Estimado</span>
                             <span className={styles.specValue}>{item.estimatedConsumption}W /mes</span>
                         </div>
                     </div>
 
                     <div className={styles.compatibilityHeader}>
-                        <CompatibilityList items={item.compatibleWith} />
+                        <GenericList 
+                        title='Compatible con' 
+                        items={item.compatibleList} />
                     </div>
 
                     <div className={styles.purchaseControls}>

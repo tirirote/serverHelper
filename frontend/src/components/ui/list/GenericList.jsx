@@ -24,8 +24,7 @@ const GenericList = ({ title, items, onRemoveItem }) => {
             <div className={styles.listContainer}>
                 <label className={styles.listTitle}>{title}</label>
                 <div className={styles.emptyList}>
-                    <Package size={20} className={styles.emptyIcon} />
-                    <span>Sin ítems registrados.</span>
+                    <p>Sin ítems registrados.</p>
                 </div>
             </div>
         );
