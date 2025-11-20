@@ -101,7 +101,7 @@ describe('Component API (Simplified)', () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body).toHaveProperty('modelPath');
-        expect(res.body.modelPath).toBe('./assets/models/ram.glb'); // Valor del mock
+        expect(res.body.modelPath).toBe('/assets/models/ram.glb'); // Valor del mock
     });
 
     it('should return 404 for a non-existent component when getting model path', async () => {
