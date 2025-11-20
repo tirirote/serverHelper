@@ -1,0 +1,42 @@
+name: Backend CI: Ejecutar Tests
+
+#Define el evento que dispara el workflow
+on:
+push:
+branches:
+- main  # Se activa solo en los push a la rama 'main'
+
+jobs:
+test-backend:
+# El trabajo se ejecutará en un runner de Ubuntu reciente
+runs-on: ubuntu-latest
+
+# Define la estrategia de la matriz para probar con diferentes versiones de Node.js (opcional pero recomendado)
+strategy:
+  matrix:
+    node-version: [18.x, 20.x] # Prueba con versiones LTS de Node.js
+
+steps:
+  - name: Checkout Code
+    # Descarga el código del repositorio
+    uses: actions/checkout@v4
+
+  - name: Set up Node.js ${{ matrix.node-version }}
+    # Configura el ambiente de Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: ${{ matrix.node-version }}
+      cache: 'npm' # Usa caché para dependencias de npm
+      
+  - name: Install Dependencies
+    # Instala las dependencias del proyecto
+    run: npm install
+
+  - name: Run Backend Tests
+    # Ejecuta el comando de tests definido en tu package.json (debe ser "test")
+    run: npm test
+    
+  - name: Check for Test Failures
+    # Este paso es implícito, pero asegura que el workflow falle si 'npm test' devuelve un código de salida distinto de cero
+    if: ${{ failure() }}
+    run: echo "Los tests del backend fallaron. Revisa los logs."
