@@ -1,4 +1,4 @@
-name: Backend CI: Ejecutar Tests
+name: Backend CI - Ejecutar Tests
 
 #Define el evento que dispara el workflow
 on:
