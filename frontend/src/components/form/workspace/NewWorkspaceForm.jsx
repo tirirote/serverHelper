@@ -80,8 +80,8 @@ const NewWorkspaceForm = ({ onClose }) => {
 
     return (
         <div className={styles.formContainer}>
-            <header className={styles.formHeader}>
-                <h1>Crear Nuevo Workspace</h1>
+            <header className={styles.header}>
+                <h1>Nuevo Workspace</h1>
             </header>
 
             <form onSubmit={handleSubmit} className={styles.formBody}>
@@ -110,7 +110,7 @@ const NewWorkspaceForm = ({ onClose }) => {
                     onAddComponent={handleAddNetwork}
                     onRemoveComponent={handleRemoveNetwork}
                     isLoading={networkLoading || isLoading}
-                    selectorTitle="Busca Redes"
+                    selectorTitle="Asigna una red"
                     listTitle='Red Asignada'
                     singleSelection={true}
                 />
