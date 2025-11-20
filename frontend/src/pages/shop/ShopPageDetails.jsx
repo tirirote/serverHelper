@@ -55,82 +55,86 @@ const ShopPageDetails = ({ onAddToCart }) => {
         onAddToCart(item, quantity);
     };
 
-    const formatCurrency = (amount) => `$${(amount || 0).toFixed(2)}`;
+    const formatCurrency = (amount) => `${(amount || 0).toFixed(2)} €`;
 
     const compatibleList = item.compatibleComponents || item.compatibleWith || [];
 
     return (
-        <div className={styles.detailsPage}>
+        <div>
             <div className={styles.headerContainer}>
                 {/* Botón de Regreso */}
                 <Button variant="secondary" size="medium">
                     <ChevronLeft size={20} /> Volver
                 </Button>
-
             </div>
-            <div className={styles.productContainer}>
-                {/* Columna Izquierda: Visor 3D */}
-                <div className={styles.viewerColumn}>
-                    <div className={styles.viewerLgContainer}>
-                        <ModelViewer
-                            modelPath={item.modelPath}
-                            variant="default" // Usamos el modo default (interactivo)
-                            customScale={item.scale} // Aplicamos la escala del modelo
-                        />
-                    </div>
-                    <p className={styles.viewerTip}>
-                        * Usa el ratón para rotar y hacer zoom en el modelo 3D.
-                    </p>
-                </div>
-
-                <div className={styles.infoColumn}>
-
-                    <div className={styles.namePriceContainer}>
-                        <h1 className={styles.productName}>{item.name}</h1>
-                        <span className={styles.priceTag}>{formatCurrency(item.price)}</span>
-                    </div>
-
-                    <p className={styles.description}>{item.details}</p>
-
-                    <div className={styles.specsSection}>
-                        <div className={styles.specItem}>
-                            <span className={styles.specLabel}>Costo Mantenimiento</span>
-                            <span className={styles.specValue}>{formatCurrency(item.maintenanceCost)}/mes</span>
-                        </div>
-
-                        <div className={styles.specItem}>
-                            <span className={styles.specLabel}>Consumo Estimado</span>
-                            <span className={styles.specValue}>{item.estimatedConsumption}W /mes</span>
-                        </div>
-                    </div>
-
-                    <div className={styles.compatibilityHeader}>
-                        <GenericList 
-                        title='Compatible con' 
-                        items={item.compatibleList} />
-                    </div>
-
-                    <div className={styles.purchaseControls}>
-                        <div className={styles.quantityControl}>
-                            <label htmlFor="quantity" className={styles.quantityLabel}>Cantidad</label>
-                            <NumberSelector
-                                value={quantity}
-                                min={1}
-                                max={255}
-                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+            <div className={styles.productCard}>
+                    
+                    <div className={styles.viewerColumn}>
+                        <div className={styles.viewerContainer}>
+                            <ModelViewer
+                                modelPath={item.modelPath}
+                                variant="default"
                             />
                         </div>
-
-                        <Button
-                            variant="primary"
-                            onClick={handleAdd}
-                        >
-                            <Plus size={24} />
-                            Añadir ({quantity})
-                        </Button>
+                        <p className={styles.viewerTip}>* Usa el ratón para rotar y hacer zoom en el modelo 3D.</p>
                     </div>
 
-                </div>
+                    <div className={styles.infoColumn}>
+
+                        <div className={styles.namePriceContainer}>
+                            <h1 className={styles.productName}>{item.name}</h1>
+                            <span className={styles.priceTag}>{formatCurrency(item.price)}</span>
+                        </div>
+
+                        <p className={styles.description}>{item.details}</p>
+
+                        <div className={styles.infoSection}>
+                            
+                            <h2 className={styles.infoHeader}>Detalles</h2>
+                            
+                            <div className={styles.infoList}>
+
+                                <div className={styles.infoCard}>
+                                    <label className={styles.infoLabel}>Tipo de Componente</label>
+                                    <span className={styles.infoValue}>{item.type}</span>
+                                </div>
+                                <div className={styles.infoCard}>
+                                    <label className={styles.infoLabel}>Coste de Mantenimiento</label>
+                                    <span className={styles.infoValue}>{formatCurrency(item.maintenanceCost)}/mes</span>
+                                </div>
+                                <div className={styles.infoCard}>
+                                    <label className={styles.infoLabel}>Consumo Estimado</label>
+                                    <span className={styles.infoValue}>{item.estimatedConsumption}W /mes</span>
+                                </div>
+
+                            </div>
+
+                            <GenericList
+                                title='Compatible con'
+                                items={item.compatibleList} />
+                        </div>
+
+                        <div className={styles.purchaseControls}>
+                            <div className={styles.quantityControl}>
+                                <label htmlFor="quantity" className={styles.quantityLabel}>Cantidad</label>
+                                <NumberSelector
+                                    value={quantity}
+                                    min={1}
+                                    max={255}
+                                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                                />
+                            </div>
+
+                            <Button
+                                variant="primary"
+                                onClick={handleAdd}
+                            >
+                                <Plus size={24} />
+                                Añadir ({quantity})
+                            </Button>
+                        </div>
+                    </div>
+                
             </div>
         </div>
     );
