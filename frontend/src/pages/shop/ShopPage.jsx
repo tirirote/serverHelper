@@ -106,24 +106,35 @@ const ShopPage = () => {
             <div key={item.name} className={styles.itemCard}>
                 <div className={styles.itemNameContainer}>
                     <h4 className={styles.itemName} title={item.name}>{item.name}</h4>
-                    <span className={styles.itemCategory}>{item.type}</span>
-                </div>
-                {/* 1. Visor 3D: Ocupa la mayor parte del espacio visual */}
-                <div className={styles.viewer3DContainer}>
-                    <ModelViewer
-                        modelPath={item.modelPath}
-                        variant="default" // Usamos la vista frontal estática para la tarjeta
-                    />
                 </div>
 
-                {/* 2. Información del Item */}
-                <div className={styles.itemInfo}>
-                    <p className={styles.itemDescription}>{item.details}</p>
+                <div className={styles.cardBody}>
+                    <div className={styles.viewer3DContainer}>
+                        <ModelViewer
+                            modelPath={item.modelPath}
+                            variant="default" // Usamos la vista frontal estática para la tarjeta
+                        />
+                    </div>
+                    <div className={styles.itemInfo}>
+                        <p className={styles.itemDescription}>{item.details}</p>
+                        <div className={styles.infoRow}>
+                            <label className={styles.infoLabel}>Categoría</label>
+                            <p className={styles.infoValue}> {item.type}</p>
+                        </div>
+                        <div className={styles.infoRow}>
+                            <label className={styles.infoLabel}>Mantenimiento</label>
+                            <p className={styles.infoValue}> {item.maintenanceCost} €/mes</p>
+                        </div>
+                        <div className={styles.infoRow}>
+                            <label className={styles.infoLabel}>Consumo</label>
+                            <p className={styles.infoValue}> {item.estimatedConsumption} W</p>
+                        </div>
+                    </div>
                 </div>
 
                 {/* 3. Footer: Precio y Botón de Compra */}
                 <div className={styles.itemFooter}>
-                    <span className={styles.itemPrice}>${item.price.toFixed(2)}</span>
+                    <p className={styles.itemPrice}>${item.price.toFixed(2)}</p>
                     <Button
                         variant="primary"
                         size="small"
