@@ -7,7 +7,7 @@ import ModelViewer from '../../components/3d/ModelViewer.jsx';
 import ShopPageDetails from './ShopPageDetails.jsx';
 import styles from './ShopPage.module.css';
 import { useNavigate } from 'react-router-dom';
-
+import NewComponentForm from '../../components/form/component/NewComponentForm.jsx';
 // API Services
 import { getAllComponents } from '../../api/services/componentService.js'; // Importar la función de la API
 import Dialog from '../../components/ui/dialog/Dialog.jsx';

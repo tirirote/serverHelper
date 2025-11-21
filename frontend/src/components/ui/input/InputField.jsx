@@ -12,19 +12,13 @@ const InputField = React.forwardRef(({
   ...props
 }, ref) => {
 
-
-  const [displayValue, setDisplayValue] = useState(value || '');
-
-  useEffect(() => {
-    setDisplayValue(value || '');
-  }, [value]);;
-
   const handleChange = (e) => {
     if (onChange) {
       onChange(e);
     }
-    setDisplayValue(e.target.value);
   };
+
+  const currentValue = value || '';
 
   return (
     <div className={styles.inputContainer}>
@@ -38,18 +32,19 @@ const InputField = React.forwardRef(({
         <input
           ref={ref}
           type={type}
+          name={label}
           className={
             `${styles.inputField} ${startAdornment ? styles.inputFieldWithAdornment : ''}`
           }
           maxLength={maxLength}
-          value={value}
+          value={currentValue}
           onChange={handleChange}
           {...props}
         />
         {/* Contador de caracteres, se muestra si hay un maxLength definido */}
         {maxLength && (
           <span className={styles.charCounter}>
-            {(value ? value.length : 0)}/{maxLength}
+            {currentValue.length}/{maxLength}
           </span>
         )}
       </div>
