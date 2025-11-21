@@ -61,22 +61,20 @@ const Sidebar = ({ isOpen, handleLogout, onToggle }) => {
 
         </div>
 
-        <ul className={styles.navList}>          
+        <div className={styles.navList}>
           {navItems.map((item) => (
-            <li key={item.name} className={styles.navItemContainer}>
-              <NavLink
-                to={item.to}
-                className={({ isActive }) =>
-                  `${styles.navItem} ${isActive ? styles.active : ''}`
-                }
-                onClick={handleNavigation} // Cierra al navegar
-              >
-                {item.icon}
-                {isOpen && <span className={styles.navLabel}>{item.name}</span>}
-              </NavLink>
-            </li>
+            <NavLink
+              to={item.to}
+              className={({ isActive }) =>
+                `${styles.navItem} ${isActive ? styles.active : ''}`
+              }
+              onClick={handleNavigation} // Cierra al navegar
+            >
+              {item.icon}
+              {isOpen && <span>{item.name}</span>}
+            </NavLink>
           ))}
-        </ul>
+        </div>
 
       </div>
     </nav>

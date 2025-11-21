@@ -28,7 +28,7 @@ const InputField = React.forwardRef(({
 
   return (
     <div className={styles.inputContainer}>
-      {label && <label className={styles.label}>{label}</label>}
+      {label && <label>{label}</label>}
       <div className={styles.inputWrapper}>
         {startAdornment && (
           <div className={styles.startAdornment}>

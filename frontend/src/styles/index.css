@@ -2,7 +2,7 @@
  @import url('./colors.css');
 
  /* Fuentes */
-@import url('https://fonts.googleapis.com/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&family=Cascadia+Mono:ital,wght@0,200..700;1,200..700&family=Fira+Code:wght@300..700&family=Genos:ital,wght@0,100..900;1,100..900&family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+ @import url('https://fonts.googleapis.com/css2?family=Cascadia+Code:ital,wght@0,200..700;1,200..700&family=Cascadia+Mono:ital,wght@0,200..700;1,200..700&family=Fira+Code:wght@300..700&family=Genos:ital,wght@0,100..900;1,100..900&family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
  /* Fuentes y estilos globales */
  :root {
@@ -37,7 +37,12 @@
    /* Negrita, el peso más alto para el título principal */
    color: var(--color-white);
  }
-h2, h3, h4, h5, h6 {
+
+ h2,
+ h3,
+ h4,
+ h5,
+ h6 {
    font-family: var(--font-title);
    font-size: 1.5rem;
    font-weight: 600;
@@ -50,6 +55,14 @@ h2, h3, h4, h5, h6 {
    font-size: 0.8rem;
    color: var(--color-gray-lightest);
    font-weight: 400;
+ }
+
+ label {
+
+   font-family: var(--font-body);
+   font-size: 1rem;
+   font-weight: 400;
+   color: var(--color-white);
  }
 
  span {

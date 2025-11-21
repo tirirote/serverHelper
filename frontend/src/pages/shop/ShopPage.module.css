@@ -2,6 +2,7 @@
 
 .headerContainer {
     display: flex;
+    flex-direction: row;
     align-self: start;
     justify-content: space-between;
     align-items: center;
@@ -12,8 +13,11 @@
     gap: 15px;
 }
 
-.cartButton {
-    min-width: 150px;
+.actionButtons {
+    display: flex;
+    align-self: center;
+    justify-content: center;
+    gap: 32px;
 }
 
 .searchBarContainer {
@@ -141,7 +145,7 @@
     text-align: center;
 }
 
-.itemInfo{
+.itemInfo {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -175,7 +179,7 @@
     font-size: 0.75rem;
     display: flex;
     justify-content: center;
-    color: var(--color-white);    
+    color: var(--color-white);
     background-color: var(--color-gray-light);
     border-radius: 0px 4px 4px 0px;
     padding: 4px;

@@ -84,7 +84,7 @@ const NewWorkspaceForm = ({ onClose }) => {
                 <h1>Nuevo Workspace</h1>
             </header>
 
-            <form onSubmit={handleSubmit} className={styles.formBody}>
+            <form onSubmit={handleSubmit} className={styles.form}>
 
                 {/* Nombre del Workspace */}
                 <InputField

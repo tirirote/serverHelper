@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { ShoppingCart, Server, Package, Cpu, HardDrive, PlusCircle, MemoryStick, Eye, Loader2 } from 'lucide-react';
+import { ShoppingCart, Server, Package, Cpu, HardDrive, PlusCircle, MemoryStick, Eye, Loader2, Plus } from 'lucide-react';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 import Button from '../../components/ui/button/Button.jsx';
@@ -10,11 +10,12 @@ import { useNavigate } from 'react-router-dom';
 
 // API Services
 import { getAllComponents } from '../../api/services/componentService.js'; // Importar la función de la API
+import Dialog from '../../components/ui/dialog/Dialog.jsx';
 
 const ShopPage = () => {
     const { showToast } = useToast();
     const navigate = useNavigate();
-
+    const [isFormOpen, setIsFormOpen] = useState(false);
     // NUEVOS ESTADOS para manejar datos y carga
     const [shopItems, setShopItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -57,6 +58,10 @@ const ShopPage = () => {
         );
     }, [shopItems, searchTerm]);
 
+    const handleAddComponentSuccess = (newComponent) => {
+        // Añade el nuevo componente al principio del array de la tienda
+        setShopItems(prevItems => [newComponent, ...prevItems]);
+    };
     // Manejadores de carrito
     const handleAddToCart = (item) => {
         setCart(prevCart => {
@@ -160,15 +165,26 @@ const ShopPage = () => {
                     onSearchChange={setSearchTerm}
                     searchPlaceholder="Buscar servidores, CPUs, RAM o componentes..."
                 />
-                <Button
-                    variant="icon-only"
-                    onClick={handleCheckout}
-                    disabled={totalItemsInCart === 0}
-                    className={styles.cartButton}
-                >
-                    <ShoppingCart size={20} />
-                    {totalItemsInCart}
-                </Button>
+                <div className={styles.actionButtons}>
+                    <Button
+                        variant="primary"
+                        onClick={() => setIsFormOpen(true)}
+                    >
+                        <Plus size={20} />
+                        Nuevo Componente
+                    </Button>
+
+                    <Button
+                        variant="icon-only"
+                        onClick={handleCheckout}
+                        disabled={totalItemsInCart === 0}
+                    >
+                        <ShoppingCart size={20} />
+                        {totalItemsInCart}
+                    </Button>
+                </div>
+
+
             </div>
 
             <div className={styles.itemsGrid}>
@@ -203,7 +219,18 @@ const ShopPage = () => {
                     </Button>
                 </div>
             )}
+            {/* NUEVO: Renderizado Condicional del Formulario */}
+            <Dialog
+                isOpen={isFormOpen}
+                onClose={() => setIsFormOpen(false)}>
+                <NewComponentForm
+                    onClose={() => setIsFormOpen(false)}
+                    onAddSuccess={handleAddComponentSuccess}
+                />
+            </Dialog>
+
         </div>
+
     );
 };
 

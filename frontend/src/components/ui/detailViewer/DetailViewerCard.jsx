@@ -98,72 +98,78 @@ const DetailViewerCard = ({ item }) => {
 
     return (
         <div className={styles.viewerCard}>
+            <h1 className={styles.visualizerHeader}>{displayItem.name}</h1>
             <div className={styles.visualizerContainer}>
-                <h2 className={styles.visualizerTitle}>{displayItem.name}</h2>
 
                 {/* Visualizador 3D (Mocked) */}
                 <ModelViewer
                     modelPath={displayItem.modelPath}
-                    variant={type}
+                    variant='default'
+                    type={type}
                 />
             </div>
 
-            <div className={styles.details}>
-                <div className={styles.descriptionSection}>
-                    <span className={styles.detailLabel}>Descripción</span>
-                    <p className={styles.description}>{displayItem.description || 'Sin descripción detallada.'}</p>
-                </div>
+            <div className={styles.detailsContainer}>
 
-                <div className={styles.detailsGrid}>
-                    {detailsToShow.map((detail, index) => {
-                        const rawValue = displayItem[detail.key];
+                <h2 className={styles.detailsHeader}>Detalles</h2>
 
-                        // 3. Renderizado condicional: Si es una lista, usa GenericList
-                        if (detail.isList && Array.isArray(rawValue)) {
-                            // Verifica si la lista tiene elementos
-                            if (rawValue.length === 0) return null;
+                <div className={styles.detailsContent}>
+
+                    <div className={styles.descriptionSection}>
+                        <label className={styles.detailLabel}>Descripción</label>
+                        <p className={styles.description}>{displayItem.description || 'Sin descripción detallada.'}</p>
+                    </div>
+                    
+                    <div className={styles.detailsList}>
+                        {detailsToShow.map((detail, index) => {
+                            const rawValue = displayItem[detail.key];
+
+                            // 3. Renderizado condicional: Si es una lista, usa GenericList
+                            if (detail.isList && Array.isArray(rawValue)) {
+                                // Verifica si la lista tiene elementos
+                                if (rawValue.length === 0) return null;
+
+                                return (
+                                    <div className={styles.detailList}>
+                                        <GenericList
+                                            title={detail.label}
+                                            items={rawValue}
+                                        />
+                                    </div>
+                                );
+                            }
+
+                            // Si es un valor simple (no lista):
+                            // 1. Obtiene el valor (manejo de arrays de claves si el mapeo lo soporta, aunque es redundante aquí)
+                            let valueToDisplay = Array.isArray(detail.key)
+                                ? detail.key.map(k => displayItem[k]).join(' / ')
+                                : rawValue;
+
+                            // 2. Aplica formato si existe
+                            const value = detail.format
+                                ? detail.format(rawValue || valueToDisplay)
+                                : valueToDisplay;
+
+                            if (value === undefined || value === null || Array.isArray(value)) return null;
+
+                            // 3. Define el componente de valor con estilos de estado
+                            const ValueComponent = detail.status ? (
+                                <span className={`${styles.detailValue} ${getStatusClass(value)}`}>{value}</span>
+                            ) : (
+                                <span className={`${styles.detailValue} ${detail.small ? styles.detailValueSmall : ''}`}>{value}</span>
+                            );
 
                             return (
-                                <div className={styles.detailList}>
-                                    <GenericList
-                                        title={detail.label}
-                                        items={rawValue}
-                                    />
+                                <div key={index} className={styles.detailRow}>
+                                    <span className={styles.detailLabel}>
+                                        {detail.label}
+                                    </span>
+                                    {ValueComponent}
                                 </div>
                             );
-                        }
-
-                        // Si es un valor simple (no lista):
-                        // 1. Obtiene el valor (manejo de arrays de claves si el mapeo lo soporta, aunque es redundante aquí)
-                        let valueToDisplay = Array.isArray(detail.key)
-                            ? detail.key.map(k => displayItem[k]).join(' / ')
-                            : rawValue;
-
-                        // 2. Aplica formato si existe
-                        const value = detail.format
-                            ? detail.format(rawValue || valueToDisplay)
-                            : valueToDisplay;
-
-                        if (value === undefined || value === null || Array.isArray(value)) return null;
-
-                        // 3. Define el componente de valor con estilos de estado
-                        const ValueComponent = detail.status ? (
-                            <span className={`${styles.detailValue} ${getStatusClass(value)}`}>{value}</span>
-                        ) : (
-                            <span className={`${styles.detailValue} ${detail.small ? styles.detailValueSmall : ''}`}>{value}</span>
-                        );
-
-                        return (
-                            <div key={index} className={styles.detailRow}>
-                                <span className={styles.detailLabel}>
-                                    {detail.label}
-                                </span>
-                                {ValueComponent}
-                            </div>
-                        );
-                    })}
+                        })}
+                    </div>
                 </div>
-
                 {/* Sección Condicional de Compatibilidad */}
                 {(type === 'component' || type === 'rack') && hasCompatibility && (
                     <div className={styles.compatibilitySection}>

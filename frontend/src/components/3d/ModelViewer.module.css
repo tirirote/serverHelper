@@ -1,5 +1,7 @@
 .viewerContainer {
+  display: flex;
+  flex-direction: column;
   align-self: center;
-  width: 100%;
+  width: inherit;
   height: inherit;
 }

@@ -31,8 +31,15 @@ const VARIANT_CONFIGS = {
   },
 };
 
+const PRECONFIGURED_MODELS = {
+  rack: '/assets/models/rack-empty.glb',
+  server: '/assets/models/server-closed.glb',  
+  workspace: '/assets/models/workspace.glb',
+};
+
 // Componente para cargar y renderizar el modelo 3D
 const GltfModel = React.memo(({ modelPath, autoRotateSpeed }) => {
+
   const finalModelPath = modelPath || '/assets/models/test.glb';
 
   // useGLTF maneja la carga del modelo
@@ -72,7 +79,17 @@ const LoadingFallback = () => (
 );
 
 // Componente principal del visor 3D
-const ModelViewer = ({ modelPath, variant }) => {
+const ModelViewer = ({ modelPath, variant, type }) => {
+
+  // 1. Lógica para determinar la ruta final del modelo
+    const finalModelPath = useMemo(() => {
+        // Si el tipo está preconfigurado, usamos el modelo preconfigurado.
+        if (PRECONFIGURED_MODELS[type]) {
+            return PRECONFIGURED_MODELS[type];
+        }
+        // Si no, usamos la ruta proporcionada, o un modelo de prueba genérico.
+        return modelPath || '/assets/models/server-closed.glb';
+    }, [modelPath, type]);
 
   // Obtenemos la configuración basada en la variante
   const config = VARIANT_CONFIGS[variant] || VARIANT_CONFIGS.default;
@@ -88,14 +105,14 @@ const ModelViewer = ({ modelPath, variant }) => {
     <div className={styles.viewerContainer}>
       {/* Canvas de Three.js */}
       <Canvas
-        camera={{ position: cameraPosition, fov: cameraFov}}
+        camera={{ position: cameraPosition, fov: cameraFov }}
         // Configuraciones específicas para la variante 'top'
         style={variant === 'top' ? { transform: 'rotateX(-90deg)' } : {}}
       >
 
         <Suspense fallback={<LoadingFallback />}>
           <GltfModel
-            modelPath={modelPath}
+            modelPath={finalModelPath}
             autoRotateSpeed={autoRotate} // Pasamos la velocidad de rotación
           />
         </Suspense>
@@ -119,11 +136,13 @@ const ModelViewer = ({ modelPath, variant }) => {
 
 ModelViewer.propTypes = {
   modelPath: PropTypes.string.isRequired,
-  variant: PropTypes.oneOf(['default', 'static', 'top']), // <-- Nuevo PropTypes
+  variant: PropTypes.oneOf(['default', 'static', 'top']),
+  type: PropTypes.oneOf(['rack', 'server', 'workspace']),
 };
 
 ModelViewer.defaultProps = {
   variant: 'default',
+  type: 'component'
 };
 
 export default ModelViewer;
