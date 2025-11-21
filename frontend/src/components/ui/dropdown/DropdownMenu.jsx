@@ -41,11 +41,11 @@ const DropdownMenu = ({ label, items, value, onChange, placeholder = "Selecciona
         <div className={styles.dropdownContainer}>
             <label className={styles.label}>{label}</label>
             <div ref={dropdownRef} className={styles.dropdownContent}>
-                
+
                 <div className={styles.dropdownHeader}>
-                    <label className={`${selectedItem ? styles.selectedLabel : styles.placeholder}`}>
+                    <span className={`${selectedItem ? styles.selectedLabel : styles.placeholder}`}>
                         {displayLabel}
-                    </label>
+                    </span>
 
                     <button
                         type="button"
@@ -79,7 +79,7 @@ const DropdownMenu = ({ label, items, value, onChange, placeholder = "Selecciona
                                 {item.label}
                                 {/* Icono de Verificación si está seleccionado */}
                                 {item.value === value && (
-                                    <Check className={styles.checkIcon} aria-hidden="true" />
+                                    <Check size={20} />
                                 )}
                             </div>
                         ))}

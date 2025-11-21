@@ -41,16 +41,16 @@
     gap: 12px;
 }
 
-.costContainer label {
+.form label {
     font-family: var(--font-body);
-    font-weight: 200;
+    font-weight: 400;
     color: var(--color-white);
     text-transform: uppercase;
 }
 
 .costContainer .currency {
     font-family: var(--font-body);
-    font-weight: 200;
+    font-weight: 400;
     font-size: 24px;
     color: var(--color-white);
 }
