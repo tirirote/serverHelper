@@ -64,6 +64,7 @@ const Sidebar = ({ isOpen, handleLogout, onToggle }) => {
         <div className={styles.navList}>
           {navItems.map((item) => (
             <NavLink
+            key={item.name}
               to={item.to}
               className={({ isActive }) =>
                 `${styles.navItem} ${isActive ? styles.active : ''}`

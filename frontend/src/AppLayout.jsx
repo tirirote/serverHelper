@@ -14,6 +14,7 @@ import ShopPageDetails from './pages/shop/ShopPageDetails.jsx';
 import ServersPage from './pages/servers/ServersPage.jsx';
 import ServerDetailsPage from './pages/servers/ServerDetailsPage.jsx';
 import MyComponents from './pages/components/MyComponents.jsx';
+import DashboardPage from './pages/dashboard/DashboardPage.jsx';
 
 const AppLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -39,7 +40,7 @@ const AppLayout = () => {
             <div className={`${styles.contentWrapper} ${isSidebarOpen ? styles.contentShift : ''}`}>
                 <main className={styles.mainContent}>
                     <Routes>
-                        <Route path="/dashboard" element={<Playground />} />
+                        <Route path="/dashboard" element={<DashboardPage />} />
                         <Route path="/workspaces" element={<Workspaces />} />
                         <Route path="/workspaces/:workspaceId" element={<WorkspaceDetailsPage />} />
                         <Route path="/shop" element={<ShopPage />} />

@@ -1,11 +1,9 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Trash2, AlertTriangle, Loader2, Globe, Plus } from 'lucide-react';
+import { Trash2, AlertTriangle, Loader2, Globe, Plus } from 'lucide-react';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../components/ui/table/DataTable.jsx';
 import TableActions from '../../components/ui/table/TableActions.jsx';
 import Dialog from '../../components/ui/dialog/Dialog.jsx';
-import Input from '../../components/ui/input/InputField.jsx';
 import Button from '../../components/ui/button/Button.jsx';
 import styles from './WorkspacesPage.module.css';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
@@ -14,61 +12,81 @@ import NewWorkspaceForm from '../../components/form/workspace/NewWorkspaceForm.j
 
 // API Services
 import { getAllWorkspaces } from '../../api/services/workspaceService.js';
+import { getAllRacks } from '../../api/services/rackService.js';
+
+
+// Mantenemos esta función de pre-procesamiento fuera del componente para que no se redefina.
+const createWorkspaceSchema = (workspaceItem, totalRacks, racksLoading, racksError) => {
+    const racksValue = racksLoading
+        ? 'Cargando...'
+        : racksError
+            ? 'N/A (Error de API)'
+            : totalRacks;
+
+    const details = [
+        { label: 'Nombre', value: workspaceItem.name },
+        { label: 'Red', value: workspaceItem.network ? workspaceItem.network.name : 'N/A' },
+        { label: 'Racks Totales', value: racksValue },
+    ];
+
+    return {
+        name: workspaceItem.name,
+        description: workspaceItem.description,
+        modelPath: workspaceItem.modelPath,
+        type: 'workspace',
+        details: details,
+        compatibilityItems: workspaceItem.compatibleWith || [],
+    };
+};
 
 const WorkspacesPage = () => {
-
     const { showToast } = useToast();
     const [workspaces, setWorkspaces] = useState([]);
-
     const [activeWorkspace, setActiveWorkspace] = useState(null);
-
-    // Estado para el dialog de creación
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-    // Estado para el dialog de eliminación
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [workspaceToDelete, setWorkspaceToDelete] = useState(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
     const [searchTerm, setSearchTerm] = useState('');
 
-    const handleCloseNewWorkspaceModal = (creationSuccessful = false) => {
-        setIsCreateModalOpen(false);
-        if (creationSuccessful) {
-            // NewWorkspaceForm ya muestra su propio toast de éxito tras la simulación de envío,
-            // pero si tuviéramos que añadir los datos del servidor a la lista padre, 
-            // la lógica iría aquí. Por ahora, solo cerramos el modal.
-            fetchWorkspaces();
-        }
-    };
+    // Estados para datos extra (Racks)
+    const [totalRacks, setTotalRacks] = useState(null);
+    const [racksLoading, setRacksLoading] = useState(false);
+    const [racksError, setRacksError] = useState(null);
 
-    const fetchWorkspaces = useCallback(async () => {
+    // --- 1. FUNCIÓN CENTRAL DE FETCH (Reemplaza fetchInitialData y refetchWorkspaces) ---
+    const fetchAndSetWorkspaces = useCallback(async (initialLoad = false) => {
         setLoading(true);
         setError(null);
+
         try {
-            // Llama a la función de API (que usa apiClient.get('/components'))
             const data = await getAllWorkspaces();
             setWorkspaces(data);
-            if (data.length > 0 && !activeWorkspace) {
-                // Selecciona el primer workspace como activo por defecto si no hay ninguno
+
+            // Solo seleccionamos el primer workspace si es la carga inicial
+            // o si el workspace activo fue eliminado.
+            if (data.length > 0 && (initialLoad || !activeWorkspace)) {
                 setActiveWorkspace(data[0]);
             }
         } catch (err) {
-            console.error('Error al cargar los worspaces:', err);
+            console.error('Error al cargar los workspaces:', err);
             setError('Error al obtener los workspaces. Asegúrate de que el backend esté funcionando.');
             showToast('Error de conexión con el servidor.', 'error');
         } finally {
             setLoading(false);
         }
-    }, [showToast, activeWorkspace]);
+    }, [showToast]); // Mantener activeWorkspace para la lógica de re-selección
 
-    // 2. EFECTO PARA CARGAR DATOS AL MONTAR
+    // --- 2. EFECTO DE CARGA INICIAL ---
     useEffect(() => {
-        fetchWorkspaces();
-    }, [fetchWorkspaces]);
+        // Al montar, llamamos a la función con initialLoad=true
+        fetchAndSetWorkspaces(true);
+    }, [fetchAndSetWorkspaces]); 
 
+    
+    // ... (filteredWorkspaces useMemo sin cambios)
     const filteredWorkspaces = useMemo(() => {
         if (!searchTerm) {
             return workspaces;
@@ -76,57 +94,49 @@ const WorkspacesPage = () => {
         const lowerCaseSearch = searchTerm.toLowerCase();
         return workspaces.filter(ws =>
             ws.name.toLowerCase().includes(lowerCaseSearch) ||
-            ws.owner.toLowerCase().includes(lowerCaseSearch) ||
-            ws.description.toLowerCase().includes(lowerCaseSearch) ||
-            ws.id.toLowerCase().includes(lowerCaseSearch)
+            ws.description.toLowerCase().includes(lowerCaseSearch)
         );
     }, [workspaces, searchTerm]);
+    
+    // --- 3. GESTIÓN DE DATOS EXTRA (RACKS) AL SELECCIONAR UN WORKSPACE (Sin cambios) ---
+    useEffect(() => {
+        if (activeWorkspace) {
+            const fetchExtraData = async () => {
+                setRacksLoading(true);
+                setRacksError(null);
 
-    // Abre el Dialog de confirmación
-    const handleDeleteWorkspace = (workspace) => {
-        setWorkspaceToDelete(workspace);
-        setIsDeleteModalOpen(true);
-    };
-
-    // Finaliza la eliminación después de la confirmación del Dialog
-    const handleConfirmDelete = () => {
-        if (!workspaceToDelete) return;
-
-        setWorkspaces(prev => prev.filter(ws => ws.id !== workspaceToDelete.id));
-
-        // Si eliminamos el workspace activo, seleccionamos el primero restante
-        if (activeWorkspace?.name === workspaceToDelete.name) {
-            setActiveWorkspace(workspaces.filter(ws => ws.name !== workspaceToDelete.name)[0] || null);
+                try {
+                    const racks = await getAllRacks();
+                    setTotalRacks(racks.length);
+                } catch (err) {
+                    console.error("Error al obtener total de racks:", err);
+                    setRacksError('Error');
+                } finally {
+                    setRacksLoading(false);
+                }
+            };
+            fetchExtraData();
+        } else {
+            setTotalRacks(null);
+            setRacksError(null);
         }
+    }, [activeWorkspace]);
 
-        showToast(`Workspace "${workspaceToDelete.name}" eliminado.`, 'error');
-
-        // Cierra el dialog y limpia el estado
-        setIsDeleteModalOpen(false);
-        setWorkspaceToDelete(null);
-    };
-
-
-    const handleTableAction = (action, id) => {
-        const workspace = workspaces.find(ws => ws.id === id);
-        if (!workspace) return;
-
-        if (action === 'delete') {
-            handleDeleteWorkspace(workspace);
-        } else if (action === 'view') {
-            // 3. ✨ Actualizamos el estado del visor en lugar de navegar
-            setActiveWorkspace(workspace);
-            showToast(`Visualizando detalles de ${workspace.name}.`, 'info');
-        } else if (action === 'edit') {
-            showToast(`Simulando la edición para Workspace: ${workspace.name}`, 'info');
+    // --- 4. CREACIÓN DEL SCHEMA PARA EL DETAIL VIEWERCARD (Sin cambios) ---
+    const detailsSchema = useMemo(() => {
+        if (!activeWorkspace) {
+            return null;
         }
-    };
-
-    const handleFilterClick = () => {
-        showToast('Abriendo opciones avanzadas de filtro.', 'info');
-    };
+        return createWorkspaceSchema(
+            activeWorkspace,
+            totalRacks,
+            racksLoading,
+            racksError
+        );
+    }, [activeWorkspace, totalRacks, racksLoading, racksError]);
 
     // Definición de las columnas para el componente DataTable
+    // NOTA: Cambiado item.id a item.name para TableActions (coherente con el resto de la página)
     const columns = useMemo(() => [
         {
             header: 'Nombre del Workspace',
@@ -157,14 +167,14 @@ const WorkspacesPage = () => {
             className: styles.centerAlign,
             render: (item) => (
                 <TableActions
-                    itemId={item.id}
-                    onViewDetails={(id) => handleTableAction('view', id)}
-                    onEdit={(id) => handleTableAction('edit', id)}
-                    onDelete={(id) => handleTableAction('delete', id)}
+                    itemId={item.name} // Usamos name como ID temporal para las acciones
+                    onViewDetails={(name) => handleTableAction('view', name)}
+                    onEdit={(name) => handleTableAction('edit', name)}
+                    onDelete={(name) => handleTableAction('delete', name)}
                 />
             )
         },
-    ], [activeWorkspace, workspaces]); // La dependencia 'workspaces' no es necesaria si solo definimos columnas
+    ], [activeWorkspace]); 
 
     // Contenido condicional para la lista/tabla
     const listContent = useMemo(() => {
@@ -183,7 +193,7 @@ const WorkspacesPage = () => {
                     <AlertTriangle size={48} className={styles.errorIcon} />
                     <p>Ocurrió un error al cargar los datos.</p>
                     <p className={styles.errorText}>{error}</p>
-                    <Button variant="secondary" onClick={fetchWorkspaces}>Reintentar Carga</Button>
+                    <Button variant="secondary" onClick={() => fetchAndSetWorkspaces(true)}>Reintentar Carga</Button>
                 </div>
             );
         }
@@ -214,29 +224,87 @@ const WorkspacesPage = () => {
                 initialSortDirection="asc"
             />
         );
-    }, [loading, error, filteredWorkspaces, searchTerm, columns, fetchWorkspaces]);
+    }, [loading, error, filteredWorkspaces, searchTerm, columns, fetchAndSetWorkspaces]); // Usar fetchAndSetWorkspaces
+
+    // Other handlers
+    const handleTableAction = (action, name) => {
+        const workspace = workspaces.find(ws => ws.name === name);
+        if (!workspace) return;
+
+        if (action === 'delete') {
+            handleDeleteWorkspace(workspace);
+        } else if (action === 'view') {
+            setActiveWorkspace(workspace);
+            showToast(`Visualizando detalles de ${workspace.name}.`, 'info');
+        } else if (action === 'edit') {
+            showToast(`Simulando la edición para Workspace: ${workspace.name}`, 'info');
+        }
+    };
+
+    const handleDeleteWorkspace = (workspace) => {
+        setWorkspaceToDelete(workspace);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleCloseNewWorkspaceModal = (creationSuccessful = false) => {
+        setIsCreateModalOpen(false);
+        if (creationSuccessful) {
+            // Llama a la función central para recargar la lista
+            fetchAndSetWorkspaces();
+        }
+    };
+
+    const handleConfirmDelete = () => {
+        if (!workspaceToDelete) return;
+
+        // Lógica de eliminación en el frontend (idealmente, esto debería ser una llamada a la API)
+        const updatedWorkspaces = workspaces.filter(ws => ws.name !== workspaceToDelete.name);
+        setWorkspaces(updatedWorkspaces);
+
+        // Si eliminamos el workspace activo, seleccionamos el primero restante
+        if (activeWorkspace?.name === workspaceToDelete.name) {
+            setActiveWorkspace(updatedWorkspaces[0] || null);
+        }
+
+        showToast(`Workspace "${workspaceToDelete.name}" eliminado.`, 'error');
+        setIsDeleteModalOpen(false);
+        setWorkspaceToDelete(null);
+    };
+
+    const handleFilterClick = () => {
+        showToast('Abriendo opciones avanzadas de filtro.', 'info');
+    };
 
     return (
         <div>
-            {/* Título y Barra de Acciones */}
             <div className={styles.header}>
-                <h1>
-                    Workspaces
-                </h1>
+                <h1>Workspaces</h1>
             </div>
 
             <div className={styles.contentGrid}>
                 {/* Columna de Visualización / Detalles */}
                 <div className={styles.visualizerColumn}>
-                    <DetailViewerCard
-                        item={activeWorkspace} // ⬅️ Le pasamos el servidor activo
-                    />
+                    {detailsSchema ? (
+                        <DetailViewerCard
+                            name={detailsSchema.name}
+                            description={detailsSchema.description}
+                            modelPath={detailsSchema.modelPath}
+                            details={detailsSchema.details}
+                            type={detailsSchema.type}
+                            compatibilityItems={detailsSchema.compatibilityItems}
+                        />
+                    ) : (
+                        <div className={styles.viewerCardPlaceholder}>
+                            <h3>
+                                {loading ? 'Cargando lista inicial...' : 'Selecciona un Workspace'}
+                            </h3>
+                            <p>Haz clic en el nombre para visualizar los detalles.</p>
+                        </div>
+                    )}
                 </div>
 
-                {/* Implementación de la cuadrícula de dos columnas */}
+                {/* Columna de Lista */}
                 <div className={styles.listColumn}>
-
-                    {/* Barra de Búsqueda y Filtros solo se muestra si NO está cargando o en error */}
                     {!loading && !error && (
                         <SearchFilterBar
                             onSearchChange={setSearchTerm}
@@ -245,12 +313,10 @@ const WorkspacesPage = () => {
                         />
                     )}
 
-                    {/* Contenedor de la Tabla/Contenido Condicional */}
                     <div className={styles.tableContainer}>
                         {listContent}
                     </div>
 
-                    {/* Contenedor de la Tabla/Contenido Condicional */}
                     <div className={styles.listColumnFooter}>
                         <Button
                             variant="primary"
@@ -260,12 +326,10 @@ const WorkspacesPage = () => {
                             Crear Workspace
                         </Button>
                     </div>
-
                 </div>
-
             </div>
 
-            {/* Dialogo de Creación de Workspace */}
+            {/* Dialogos (Creación y Eliminación) - sin cambios */}
             <Dialog
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
@@ -275,7 +339,6 @@ const WorkspacesPage = () => {
                 />
             </Dialog>
 
-            {/* Dialogo de Confirmación de Eliminación */}
             <Dialog
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}

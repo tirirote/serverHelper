@@ -5,52 +5,7 @@ import Button from '../button/Button.jsx'
 import CompatibilityList from '../../form/component/CompatibilityList.jsx';
 import ModelViewer from '../../3d/ModelViewer.jsx'
 import GenericList from '../../ui/list/GenericList.jsx'
-// Helper para determinar el tipo de ítem y metadatos (puede expandirse con más tipos)
-const getItemMetadata = (item) => {
-    if (item.operatingSystem) {
-        return { type: 'server', icon: Server, title: 'Servidor Cloud' };
-    }
-    if (item.type) {
-        return { type: 'component', icon: Package, title: 'Componente de Hardware' };
-    }
-    if (item.units) {
-        return { type: 'rack', icon: Warehouse, title: 'Rack de Servidores' };
-    }
-    if (item.network) {
-        return { type: 'workspace', icon: Warehouse, title: 'Workspace' };
-    }
-    return { type: 'unknown', icon: Package, title: 'Detalle Genérico' };
-};
 
-// Mapa de campos de detalle para renderizar dinámicamente
-const DetailMapping = {
-    server: [
-        { label: 'Sistema Operativo', key: 'operatingSystem' },
-        { label: 'Estado', key: 'status', status: true },
-        { label: 'Componentes', key: 'components', isList: true },
-        { label: 'Precio total', key: 'totalPrice' },
-        { label: 'Salud del servidor:', key: 'healthStatus' },
-        { label: 'Coste de Mantenimiento:', key: 'totalMaintenanceCost' },
-        { label: 'Red', key: 'network' },
-        { label: 'Dirección Ip', key: 'ipAddress' }
-    ],
-    component: [
-        { label: 'Categoría', key: 'type' },
-        { label: 'Precio Unitario', key: 'price', format: (v) => `${v.toFixed(2)} €` },
-        { label: 'Costo Mantenimiento', key: 'maintenanceCost', format: (v) => `${v.toFixed(2)} €/Mes` },
-        { label: 'Consumo Estimado', key: 'estimatedConsumption', format: (v) => `${v} W` }
-    ],
-    rack: [
-        { label: 'Capacidad Máxima (U)', key: 'units' },
-        { label: 'Estado', key: 'powerStatus' },
-        { label: 'Salud del Rack', key: 'healthStatus' },
-        { label: 'Coste total de Mantenimiento', key: 'totalMaintenanceCost' }
-    ],
-    workspace: [
-        { label: 'Nombre', key: 'name' },
-        { label: 'Red', key: 'network' }
-    ]
-};
 
 const getStatusClass = (status) => {
     switch (status) {
@@ -68,9 +23,16 @@ const getStatusClass = (status) => {
  * Componente dinámico para visualizar detalles de cualquier tipo de ítem (Servidor, Componente, Rack, etc.)
  * Renderiza el modelo 3D y los campos de detalle basándose en la configuración de DetailMapping.
  */
-const DetailViewerCard = ({ item }) => {
+const DetailViewerCard = ({
+    name,
+    description,
+    modelPath,
+    details,
+    type,
+    compatibilityItems
+}) => {
     // Si no se pasa un ítem, muestra el placeholder.
-    if (!item) {
+    if (!name) {
         return (
             <div className={styles.viewerCardPlaceholder}>
                 <Package size={48} className="text-gray-400 mb-4" />
@@ -79,9 +41,7 @@ const DetailViewerCard = ({ item }) => {
             </div>
         );
     }
-
-    const displayItem = item;
-    const { type } = getItemMetadata(displayItem);
+    const hasCompatibility = Array.isArray(compatibilityItems) && compatibilityItems.length > 0;
 
     if (type === 'unknown') {
         return (
@@ -93,17 +53,14 @@ const DetailViewerCard = ({ item }) => {
         );
     }
 
-    const detailsToShow = DetailMapping[type] || [];
-    const hasCompatibility = displayItem.compatibleWith && displayItem.compatibleWith.length > 0;
-
     return (
         <div className={styles.viewerCard}>
-            <h1 className={styles.visualizerHeader}>{displayItem.name}</h1>
+            <h1 className={styles.visualizerHeader}>{name}</h1>
             <div className={styles.visualizerContainer}>
 
                 {/* Visualizador 3D (Mocked) */}
                 <ModelViewer
-                    modelPath={displayItem.modelPath}
+                    modelPath={modelPath}
                     variant='default'
                     type={type}
                 />
@@ -117,52 +74,42 @@ const DetailViewerCard = ({ item }) => {
 
                     <div className={styles.descriptionSection}>
                         <label className={styles.detailLabel}>Descripción</label>
-                        <p className={styles.description}>{displayItem.description || 'Sin descripción detallada.'}</p>
+                        <p className={styles.description}>{description || 'Sin descripción detallada.'}</p>
                     </div>
-                    
-                    <div className={styles.detailsList}>
-                        {detailsToShow.map((detail, index) => {
-                            const rawValue = displayItem[detail.key];
 
-                            // 3. Renderizado condicional: Si es una lista, usa GenericList
-                            if (detail.isList && Array.isArray(rawValue)) {
-                                // Verifica si la lista tiene elementos
-                                if (rawValue.length === 0) return null;
+                    <div className={styles.detailsList}>
+                        {/* 🚀 ITERACIÓN SIMPLIFICADA SOBRE EL ESQUEMA LISTO */}
+                        {details.map((detail, index) => {
+                            const { label, value, isStatus, isList, items } = detail;
+
+                            // 1. Manejo de Listas
+                            if (isList && Array.isArray(items)) {
+                                if (items.length === 0) return null;
 
                                 return (
-                                    <div className={styles.detailList}>
+                                    <div key={index} className={styles.detailList}>
                                         <GenericList
-                                            title={detail.label}
-                                            items={rawValue}
+                                            title={label}
+                                            items={items}
                                         />
                                     </div>
                                 );
                             }
 
-                            // Si es un valor simple (no lista):
-                            // 1. Obtiene el valor (manejo de arrays de claves si el mapeo lo soporta, aunque es redundante aquí)
-                            let valueToDisplay = Array.isArray(detail.key)
-                                ? detail.key.map(k => displayItem[k]).join(' / ')
-                                : rawValue;
-
-                            // 2. Aplica formato si existe
-                            const value = detail.format
-                                ? detail.format(rawValue || valueToDisplay)
-                                : valueToDisplay;
-
-                            if (value === undefined || value === null || Array.isArray(value)) return null;
+                            // 2. Manejo de Valor Simple (ya formateado si era necesario)
+                            if (value === undefined || value === null) return null;
 
                             // 3. Define el componente de valor con estilos de estado
-                            const ValueComponent = detail.status ? (
+                            const ValueComponent = isStatus ? (
                                 <span className={`${styles.detailValue} ${getStatusClass(value)}`}>{value}</span>
                             ) : (
-                                <span className={`${styles.detailValue} ${detail.small ? styles.detailValueSmall : ''}`}>{value}</span>
+                                <span className={`${styles.detailValue}`}>{value}</span>
                             );
 
                             return (
                                 <div key={index} className={styles.detailRow}>
                                     <span className={styles.detailLabel}>
-                                        {detail.label}
+                                        {label}
                                     </span>
                                     {ValueComponent}
                                 </div>
@@ -173,7 +120,7 @@ const DetailViewerCard = ({ item }) => {
                 {/* Sección Condicional de Compatibilidad */}
                 {(type === 'component' || type === 'rack') && hasCompatibility && (
                     <div className={styles.compatibilitySection}>
-                        <CompatibilityList items={displayItem.compatibleWith} />
+                        <CompatibilityList items={compatibilityItems} />
                     </div>
                 )}
             </div>

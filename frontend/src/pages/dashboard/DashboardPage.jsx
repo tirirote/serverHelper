@@ -1,39 +1,147 @@
-// src/pages/Dashboard/DashboardPage.jsx
-import React from 'react';
-import styles from './Dashboard.module.css';
+import React, { useState, useEffect } from 'react';
+import { Cpu, DollarSign, Server, SquareStack, Network, LayoutGrid } from 'lucide-react';
+import Infopill from '../../components/ui/infopill/InfoPill.jsx'
+import styles from './DashboardPage.module.css';
 
-// Podríamos importar un componente de Card o StatsCard que crearíamos luego
-// import StatsCard from '../../components/ui/card/StatsCard.jsx'; 
-// import ActivityLog from '../../components/modules/ActivityLog.jsx';
+//API Services
+
+import { getAllComponents } from '../../api/services/componentService.js';
+import { getAllNetworks } from '../../api/services/networkService.js'
+import { getAllRacks } from '../../api/services/rackService.js'
+import { getAllServers } from '../../api/services/serverService.js'
+import { getAllWorkspaces, getWorkspacesByName } from '../../api/services/workspaceService.js'
+
+const initialStats = {
+    totalComponents: 0,
+    purchasedComponents: 0,
+    totalPurchaseCost: 0,
+    totalServers: 0,
+    totalRacks: 0,
+    totalNetworks: 0,
+    totalWorkspaces: 0,
+};
 
 const DashboardPage = () => {
+    // Datos simulados (sustituir por llamadas a API reales)
+    const [stats, setStats] = useState(initialStats);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const formatCurrency = (amount) => {
+        return amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+    };
+
+    // --- Lógica de Peticiones Paralelas ---
+    useEffect(() => {
+        const fetchAllStats = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const [
+                    serversTotal,
+                    racksTotal,
+                    networksTotal,
+                    componentsTotal,
+                    workspacesTotal
+                ] = await Promise.all([
+                    getAllServers().length,
+                    getAllRacks().length,
+                    getAllNetworks().length,
+                    getAllComponents().length,
+                    getWorkspacesByName().length,
+                ]);
+
+                setStats({
+                    totalServers: serversTotal,
+                    totalRacks: racksTotal,
+                    totalNetworks: networksTotal,
+                    totalWorkspaces: workspacesTotal,
+                    totalComponents: componentsTotal,
+                });
+
+            } catch (err) {
+                console.error("Error al cargar datos del Dashboard:", err);
+                setError('Error al obtener una o más métricas del servidor.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAllStats();
+    }, []); // Se ejecuta solo una vez al montar
+
+    // --- Renderizado Condicional (Loading/Error) ---
+    if (loading) {
+        return (
+            <div className={styles.header}>
+                <h1>Cargando Dashboard... ⏳</h1>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className={styles.header}>
+                <h1 style={{ color: 'red' }}>Error de Conexión ❌</h1>
+                <p>{error}</p>
+            </div>
+        );
+    }
+
     return (
-        <div className={styles.dashboardContainer}>
-            <header className={styles.header}>
-                <h1>Panel de Control del Workspace</h1>
-                <p>Resumen del estado operativo y la actividad reciente del inventario y la red.</p>
-            </header>
+        <div>
+            <div className={styles.header}>
+                <h1>
+                    Overview
+                </h1>
+            </div>
 
-            {/* Sección de Estadísticas Clave */}
-            <section className={styles.statsGrid}>
-                {/* Aquí irían las Cards (ej: Total Componentes, IPs Libres, Servidores Activos) */}
-                <div className={styles.statPlaceholder}>Total de Componentes: 124</div>
-                <div className={styles.statPlaceholder}>Redes Config.</div>
-                <div className={styles.statPlaceholder}>Servidores Activos: 8</div>
-                <div className={styles.statPlaceholder}>Inventario Crítico</div>
-            </section>
+            {/* Grid de 6 Métricas */}
+            <div className={styles.overviewContainer}>
 
-            {/* Sección de Actividad Reciente */}
-            <section className={styles.recentActivity}>
-                <h2>Actividad Reciente</h2>
-                <div className={styles.logPlaceholder}>
-                    <ul>
-                        <li>[10:30] Servidor 'Web-Prod-01' reiniciado.</li>
-                        <li>[10:15] Componente 'RAM 32GB' agregado al inventario.</li>
-                        <li>[09:45] Subred 'Dev-Zone' modificada.</li>
-                    </ul>
-                </div>
-            </section>
+                {/* 1. Componentes en tienda */}
+                <Infopill
+                    label="Inventario Total"
+                    value={stats.totalComponents.toLocaleString()}
+                    details="Componentes en stock y vendidos"
+                />
+
+                {/* 2. Coste total de componentes comprados */}
+                <Infopill
+                    label="Coste Adquisición"
+                    value={formatCurrency(stats.totalPurchaseCost)}
+                    details={`${stats.purchasedComponents.toLocaleString()} Componentes comprados`}
+                />
+
+                {/* 3. Servidores creados */}
+                <Infopill
+                    label="Servidores"
+                    value={stats.totalServers}
+                    details="Total de servidores desplegados"
+                />
+
+                {/* 4. Racks creados */}
+                <Infopill
+                    label="Racks Físicos"
+                    value={stats.totalRacks}
+                    details="Estructuras de racks en datacenter"
+                />
+
+                {/* 5. Redes creadas */}
+                <Infopill
+                    label="Redes Lógicas"
+                    value={stats.totalNetworks}
+                    details="VPNs, VLANs y Subredes"
+                />
+
+                {/* 6. Workspaces creados */}
+                <Infopill
+                    label="Workspaces"
+                    value={stats.totalWorkspaces}
+                    details="Entornos de trabajo activos"
+                />
+            </div>
         </div>
     );
 };

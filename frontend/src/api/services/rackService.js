@@ -1,9 +1,9 @@
 import { apiClient } from '../api';
 
-export const getAllRacks = async () => {
+export const getAllRacks = async (workspaceName) => {
   try {
-    const response = await apiClient.get('/racks');
-    return response.data;
+    const response = await apiClient.get(`/racks/${workspaceName}`);
+    return response.data.racks;
   } catch (error) {
     throw error;
   }

@@ -12,18 +12,16 @@ import styles from './InfoPill.module.css';
  * @param {string} props.color - Variante de color ('indigo', 'green', 'gray', 'yellow').
  * @param {boolean} props.isDescription - Si es verdadero, el diseño se ajusta para texto más largo.
  */
-const InfoPill = ({ icon: Icon, label, value, color, isDescription = false }) => {
-    // La lógica de las clases se resuelve mapeando las props a nombres de clases CSS
-    const colorClass = styles[color] || styles.default;
-    const layoutClass = isDescription ? styles.descriptionLayout : styles.defaultLayout;
+const InfoPill = ({ label, value, color, details }) => {
 
     return (
-        <div className={`${styles.infoPill} ${colorClass} ${layoutClass}`}>
-            <Icon size={24} className={styles.icon} />
+        <div className={styles.infoPill}>
             <div className={styles.content}>
-                <p className={styles.label}>{label}</p>
-                {/* El estilo para el valor principal se aplica condicionalmente en el CSS */}
-                <p className={styles.value}>{value}</p>
+                <div className={styles.infoHeader}>
+                    <label className={styles.label}>{label}</label>
+                    <p className={styles.details}>{details}</p>
+                </div>
+                <span className={styles.value}>{value}</span>
             </div>
         </div>
     );
