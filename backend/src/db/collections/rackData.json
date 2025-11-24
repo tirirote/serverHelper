@@ -1,0 +1,13 @@
+[
+  {
+    "id": "rack-1",
+    "name": "Rack A1",
+    "units": 42,
+    "workspaceName": "Test Workspace",
+    "powerStatus": "Off",
+    "healthStatus": "Unknown",
+    "servers": [],
+    "totalCost": 0,
+    "totalMaintenanceCost": 0
+  }
+]

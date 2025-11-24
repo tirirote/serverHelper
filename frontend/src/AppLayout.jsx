@@ -40,7 +40,6 @@ const AppLayout = () => {
             <div className={`${styles.contentWrapper} ${isSidebarOpen ? styles.contentShift : ''}`}>
                 <main className={styles.mainContent}>
                     <Routes>
-                        <Route path="/dashboard" element={<DashboardPage />} />
                         <Route path="/workspaces" element={<Workspaces />} />
                         <Route path="/workspaces/:workspaceId" element={<WorkspaceDetailsPage />} />
                         <Route path="/shop" element={<ShopPage />} />
@@ -50,7 +49,7 @@ const AppLayout = () => {
                         <Route path="/servers" element={<ServersPage />} />
                         <Route path="/servers/:serverId" element={<ServerDetailsPage />} />
                         <Route path="/profile" element={<ProfilePage />} />
-                        <Route path="*" element={<Playground />} />
+                        <Route path="*" element={<Workspaces />} />
                     </Routes>
                 </main>
             </div>

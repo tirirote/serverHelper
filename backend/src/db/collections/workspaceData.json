@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Test Workspace",
+    "description": "A test workspace",
+    "racks": [
+      "Rack A1"
+    ],
+    "network": "WS_TestNet"
+  }
+]

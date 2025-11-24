@@ -3,7 +3,7 @@ import { apiClient } from "../api";
 export const getAllServers = async () => {
   try {
     const response = await apiClient.get('/servers');
-    return response.data;
+    return response.data.servers;
   } catch (error) {
     throw error;
   }
@@ -45,7 +45,7 @@ export const getServerByName = async (serverName) => {
   }
 };
 
-export const getServersComponents = async (serverName) => {
+export const getServerComponents = async (serverName) => {
   try {
     const response = await apiClient.get(`/servers/${serverName}/components`);
     return response.data;

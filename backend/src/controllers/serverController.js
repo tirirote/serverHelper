@@ -1,10 +1,15 @@
-import { db } from '../db/index.js';
 import { serverSchema } from '../schemas/serverSchema.js';
 import { mandatoryComponentTypes } from '../schemas/types.js';
 import { findComponentByName } from './componentController.js';
 import { findNetworkByName } from './networkController.js';
+//BD
+import { getDb } from '../db/dbLoader.js';
+import { saveCollectionToDisk, COLLECTION_NAMES } from '../db/dbUtils.js';
+
 //AUX
 const findExistingServer = (name, res) => {
+
+  const db = getDb();
   const existingServer = db.servers.find(s => s.name === name);
   if (existingServer) {
     return res.status(409).json({ message: 'Ya existe un servidor con este nombre.' });
@@ -12,6 +17,8 @@ const findExistingServer = (name, res) => {
 };
 
 export const findServerByName = (serverName, res) => {
+
+  const db = getDb();
   const server = db.servers.find(s => s.name === serverName);
   if (!server) {
     return res.status(404).json({ message: 'Servidor no encontrado.' });
@@ -20,6 +27,8 @@ export const findServerByName = (serverName, res) => {
 };
 
 const findServerIndexByName = (serverName, res) => {
+
+  const db = getDb();
   const serverIndex = db.servers.findIndex(s => s.name === serverName);
   if (serverIndex === -1) {
     return res.status(404).json({ message: 'Servidor no encontrado.' });
@@ -43,12 +52,24 @@ const validateServerDetails = (details, res) => {
 
 const validateComponents = (serverComponents, res) => {
 
+  const db = getDb();
+
   const serverComponentTypes = serverComponents.map(c => c.type);
 
   // 1. Validar componentes obligatorios
   // Usamos la lista mandatoryComponentTypes, asumiendo que incluye 'OS'
   // Filtramos 'HardDisk' y 'RAM' ya que son opcionales en el mínimo requerido.
-  const requiredTypes = mandatoryComponentTypes.filter(type => type !== 'HardDisk' && type !== 'RAM');
+  const requiredTypes = [
+    'CPU',
+    'RAM',
+    'HardDisk',
+    'BiosConfig',
+    'Fan',
+    'PowerSupply',
+    'ServerChasis',
+    'NetworkInterface',
+    'OS'
+  ]
 
   for (const type of requiredTypes) {
     if (!serverComponentTypes.includes(type)) {
@@ -67,6 +88,8 @@ const validateComponents = (serverComponents, res) => {
 
 //API
 export const calculateTotalCost = (serverComponents) => {
+
+  const db = getDb();
   return serverComponents.reduce((total, component) => {
     const dbComponent = db.components.find(c => c.name === component.name);
     return total + (dbComponent ? dbComponent.price : 0);
@@ -74,6 +97,8 @@ export const calculateTotalCost = (serverComponents) => {
 };
 
 export const calculateTotalMaintenanceCost = (serverComponents) => {
+
+  const db = getDb();
   return serverComponents.reduce((total, component) => {
     const dbComponent = db.components.find(c => c.name === component.name);
     return total + (dbComponent && dbComponent.maintenanceCost ? dbComponent.maintenanceCost : 0);
@@ -81,6 +106,10 @@ export const calculateTotalMaintenanceCost = (serverComponents) => {
 };
 
 export const createServer = (req, res) => {
+
+  const db = getDb();
+  const servers = [...db.servers];
+  const workspaces = [...db.workspaces];
   const {
     name,
     components: rawComponents,
@@ -94,7 +123,7 @@ export const createServer = (req, res) => {
 
   // Determinar la red del servidor a partir del rack (si se proporciona)
   if (rackName) {
-    const workspace = db.workspaces.find(w => w.racks.includes(rackName));
+    const workspace = workspaces.find(w => w.racks.includes(rackName));
     if (workspace) {
       network = workspace.network;
     }
@@ -129,11 +158,16 @@ export const createServer = (req, res) => {
   };
 
 
-  validateServer(serverToValidate, res);
+  let response;
 
-  findExistingServer(name, res);
+  response = validateServer(serverToValidate, res);
+  if (response) return response;
 
-  validateComponents(components, res);
+  response = findExistingServer(name, res);
+  if (response) return response;
+
+  response = validateComponents(components, res);
+  if (response) return response;
 
   const newServer = {
     id: `server-${db.servers.length + 1}`,
@@ -150,27 +184,37 @@ export const createServer = (req, res) => {
     rackId: rackName // Mantenemos la referencia al rack, útil para la navegación
   };
 
-  db.servers.push(newServer);
+  servers.push(newServer);
+  // 4. PERSISTENCIA EN DISCO
+  saveCollectionToDisk(servers, 'servers');
   res.status(201).json({ message: 'Servidor creado con éxito', server: newServer });
 };
 
 export const deleteServerByName = (req, res) => {
-  const { name } = req.params;
-  const initialLength = db.servers.length;
-  db.servers = db.servers.filter(s => s.name !== name);
 
-  if (db.servers.length === initialLength) {
+  const db = getDb();
+  const servers = [...db.servers];
+  const { name } = req.params;
+  const updatedServers = servers.filter(s => s.name !== name);
+
+  if (updatedServers.length === servers.length) {
     return res.status(404).json({ message: 'Servidor no encontrado.' });
   }
+  saveCollectionToDisk(updatedServers, 'servers');
   res.status(200).json({ message: 'Servidor eliminado con éxito.' });
 };
 
 export const updateServer = (req, res) => {
+
+  const db = getDb();
+  const servers = [...db.servers];
   const { name } = req.params;
-  const { id, components, ...newDetails } = req.body; // Extraer y descartar 'id'
+  const { id, components, rackName, ...newDetails } = req.body; // Extraer y descartar 'id'
 
   const serverIndex = findServerIndexByName(name, res);
-  const currentServer = db.servers[serverIndex];
+  if (typeof serverIndex !== 'number') return serverIndex;
+
+  const currentServer = servers[serverIndex];
 
   if (components) {
     const filteredComponents = components.map(c => ({
@@ -193,18 +237,19 @@ export const updateServer = (req, res) => {
 
   // Si la red se actualiza, verificar que existe (asumiendo que findExistingNetworkByName existe y usa findNetworkByName)
   if (newDetails.network) {
-    findNetworkByName(newDetails.network, res);
+    let response = findNetworkByName(newDetails.network, res);
+    if (response && response.statusCode !== 200) return response; // Si findNetworkByName devuelve la respuesta de error 404
   }
 
-  // Actualizar el servidor con los nuevos detalles antes de validar
-  const serverToValidate = { ...currentServer, ...newDetails };
-
   // Validar los detalles restantes de la solicitud con el esquema
-  validateServerDetails(newDetails, res);
+  let response = validateServerDetails(newDetails, res);
+  if (response) return response;
 
   // Actualizar el servidor en la base de datos (usando el objeto validado o newDetails)
   const updatedServer = { ...currentServer, ...newDetails };
-  db.servers[serverIndex] = updatedServer;
+  servers[serverIndex] = updatedServer;
+
+  saveCollectionToDisk(servers, 'servers');
 
   res.status(200).json({
     message: 'Servidor actualizado con éxito',
@@ -213,33 +258,41 @@ export const updateServer = (req, res) => {
 };
 
 export const getAllServers = (req, res) => {
+
+  const db = getDb();
   const servers = db.servers;
   res.status(200).json({ servers });
 };
 
 export const getServerByName = (req, res) => {
+
   const { name } = req.params;
   const server = findServerByName(name, res);
   res.status(200).json({ server });
 };
 
 export const getAllComponents = (req, res) => {
+
   const { name } = req.params;
   const server = findServerByName(name, res);
   res.status(200).json({ components: server.components });
 };
 
 export const addComponentToServer = (req, res) => {
-  const { serverName, componentName, componentType } = req.body;
+  const db = getDb();
+  const servers = [...db.servers]; // Copia mutable
+  const { serverName, componentName } = req.body;
 
   // 1. Encontrar el servidor
   const serverIndex = findServerIndexByName(serverName, res);
+  if (typeof serverIndex !== 'number') return serverIndex;
 
   // 2. Validar que el componente exista
   const component = findComponentByName(componentName, res);
+  if (!component || component.statusCode) return component;
 
   // 3. Añadir el componente al servidor
-  const server = db.servers[serverIndex];
+  const server = servers[serverIndex];
   server.components.push({ name: component.name, type: component.type });
 
   // Si el componente es un OS, actualizar el campo 'operatingSystem'
@@ -247,10 +300,11 @@ export const addComponentToServer = (req, res) => {
     server.operatingSystem = component.name;
   }
 
-
   // 4. Recalcular costos
   server.totalPrice = calculateTotalCost(server.components);
   server.totalMaintenanceCost = calculateTotalMaintenanceCost(server.components);
+
+  saveCollectionToDisk(servers, 'servers');
 
   res.status(200).json({
     message: 'Componente añadido al servidor con éxito.',

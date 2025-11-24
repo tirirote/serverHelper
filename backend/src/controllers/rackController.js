@@ -1,10 +1,13 @@
-import { db } from '../db/index.js';
 import { rackSchema } from '../schemas/rackSchema.js';
 import { findWorkspaceByName } from './workspaceController.js';
 import { findServerByName } from './serverController.js';
 
+//BD
+import { getDb } from '../db/dbLoader.js';
+import { saveCollectionToDisk } from '../db/dbUtils.js';
 //AUX
 export const findRackByName = (rackName, res) => {
+  const db = getDb();
   const rack = db.racks.find(r => r.name === rackName);
   if (!rack) {
     return res.status(404).json({ message: 'Rack no encontrado.' });
@@ -13,14 +16,16 @@ export const findRackByName = (rackName, res) => {
 };
 
 const findExistingRackByName = (name, workspaceName, res) => {
+  const db = getDb();
   const existingRack = db.racks.find(r => r.name === name && r.workspaceName === workspaceName);
   if (existingRack) {
     return res.status(409).json({ message: 'Ya existe un rack con este nombre en el workspace.' });
   }
-  return existingRack;
+  return null;
 };
 
 const findRackIndexByWorkspace = (name, workspaceName, res) => {
+  const db = getDb();
   const rackIndex = db.racks.findIndex(r => r.name === name && r.workspaceName === workspaceName);
 
   if (rackIndex === -1) {
@@ -30,6 +35,7 @@ const findRackIndexByWorkspace = (name, workspaceName, res) => {
 }
 
 const findRackIndexByName = (name, res) => {
+  const db = getDb();
   const rackIndex = db.racks.findIndex(r => r.name === name);
   if (rackIndex === -1) {
     return res.status(404).json({ message: 'Rack no encontrado.' });
@@ -41,6 +47,7 @@ const findExistingServerInRack = (serverName, rack, res) => {
   if (rack.servers.includes(serverName)) {
     return res.status(409).json({ message: 'El servidor ya está en este rack.' });
   }
+  return null;
 };
 
 const validateRack = (rack, res) => {
@@ -62,13 +69,27 @@ const validateRack = (rack, res) => {
 
 //API
 export const createRack = (req, res) => {
+  const db = getDb();
+  const racks = [...db.racks];
+  const workspaces = [...db.workspaces];
 
-  const { name, units, workspaceName, powerStatus, healthStatus } = validateRack(req.body, res);
+  // 1. Validar y obtener datos (validateRack debe devolver un error o el valor)
+  const validatedData = validateRack(req.body, res);
+  if (validatedData.statusCode) return validatedData; // Devolver error 400
 
-  // Buscamos el workspace directamente en la base de datos simulada
-  const workspace = findWorkspaceByName(workspaceName, res);
+  const { name, units, workspaceName, powerStatus, healthStatus } = validatedData;
 
-  findExistingRackByName(name, workspaceName, res);
+  // 2. 💡 CORRECCIÓN DE FLUJO: Buscar Workspace (findWorkspaceByName devuelve error 404 o el objeto)
+  const workspaceErrorOrObject = findWorkspaceByName(workspaceName, res);
+  if (workspaceErrorOrObject.statusCode) return workspaceErrorOrObject; // Devolver error 404
+
+  // Usar la copia del workspace para la modificación
+  const workspaceIndex = workspaces.findIndex(ws => ws.name === workspaceName);
+  const workspace = workspaces[workspaceIndex];
+
+  // 3. 💡 CORRECCIÓN DE FLUJO: Comprobar existencia (findExistingRackByName devuelve error 409 o null)
+  const existingRackError = findExistingRackByName(name, workspaceName, res);
+  if (existingRackError) return existingRackError; // Devolver error 409
 
   const newRack = {
     id: `rack-${db.racks.length + 1}`,
@@ -85,47 +106,75 @@ export const createRack = (req, res) => {
     totalMaintenanceCost: 0,
   };
 
-  db.racks.push(newRack);
+  racks.push(newRack);
   workspace.racks.push(newRack.name);
+
+  saveCollectionToDisk(racks, 'racks');
+  saveCollectionToDisk(workspaces, 'workspaces'); // Es vital guardar el workspace actualizado
 
   res.status(201).json({ message: 'Rack creado con éxito', rack: newRack });
 };
 
 export const deleteRackByName = (req, res) => {
+  const db = getDb();
+  let racks = [...db.racks];
+  let workspaces = [...db.workspaces];
   const { name, workspaceName } = req.params;
 
+  // 1. Encontrar y validar el índice del rack (devuelve 404 o el índice)
   const rackIndex = findRackIndexByWorkspace(name, workspaceName, res);
+  if (typeof rackIndex !== 'number') return rackIndex;
 
-  // Mutamos el array directamente
-  db.racks.splice(rackIndex, 1);
+  // 2. Mutar la copia del array racks
+  racks.splice(rackIndex, 1);
 
-  // Eliminar el rack del array de racks del workspace
-  const workspace = db.workspaces.find(ws => ws.name === workspaceName);
-  if (workspace) {
+  // 3. Mutar la copia del array workspaces
+  const workspaceIndex = workspaces.findIndex(ws => ws.name === workspaceName);
+  if (workspaceIndex > -1) {
+    const workspace = workspaces[workspaceIndex];
     const workspaceRackIndex = workspace.racks.indexOf(name);
     if (workspaceRackIndex > -1) {
       workspace.racks.splice(workspaceRackIndex, 1);
     }
+    // No es necesario guardar aquí, se guarda al final.
   }
+
+  // 4. 💡 PERSISTENCIA
+  saveCollectionToDisk(racks, 'racks');
+  saveCollectionToDisk(workspaces, 'workspaces');
 
   res.status(200).json({ message: 'Rack eliminado con éxito.' });
 };
 
 export const updateRack = (req, res) => {
+  const db = getDb();
+  const racks = [...db.racks];
   const { name } = req.params;
-  const updatedDetails = req.body;
 
+  // 💡 CORRECCIÓN: Descartar campos que no deben ser actualizados si se envían.
+  const { id, workspaceName, ...updatedDetails } = req.body;
+
+  // 1. Encontrar el índice (findRackIndexByName devuelve 404 o el índice)
   const rackIndex = findRackIndexByName(name, res);
+  if (typeof rackIndex !== 'number') return rackIndex;
 
-  const updatedRack = { ...db.racks[rackIndex], ...updatedDetails };
+  const currentRack = racks[rackIndex];
 
-  validateRack(updatedRack, res);
+  const updatedRack = { ...currentRack, ...updatedDetails };
 
-  db.racks[rackIndex] = updatedRack;
+  // 2. 💡 CORRECCIÓN DE FLUJO: Validar el rack completo actualizado
+  const validatedRack = validateRack(updatedRack, res);
+  if (validatedRack.statusCode) return validatedRack;
+
+  // 3. Mutar la copia del array racks
+  racks[rackIndex] = updatedRack;
+
+  // 4. 💡 PERSISTENCIA
+  saveCollectionToDisk(racks, 'racks');
 
   res.status(200).json({
     message: 'Rack actualizado con éxito',
-    rack: db.racks[rackIndex]
+    rack: updatedRack
   });
 };
 
@@ -138,26 +187,38 @@ export const getRackByName = (req, res) => {
 };
 
 export const getAllRacks = (req, res) => {
+  const db = getDb();
+
   const { workspaceName } = req.params;
   const racksInWorkspace = db.racks.filter(r => r.workspaceName === workspaceName);
 
   res.status(200).json({ racks: racksInWorkspace });
 };
 
+// ...
+
 export const addServerToRack = (req, res) => {
+  const db = getDb();
+  const racks = [...db.racks];
   const { rackName, serverName } = req.body;
 
-  // 1. Encontrar el rack
+  // 1. Encontrar el rack (findRackByName devuelve 404 o el objeto)
   const rack = findRackByName(rackName, res);
+  if (rack.statusCode) return rack;
 
-  // 2. Encontrar el servidor
-  findServerByName(serverName, res);
+  // 2. Encontrar el servidor (findServerByName devuelve 404 o el objeto)
+  const serverErrorOrObject = findServerByName(serverName, res);
+  if (serverErrorOrObject.statusCode) return serverErrorOrObject;
 
-  // 3. Verificar si el servidor ya está en el rack
-  findExistingServerInRack(serverName, rack, res);
+  // 3. Verificar si el servidor ya está en el rack (findExistingServerInRack devuelve 409 o null)
+  const existingServerError = findExistingServerInRack(serverName, rack, res);
+  if (existingServerError) return existingServerError;
 
-  // 4. Añadir el servidor al rack
+  // 4. Mutar el rack en la copia (rack es una referencia al elemento dentro de 'racks')
   rack.servers.push(serverName);
+
+  // 5. 💡 PERSISTENCIA
+  saveCollectionToDisk(racks, 'racks'); // Guardar el array racks completo
 
   res.status(200).json({
     message: 'Servidor añadido al rack con éxito.',
@@ -165,9 +226,35 @@ export const addServerToRack = (req, res) => {
   });
 };
 
-export const getRackMaintenanceCost = (req, res) => {
+export const toggleRackPower = (req, res) => {
+  const db = getDb();
+  const racks = [...db.racks];
   const { name } = req.params;
 
+  // 1. Encontrar el rack (findRackByName devuelve 404 o el objeto)
+  const rack = findRackByName(name, res);
+  if (rack.statusCode) return rack;
+
+  // 2. Cambiar el estado
+  const newStatus = rack.powerStatus === 'On' ? 'Off' : 'On';
+  rack.powerStatus = newStatus;
+
+  // 3. 💡 CORRECCIÓN DE FLUJO: Validar el rack (validateRack devuelve error 400 o el valor)
+  const validatedRack = validateRack(rack, res);
+  if (validatedRack.statusCode) return validatedRack;
+
+  // 4. 💡 PERSISTENCIA
+  saveCollectionToDisk(racks, 'racks');
+
+  res.status(200).json({
+    message: `Rack '${name}' encendido: ${newStatus}`,
+    powerStatus: newStatus
+  });
+};
+
+export const getRackMaintenanceCost = (req, res) => {
+  const { name } = req.params;
+  const db = getDb();
   const rack = findRackByName(name, res)
 
   let totalMaintenanceCost = 0;
@@ -181,22 +268,4 @@ export const getRackMaintenanceCost = (req, res) => {
   });
 
   res.status(200).json({ totalMaintenanceCost: totalMaintenanceCost.toFixed(2) });
-};
-
-export const toggleRackPower = (req, res) => {
-  const { name } = req.params;
-
-  const rack = findRackByName(name, res);
-
-  // Cambiar el estado: 'On' si está 'Off', 'Off' si está 'On'.
-  const newStatus = rack.powerStatus === 'On' ? 'Off' : 'On';
-  rack.powerStatus = newStatus;
-
-  // Aunque solo se cambia un campo, validamos por si acaso
-  validateRack(rack, res);
-
-  res.status(200).json({
-    message: `Rack '${name}' encendido: ${newStatus}`,
-    powerStatus: newStatus
-  });
 };

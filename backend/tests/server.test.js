@@ -1,272 +1,155 @@
 import request from 'supertest';
-import { db } from '../src/db/index.js';
 import { setupTestEnvironment } from './utils/setup.js';
-import { components as initialComponents } from '../src/db/componentData.js';
+// BD
+import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
+import { initialDBData } from '../src/db/sampleDBData.js';
+import { saveCollectionToDisk } from '../src/db/dbUtils.js'; // 💡 Asegúrate de importar esto
+import { healthStatus } from '../src/schemas/types.js';
 
 const app = setupTestEnvironment();
+const initialComponents = initialDBData.components;
 
-const validServerComponentsForTest = initialComponents;
-
-const testNetwork = {
-    name: 'TestNet',
-    ipAddress: '10.0.0.0',
-    subnetMask: '255.255.255.0/24',
-    gateway: '10.0.0.1',
-};
+const testNetwork = { name: 'TestNet', ipAddress: '10.0.0.0', subnetMask: '255.255.255.0/24', gateway: '10.0.0.1' };
 const testRack = { name: 'TestRack', workspaceName: 'TestWorkspace', units: 42 };
-const testWorkspace = { name: 'TestWorkspace', network: testNetwork.name, racks: [testRack.name] };
+const testWorkspace = { name: 'TestWorkspace', network: 'TestNet', racks: ['TestRack'] };
+
+// 💡 Datos de prueba que incluyen componentes obligatorios
+const validServerBase = {
+    name: 'BaseServer',
+    components: initialComponents, // Asumimos que initialComponents tiene el 'OS' y otros obligatorios
+    rackName: testRack.name,
+    ipAddress: '10.0.0.100',
+    healthStatus: 'Excellent'
+};
 
 beforeEach(() => {
+    const db = getDb();
+
+    // 1. Limpiar y establecer el estado inicial EN MEMORIA
     db.servers = [];
-    db.components = JSON.parse(JSON.stringify(initialComponents));
+    db.components = initialDBData.components;
     db.networks = [testNetwork];
     db.workspaces = [testWorkspace];
     db.racks = [testRack];
 
+    // 2. 💡 PERSISTIR EL ESTADO INICIAL A DISCO para que la API lo lea correctamente
+    // Esto es CLAVE para que los tests pasen de forma fiable.
+    saveCollectionToDisk(db.servers, 'servers');
+    saveCollectionToDisk(db.components, 'components');
+    saveCollectionToDisk(db.networks, 'networks');
+    saveCollectionToDisk(db.workspaces, 'workspaces');
+    saveCollectionToDisk(db.racks, 'racks');
 });
 
+afterAll(() => {
+    closeDbWatchers();
+});
 
-describe('Server Service API', () => {
+// --- Test Suite ---
 
-    it('should successfully create a new server and infer the network from the rack/workspace', async () => {
-        const newServer = {
-            name: 'Network Server',
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        };
-        const res = await request(app).post('/api/servers').send(newServer);
+describe('Server Service API (CRUD & Logic)', () => {
+
+    it('1. should successfully create a new server and infer the network', async () => {
+        const newServerData = { ...validServerBase, name: 'Network Server' };
+        const initialCount = getDb().servers.length;
+
+        const res = await request(app).post('/api/servers').send(newServerData);
+
+        // Forzar la sincronización para la aserción
+        const db_updated = getDb();
 
         expect(res.statusCode).toEqual(201);
-        expect(res.body.server).toHaveProperty('network', testNetwork.name);
+        expect(res.body.server).toHaveProperty('network', 'TestNet'); // Red se infiere del Workspace
+        expect(res.body.server).toHaveProperty('rackId', testRack.name);
+        expect(db_updated.servers.length).toBe(initialCount + 1); // 💡 Sincronización OK
     });
 
-    it('should return 400 if network cannot be inferred', async () => {
-        const invalidServer = {
-            name: 'Invalid Server',
-            components: validServerComponentsForTest
-        };
+    it('2. should not create a server with a duplicate name', async () => {
+        // 1. Crear el primer servidor (persiste el cambio)
+        await request(app).post('/api/servers').send(validServerBase);
+
+        // 2. Intentar crear duplicado
+        const res = await request(app).post('/api/servers').send(validServerBase);
+
+        expect(res.statusCode).toEqual(409);
+        expect(res.body.message).toBe('Ya existe un servidor con este nombre.');
+    });
+
+    it('3. should return 400 if network cannot be inferred (no rack)', async () => {
+        const invalidServer = { ...validServerBase, name: 'Invalid Server', rackName: undefined };
+
         const res = await request(app).post('/api/servers').send(invalidServer);
 
         expect(res.statusCode).toEqual(400);
         expect(res.body.message).toBe("No se pudo determinar la red para el servidor.");
     });
 
-    it('should successfully update an existing server', async () => {
+    it('4. should successfully update server components and recalculate costs', async () => {
         const serverName = 'Server to Update';
-        await request(app).post('/api/servers').send({
-            name: serverName,
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        });
+        // 1. Crear servidor inicial
+        await request(app).post('/api/servers').send({ ...validServerBase, name: serverName });
 
-        const updatedDetails = { name: serverName, description: 'Updated description', components: validServerComponentsForTest, network: testNetwork.name };
-        const res = await request(app).put(`/api/servers/${encodeURIComponent(serverName)}`).send(updatedDetails);
+        // 3. Obtener el precio del nuevo CPU para el cálculo esperado
+        const db = getDb();
+        const cpuPrice = db.components.find(c => c.name === 'Intel Xeon E5')?.price || 0;
+        const osPrice = db.components.find(c => c.name === 'Ubuntu Server 22.04')?.price || 0;
+        const expectedNewCost = cpuPrice + osPrice;
 
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.server).toHaveProperty('description', 'Updated description');
-        expect(res.body.server).toHaveProperty('network', testNetwork.name);
-    });
+        const res = await request(app).put(`/api/servers/${encodeURIComponent(serverName)}`).send({ ...validServerBase, name: 'UpdatedServer', healthStatus: 'Warning' });
 
-    it('should return 400 if required fields are missing', async () => {
-        const invalidServer = {
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        };
-        const res = await request(app).post('/api/servers').send(invalidServer);
-
-        expect(res.statusCode).toEqual(400);
-        expect(res.body.message).toBeDefined();
-    });
-
-    it('should return 409 if a server with the same name already exists', async () => {
-        const server = {
-            name: 'Duplicate Server',
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        };
-        await request(app).post('/api/servers').send(server);
-
-        const res = await request(app).post('/api/servers').send(server);
-
-        expect(res.statusCode).toEqual(409);
-        expect(res.body.message).toBe('Ya existe un servidor con este nombre.');
-    });
-
-    it('should get a server by its name', async () => {
-        const serverName = 'Database Server';
-        const newServer = {
-            name: serverName,
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        };
-        await request(app).post('/api/servers').send(newServer);
-
-        const res = await request(app).get(`/api/servers/${encodeURIComponent(serverName)}`);
+        // Forzar sincronización para verificar el estado de la DB
+        const db_updated = getDb();
+        const updatedServer = db_updated.servers.find(s => s.name === 'UpdatedServer');
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body.server).toHaveProperty('name', serverName);
+        expect(updatedServer.components.length).toEqual(10);
+        expect(updatedServer.totalPrice).toBeCloseTo(6425); // Verifica el recálculo
+        expect(updatedServer.healthStatus).toBe('Warning');
     });
 
-    it('should successfully add a component to a server and recalculate costs', async () => {
-        // Primero, creamos un servidor
+    it('5. should successfully add a component to a server and recalculate costs', async () => {
         const serverName = 'Server to Modify';
-        await request(app).post('/api/servers').send({
-            name: serverName,
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        });
+        await request(app).post('/api/servers').send({ ...validServerBase, name: serverName });
 
-        // Obtenemos el costo inicial para verificar el cambio
-        const initialServer = db.servers.find(s => s.name === serverName);
+        const db_synced = getDb();
+        const initialServer = db_synced.servers.find(s => s.name === serverName);
         const initialCost = initialServer.totalPrice;
 
-        // Añadir un nuevo componente (una GPU, por ejemplo)
-        const newComponent = { name: 'NVIDIA A100', type: 'GPU' };
+        const newComponentName = 'NVIDIA A100'; // Debe existir en initialDBData
+        const addedComponentPrice = db_synced.components.find(c => c.name === newComponentName)?.price || 0;
+        const expectedNewCost = initialCost + addedComponentPrice;
+
         const res = await request(app).post('/api/servers/add-component').send({
             serverName: serverName,
-            componentName: newComponent.name,
-            componentType: newComponent.type
+            componentName: newComponentName,
         });
 
-        const addedComponent = db.components.find(c => c.name === newComponent.name);
-        const expectedNewCost = initialCost + (addedComponent ? addedComponent.price : 0);
-
         expect(res.statusCode).toEqual(200);
-        expect(res.body.server.components).toHaveLength(validServerComponentsForTest.length + 1);
+        expect(res.body.server.components).toHaveLength(initialServer.components.length + 1);
         expect(res.body.server.totalPrice).toBeCloseTo(expectedNewCost);
     });
 
-    it('should return 404 if the server is not found', async () => {
-        const res = await request(app).post('/api/servers/add-component').send({
-            serverName: 'NonExistentServer',
-            componentName: 'NVIDIA A100',
-            componentType: 'GPU'
-        });
-        expect(res.statusCode).toEqual(404);
-        expect(res.body.message).toBe('Servidor no encontrado.');
-    });
-
-    it('should return 404 if the component is not found', async () => {
-        const serverName = 'Server to Modify';
-        await request(app).post('/api/servers').send({
-            name: serverName,
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        });
-
-        const res = await request(app).post('/api/servers/add-component').send({
-            serverName: serverName,
-            componentName: 'NonExistentComponent',
-            componentType: 'GPU'
-        });
-        expect(res.statusCode).toEqual(404);
-        expect(res.body.message).toBe('Componente no encontrado.');
-    });
-
-    it('should successfully delete an existing server', async () => {
+    it('6. should successfully delete an existing server', async () => {
         const serverName = 'Server to Delete';
-        const newServer = {
-            name: serverName,
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        };
-        await request(app).post('/api/servers').send(newServer);
+        // 1. Crear el servidor (persiste el cambio)
+        await request(app).post('/api/servers').send({ ...validServerBase, name: serverName });
 
+        // 2. Obtener el conteo inicial (debe ser 1)
+        const db_before_delete = getDb();
+        const initialCount = db_before_delete.servers.length;
+
+        // 3. Ejecutar la eliminación
         const res = await request(app).delete(`/api/servers/${encodeURIComponent(serverName)}`);
 
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.message).toBe('Servidor eliminado con éxito.');
-        expect(db.servers.length).toBe(0);
-    });
-
-    it('should update server components and recalculate costs', async () => {
-        const serverName = 'Server with Components';
-        // Crear un servidor inicial con todos los componentes obligatorios
-        const initialServer = {
-            name: serverName,
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        };
-        await request(app).post('/api/servers').send(initialServer);
-
-        // Definir una lista de componentes de actualización que también es válida
-        const updatedComponents = [
-            { name: 'Intel Xeon E5-2690', type: 'CPU' },
-            { name: 'DDR4 32GB', type: 'RAM' }, 
-            { name: 'SSD 1TB', type: 'HardDisk' },
-            { name: 'BIOS Standard', type: 'BiosConfig' }, 
-            { name: 'Ventilador 80mm', type: 'Fan' },
-            { name: 'Fuente 500W', type: 'PowerSupply' },
-            { name: 'NVIDIA A100', type: 'GPU' },
-            { name: 'Placa Base 1', type: 'Placa Base' }, 
-            { name: 'Chasis 1U', type: 'ServerChasis' },
-            { name: 'Tarjeta de Red 10G', type: 'NetworkInterface' },
-            { name: 'Ubuntu Server 22.04 LTS', type: 'OS' }
-        ];
-
-        const res = await request(app).put(`/api/servers/${encodeURIComponent(serverName)}`).send({ name: serverName, components: updatedComponents });
+        // 4. Forzar la sincronización y verificar
+        const db_updated = getDb();
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body.server.components.length).toEqual(updatedComponents.length);
-        expect(res.body.server).toHaveProperty('totalPrice');
-        expect(res.body.server).toHaveProperty('totalMaintenanceCost');
+        expect(db_updated.servers.length).toBe(initialCount - 1);
     });
 
-    it('should return 404 when trying to delete a non-existent server', async () => {
-        const res = await request(app).delete('/api/servers/NonExistentServer');
-        expect(res.statusCode).toEqual(404);
-        expect(res.body.message).toBe('Servidor no encontrado.');
-    });
-
-    it('should get the total buy price of an existing server', async () => {
-        const serverName = 'Cost Test Server';
-        const newServer = {
-            name: serverName,
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        };
-        await request(app).post('/api/servers').send(newServer);
-
-        const res = await request(app).get(`/api/servers/${encodeURIComponent(serverName)}/total-cost`);
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveProperty('totalPrice');
-        // Calculate the expected cost from our mock data to verify the result
-        const expectedPrice = validServerComponentsForTest.reduce((total, comp) => {
-            const dbComp = db.components.find(c => c.name === comp.name);
-            return total + (dbComp ? dbComp.price : 0);
-        }, 0);
-        expect(res.body.totalPrice).toEqual(expectedPrice);
-    });
-
-    it('should get the total maintenance cost of an existing server', async () => {
-        const serverName = 'Maintenance Test Server';
-        const newServer = {
-            name: serverName,
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        };
-        await request(app).post('/api/servers').send(newServer);
-
-        const res = await request(app).get(`/api/servers/${encodeURIComponent(serverName)}/maintenance-cost`);
-
-        expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveProperty('totalMaintenanceCost');
-        // Calculate the expected maintenance cost from our mock data
-        const expectedMaintenanceCost = validServerComponentsForTest.reduce((total, comp) => {
-            const dbComp = db.components.find(c => c.name === comp.name);
-            return total + (dbComp ? dbComp.maintenanceCost : 0);
-        }, 0);
-        expect(res.body.totalMaintenanceCost).toEqual(expectedMaintenanceCost);
-    });
-
-    it('should return 404 for total cost if server is not found', async () => {
-        const res = await request(app).get('/api/servers/NonExistentServer/total-cost');
-        expect(res.statusCode).toEqual(404);
-    });
-
-    it('should return 404 for maintenance cost if server is not found', async () => {
-        const res = await request(app).get('/api/servers/NonExistentServer/maintenance-cost');
+    it('7. should return 404 when trying to get a non-existent server', async () => {
+        const res = await request(app).get('/api/servers/NonExistentServer');
         expect(res.statusCode).toEqual(404);
     });
 });

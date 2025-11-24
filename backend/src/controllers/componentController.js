@@ -1,8 +1,12 @@
-import { db } from '../db/index.js';
 import { componentSchema } from '../schemas/componentSchema.js'
 
-//Aux
+//BD
+import { getDb } from '../db/dbLoader.js';
+
+//AUX
 const findExistingComponentByName = (name, res) => {
+
+  const db = getDb();
   const existingComponent = db.components.find(c => c.name === name);
   if (existingComponent) {
     return res.status(409).json({ message: 'Ya existe un componente con este nombre.' });
@@ -12,6 +16,7 @@ const findExistingComponentByName = (name, res) => {
 };
 
 export const findComponentByName = (name, res) => {
+  const db = getDb();
   const component = db.components.find(c => c.name === name);
   if (!component) {
     return res.status(404).json({ message: 'Componente no encontrado.' });
@@ -21,6 +26,7 @@ export const findComponentByName = (name, res) => {
 };
 
 const findComponentIndexByName = (name, res) => {
+  const db = getDb();
   const componentIndex = db.components.findIndex(c => c.name === name);
   if (componentIndex === -1) {
     return res.status(404).json({ message: 'Componente no encontrado.' });
@@ -37,6 +43,8 @@ const validateComponent = (component, res) => {
 //API Methods
 export const createComponent = (req, res) => {
 
+  const db = getDb();
+
   const { error } = componentSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
@@ -52,6 +60,8 @@ export const createComponent = (req, res) => {
 };
 
 export const deleteComponent = (req, res) => {
+
+  const db = getDb();
   const { name } = req.params;
   const componentIndex = findComponentIndexByName(name, res);
 
@@ -61,6 +71,8 @@ export const deleteComponent = (req, res) => {
 };
 
 export const updateComponent = (req, res) => {
+
+  const db = getDb();
   const { name } = req.params;
   const newDetails = req.body;
 
@@ -71,11 +83,15 @@ export const updateComponent = (req, res) => {
 };
 
 export const getAllComponents = (req, res) => {
+
+  const db = getDb();
   const components = db.components;
   res.status(200).json({ components });
 };
 
 export const getComponentByName = (req, res) => {
+
+  const db = getDb();
   const { name } = req.params;
 
   const component = findComponentByName(name, res);
@@ -84,6 +100,8 @@ export const getComponentByName = (req, res) => {
 };
 
 export const getComponentPrice = (req, res) => {
+
+  const db = getDb();
   const { name } = req.params;
 
   const component = findComponentByName(name, res);
@@ -92,6 +110,7 @@ export const getComponentPrice = (req, res) => {
 };
 
 export const getComponentMaintenanceCost = (req, res) => {
+  const db = getDb();
   const { name } = req.params;
 
   const component = findComponentByName(name, res);
@@ -100,6 +119,7 @@ export const getComponentMaintenanceCost = (req, res) => {
 };
 
 export const getComponentModelPath = (req, res) => {
+  const db = getDb();
   const { name } = req.params;
 
   const component = findComponentByName(name, res);

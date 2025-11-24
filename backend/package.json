@@ -9,7 +9,9 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "seed:up": "node src/db/scripts/seed-up.js",
+    "seed:down": "node src/db/scripts/seed-down.js"
   },
   "repository": {
     "type": "git",

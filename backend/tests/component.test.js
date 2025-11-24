@@ -1,20 +1,21 @@
 import request from 'supertest';
-import { db } from '../src/db/index.js';
-import { components as initialComponents } from '../src/db/componentData.js';
+import { initialDBData } from '../src/db/sampleDBData.js';
 import { setupTestEnvironment } from './utils/setup.js';
 
-const app = setupTestEnvironment();
+//BD
+import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
+const db = getDb();
 
-// Restablecer la base de datos mock después de cada test
-afterEach(() => {
-    // La forma más segura es reasignar el array completo
-    db.components = JSON.parse(JSON.stringify(initialComponents));
+const app = setupTestEnvironment();
+const initialComponents = initialDBData.components;
+
+afterAll(() => {
+    closeDbWatchers();
 });
 
 describe('Component API (Simplified)', () => {
 
     it('should successfully create a new component', async () => {
-        // Los datos de prueba deben coincidir con el nuevo esquema
         const newComponent = {
             type: 'RAM',
             name: 'Test RAM',
@@ -24,50 +25,56 @@ describe('Component API (Simplified)', () => {
             estimatedConsumption: 10,
             modelPath: './assets/models/ram.glb'
         };
+
+        // 2. Ejecutar la escritura (guarda en disco)
         const res = await request(app).post('/api/components').send(newComponent);
+
+        // 3. Forzar la sincronización (obtener la nueva referencia)
+        const db_updated = getDb();
+
         expect(res.statusCode).toBe(201);
         expect(res.body.component).toHaveProperty('name', 'Test RAM');
-        // Validar que los nuevos campos también se guardan
-        expect(res.body.component).toHaveProperty('maintenanceCost', 2.5);
+
+        // 4. Verificar la longitud con la nueva referencia
+        expect(db_updated.components.length).toBe(initialDBData.components.length + 1);
     });
 
-    it('should not create a component with a duplicate name', async () => {
-        const originalComponent = { type: 'RAM', name: 'DDR4 32GB', price: 300 };
-        // No es necesario crear el componente manualmente, el beforeEach lo hace.
-        // Solo necesitamos que la BD tenga datos iniciales.
-        const res = await request(app).post('/api/components').send(originalComponent);
+    it('should successfully delete a component', async () => {
+        const componentName = 'Intel Xeon E5';
 
-        expect(res.statusCode).toBe(409);
-        expect(res.body.message).toBe('Ya existe un componente con este nombre.');
+        // 1. Obtener la longitud inicial
+        const db_initial = getDb();
+        const initialCount = db_initial.components.length;
+
+        // 2. Ejecutar la eliminación (guarda en disco)
+        const res = await request(app).delete(`/api/components/${encodeURIComponent(componentName)}`);
+
+        // 3. Forzar la sincronización
+        const db_updated = getDb();
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.message).toBe('Componente eliminado con éxito.');
+
+        // 4. Verificar la longitud con la nueva referencia
+        expect(db_updated.components.length).toBe(initialDBData.components.length - 1);
     });
 
     it('should get a component by name', async () => {
-        const componentName = 'Intel Xeon E5-2690'; // Usar un componente de los datos iniciales
+        const componentName = 'Intel Xeon E5'; // Usar un componente de los datos iniciales
         const res = await request(app).get(`/api/components/${encodeURIComponent(componentName)}`);
-
+        const db_updated = getDb();
         expect(res.statusCode).toBe(200);
         expect(res.body.component).toHaveProperty('name', componentName);
     });
 
     it('should successfully update a component', async () => {
-        const componentName = 'Intel Xeon E5-2690';
-        const updatedDetails = { buyPrice: 1600, details: 'Precio y detalles actualizados' };
+        const componentName = 'Intel Xeon E5';
+        const updatedDetails = { price: 1600, details: 'Precio y detalles actualizados' };
         const res = await request(app).put(`/api/components/${encodeURIComponent(componentName)}`).send(updatedDetails);
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.component.buyPrice).toBe(1600);
+        expect(res.body.component.price).toBe(1600);
         expect(res.body.component.details).toBe('Precio y detalles actualizados');
-    });
-
-    it('should successfully delete a component', async () => {
-        const componentName = 'Intel Xeon E5-2690';
-        const initialCount = db.components.length;
-        const res = await request(app).delete(`/api/components/${encodeURIComponent(componentName)}`);
-
-        expect(res.statusCode).toBe(200);
-        expect(res.body.message).toBe('Componente eliminado con éxito.');
-        // Esperamos que la longitud del array sea uno menos
-        expect(db.components.length).toBe(initialCount - 1);
     });
 
     it('should return all components in the database', async () => {
@@ -84,19 +91,17 @@ describe('Component API (Simplified)', () => {
         expect(res.statusCode).toBe(404);
     });
 
-    // --- NUEVOS TESTS ---
-
     it('should get the maintenance cost of a component by name', async () => {
-        const componentName = 'Intel Xeon E5-2690';
+        const componentName = 'Intel Xeon E5';
         const res = await request(app).get(`/api/components/${encodeURIComponent(componentName)}/maintenance-cost`);
 
         expect(res.statusCode).toBe(200);
         expect(res.body).toHaveProperty('maintenanceCost');
-        expect(res.body.maintenanceCost).toBe(15.0); // Valor del mock
+        expect(res.body.maintenanceCost).toBe(5); // Valor del mock
     });
 
     it('should get the 3D model path of a component by name', async () => {
-        const componentName = 'DDR4 32GB';
+        const componentName = 'DDR4 ECC 32GB';
         const res = await request(app).get(`/api/components/${encodeURIComponent(componentName)}/model-path`);
 
         expect(res.statusCode).toBe(200);

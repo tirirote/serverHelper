@@ -1,6 +1,8 @@
-import { db } from '../db/index.js';
 import { workspaceSchema } from '../schemas/workspaceSchema.js';
 import { findNetworkByName } from './networkController.js';
+//BD
+import { saveCollectionToDisk, COLLECTION_NAMES } from '../db/dbUtils.js';
+import { getDb } from '../db/dbLoader.js';
 
 //AUX
 const validateWorkspace = (req, res) => {
@@ -17,6 +19,8 @@ const validateWorkspace = (req, res) => {
 };
 
 const findExistingWorkspaceByName = (name, res) => {
+
+  const db = getDb();
   const existingWorkspace = db.workspaces.find(ws => ws.name === name);
   if (existingWorkspace) {
     return res.status(409).json({ message: 'Ya existe un workspace con este nombre.' });
@@ -24,6 +28,8 @@ const findExistingWorkspaceByName = (name, res) => {
 }
 
 export const findWorkspaceByName = (name, res) => {
+  const db = getDb();
+
   const workspace = db.workspaces.find(ws => ws.name === name);
 
   if (!workspace) {
@@ -33,6 +39,8 @@ export const findWorkspaceByName = (name, res) => {
 }
 
 const findWorkspaceIndexByName = (name, res) => {
+
+  const db = getDb();
   const workspaceIndex = db.workspaces.findIndex(w => w.name === name);
 
   if (workspaceIndex === -1) {
@@ -44,6 +52,8 @@ const findWorkspaceIndexByName = (name, res) => {
 //API
 export const createWorkspace = (req, res) => {
 
+  const db = getDb();
+  const workspaces = [...db.workspaces];
   const { name, description, network } = req.body;
 
   findNetworkByName(network, res);
@@ -58,11 +68,15 @@ export const createWorkspace = (req, res) => {
     racks: [],
     network
   };
-  db.workspaces.push(newWorkspace);
+  workspaces.push(newWorkspace);
+  // 4. PERSISTENCIA EN DISCO
+  saveCollectionToDisk(workspaces, 'workspaces');
   res.status(201).json({ message: 'Workspace creado con éxito', workspace: newWorkspace });
 };
 
 export const updateWorkspace = (req, res) => {
+
+  const db = getDb();
   const { name } = req.params;
   const updatedDetails = req.body;
 
@@ -81,6 +95,8 @@ export const updateWorkspace = (req, res) => {
 };
 
 export const deleteWorkspaceByName = (req, res) => {
+
+  const db = getDb();
   const { name } = req.params;
   const initialLength = db.workspaces.length;
 
@@ -95,18 +111,21 @@ export const deleteWorkspaceByName = (req, res) => {
 
 export const getWorkspaceByName = (req, res) => {
   const { name } = req.params;
-  
+
   const workspace = findWorkspaceByName(name, res);
 
   res.status(200).json({ workspace });
 };
 
 export const getAllWorkspaces = (req, res) => {
-  const workspaces = db.workspaces
+  const db = getDb();
+  const workspaces = [...db.workspaces];
   res.status(200).json({ workspaces });
 };
 
 export const addRackToWorkspace = (req, res) => {
+
+  const db = getDb();
   const { workspaceName, rackName } = req.body;
 
   // 1. Encontrar el workspace
@@ -133,6 +152,8 @@ export const addRackToWorkspace = (req, res) => {
 };
 
 export const getAllCurrentRacks = (req, res) => {
+
+  const db = getDb();
   const { name } = req.params;
   const workspace = db.workspaces.find(ws => ws.name === name);
 
@@ -145,6 +166,8 @@ export const getAllCurrentRacks = (req, res) => {
 };
 
 export const removeRackFromWorkspace = (workspaceName, rackName) => {
+
+  const db = getDb();
   const workspace = db.workspaces.find(ws => ws.name === workspaceName);
   if (workspace) {
     const initialRackCount = workspace.racks.length;

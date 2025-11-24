@@ -1,8 +1,12 @@
-import { db } from '../db/index.js';
 import { userSchema } from '../schemas/userSchema.js';
+
+//BD
+import { getDb } from '../db/dbLoader.js';
 
 //AUX
 const findUserByName = (username, res) => {
+
+  const db = getDb();
   const user = db.users.find(u => u.username === username);
 
   if (!user) {
@@ -13,6 +17,7 @@ const findUserByName = (username, res) => {
 
 const findExistingUserByName = (username, res) => {
 
+  const db = getDb();
   const existingUser = db.users.find(user => user.username === username);
 
   if (existingUser) {
@@ -22,13 +27,15 @@ const findExistingUserByName = (username, res) => {
 
 //API
 export const createUser = (req, res) => {
+
+  const db = getDb();
   const { error } = userSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
 
   const { username, password } = req.body;
-  
+
   findExistingUserByName(username, res);
 
   const newUser = { username, password };
@@ -37,6 +44,8 @@ export const createUser = (req, res) => {
 };
 
 export const deleteUser = (req, res) => {
+
+  const db = getDb();
   const { username } = req.params;
   const initialLength = db.users.length;
 
@@ -50,6 +59,8 @@ export const deleteUser = (req, res) => {
 };
 
 export const updateUser = (req, res) => {
+
+  const db = getDb();
   const { username } = req.params;
   const { newPassword, newUsername } = req.body;
 
@@ -71,6 +82,8 @@ export const updateUser = (req, res) => {
 };
 
 export const getAllUsers = (req, res) => {
+
+  const db = getDb();
   const usersWithoutPasswords = db.users.map(user => {
     const { password, ...rest } = user;
     return rest;
@@ -79,6 +92,7 @@ export const getAllUsers = (req, res) => {
 };
 
 export const getUserByUsername = (req, res) => {
+
   const { username } = req.params;
 
   const user = findUserByName(username, res);

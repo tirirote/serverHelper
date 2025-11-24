@@ -21,7 +21,7 @@ import Icon from '/assets/icon.png';
 import Logo from '/assets/logo.png';
 
 const navItems = [
-  { name: 'Dashboard', icon: <LayoutDashboard />, to: '/dashboard' },
+  //{ name: 'Dashboard', icon: <LayoutDashboard />, to: '/dashboard' },
   { name: 'Workspaces', icon: <FolderOpen />, to: '/workspaces' },
   { name: 'Shop', icon: <ShoppingBag />, to: '/shop' },
   { name: 'Components', icon: <Cpu />, to: '/components' },

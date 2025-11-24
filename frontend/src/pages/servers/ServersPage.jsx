@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Trash2, AlertTriangle, Server, Cpu, Save, Plus } from 'lucide-react';
+import { PlusCircle, Trash2, AlertTriangle, Server, Cpu, Save, Plus, Loader2 } from 'lucide-react';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../components/ui/table/DataTable.jsx';
 import TableActions from '../../components/ui/table/TableActions.jsx';
@@ -12,146 +12,103 @@ import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.
 import styles from './ServersPage.module.css';
 import NewServerForm from '../../components/form/server/NewServerForm.jsx';
 
-// MOCK Data para servidores
-const initialServers = [
-    {
-        id: 'srv-101',
-        name: 'Web Server Prod EU',
-        description: 'Servidor de producción principal para la web.',
-        components: [
-            // --- Componente 1: Servidor Base (Proporcionado por el usuario) ---
-            {
-                id: 'i-101',
-                name: 'Servidor Base R-10',
-                category: 'Server',
-                description: 'Servidor genérico de 1U, ideal para desarrollo.',
-                price: 1200.00,
-                maintenanceCost: 15.00,
-                estimatedConsumption: 150, // Consumo en Watts (W)
-                compatibleWith: [
-                    // Esto asume que estos IDs (1, 2, 3) corresponden a otros componentes/accesorios
-                    { id: 1, name: 'Rack-1', count: 1 },
-                    { id: 2, name: 'Server-1', count: 1 },
-                    { id: 3, name: 'Cable-2', count: 1 },
-                ],
-                modelPath: '/assets/models/server-closed.glb'
-            },
+//API Services
+import { getAllServers, deleteServer, getServerTotalCost, getServerComponents } from '../../api/services/serverService.js';
 
-            // --- Componente 2: Array de Almacenamiento SSD ---
-            {
-                id: 'i-102',
-                name: 'Array Almacenamiento SSD-T',
-                category: 'Storage',
-                description: 'Unidad de almacenamiento de estado sólido (NVMe) de alta velocidad, 10TB en configuración RAID.',
-                price: 3500.00,
-                maintenanceCost: 45.50,
-                estimatedConsumption: 80, // Consumo en Watts (W)
-                compatibleWith: [
-                    { id: 1, name: 'Rack-1', count: 2 }, // Ocupa 2 unidades de Rack
-                    { id: 4, name: 'Cable SFP+', count: 4 }, // Necesita 4 cables de fibra
-                ],
-                modelPath: '/assets/models/nas.glb'
-            },
+// --- FUNCIÓN DE PREPROCESAMIENTO ---
+/**
+ * Convierte el objeto de servidor a un esquema listo para DetailViewerCard.
+ * @param {object} serverItem - Objeto de servidor del mock.
+ * @returns {object} Esquema de detalles listo para renderizar.
+ */
+const createServerSchema = (serverItem) => {
+    if (!serverItem) return null;
 
-            // --- Componente 3: Switch de Red Core ---
-            {
-                id: 'i-103',
-                name: 'Switch Core 48-Port',
-                category: 'Network',
-                description: 'Switch de agregación de capa 3 con 48 puertos 10GbE y 4 uplinks 40GbE.',
-                price: 5800.00,
-                maintenanceCost: 60.00,
-                estimatedConsumption: 220, // Consumo en Watts (W)
-                compatibleWith: [
-                    { id: 1, name: 'Rack-1', count: 1 },
-                    { id: 5, name: 'Cable CAT6', count: 48 }, // Puertos de cobre
-                    { id: 4, name: 'Cable SFP+', count: 4 },  // Puertos de fibra
-                ],
-                modelPath: '/assets/models/switch.glb'
-            },
+    // 1. Mapear los detalles básicos y formateados
+    const details = [
+        { label: 'Sistema Operativo', value: serverItem.operatingSystem },
+        { label: 'Estado', value: serverItem.status, isStatus: true }, // isStatus para el formato de color
+        { label: 'Salud', value: serverItem.healthStatus },
+        { label: 'Dirección IP', value: serverItem.ipAddress },
+        { label: 'Red', value: serverItem.network },
+        { label: 'Coste Mantenimiento', value: `${serverItem.totalMaintenanceCost} €/Mes` },
+        { label: 'Precio Total', value: `${serverItem.totalPrice} €` },
 
-            // --- Componente 4: Unidad de Distribución de Energía (PDU) ---
-            {
-                id: 'i-104',
-                name: 'PDU Inteligente 1U',
-                category: 'Accessory',
-                description: 'Unidad de distribución de energía con medición de consumo por puerto y control remoto.',
-                price: 750.00,
-                maintenanceCost: 5.00,
-                estimatedConsumption: 5, // Consumo de la propia unidad
-                compatibleWith: [
-                    { id: 1, name: 'Rack-1', count: 1 },
-                    { id: 6, name: 'Cable C13/C14', count: 12 }, // Máximo 12 dispositivos conectados
-                ],
-                modelPath: '/assets/models/ups.glb'
-            },
+        // 2. Mapear la lista de componentes usando el formato de lista de DetailViewerCard
+        {
+            label: 'Componentes Instalados',
+            isList: true,
+            // Asumimos que GenericList espera objetos con una propiedad 'name'
+            items: serverItem.components.map(comp => ({ name: comp.name }))
+        }
+    ];
 
-            // --- Componente 5: Módulo de Memoria RAM ECC ---
-            {
-                id: 'i-105',
-                name: 'Memoria RAM 64GB ECC',
-                category: 'Memory',
-                description: 'Módulo de 64GB DDR4 ECC. Esencial para servidores y workstations.',
-                price: 450.00,
-                maintenanceCost: 0.00,
-                estimatedConsumption: 10, // Por módulo
-                compatibleWith: [
-                    { id: 'i-101', name: 'Servidor Base R-10', count: 1 }, // Compatible con el Servidor R-10
-                    { id: 7, name: 'Workstation T-200', count: 1 },
-                ],
-                modelPath: '/assets/models/ram.glb'
-            },
-            {
-                id: 'i-106',
-                name: 'NVIDIA GForce 4090',
-                category: 'GPU',
-                description: 'Tarjeta gráfica de alto rendimineto, para Gráficos, diseño y CUDA.',
-                price: 1299.00,
-                maintenanceCost: 0.00,
-                estimatedConsumption: 10, // Por módulo
-                compatibleWith: [
-                    { id: 'i-101', name: 'Servidor Base R-10', count: 1 }, // Compatible con el Servidor R-10
-                    { id: 7, name: 'Workstation T-200', count: 1 },
-                ],
-                modelPath: '/assets/models/gpu.glb'
-            },
-        ],
-        totalPrice: '2,340',
-        totalMaintenanceCost: '63',
-        healthStatus: 'Excellent',
-        network: '192.168.0.0',
-        ipAddress: '192.168.0.2',
-        operatingSystem: 'Ubuntu 22.04',
-        status: 'Running'
-    }
-];
+    // 3. Devolver el objeto de esquema completo
+    return {
+        name: serverItem.name,
+        description: serverItem.description,
+        modelPath: serverItem.modelPath || '/assets/models/server-full-rack.glb',
+        type: 'server',
+        details: details,
+        // En servidores, la compatibilidad puede no ser relevante, o podría ser la lista de racks compatibles
+        // Por simplicidad, se deja vacío o se adapta si es necesario.
+        compatibilityItems: [],
+    };
+};
 
 const ServersPage = () => {
     const { showToast } = useToast();
 
-    const [servers, setServers] = useState(initialServers);
-    const [activeServer, setActiveServer] = useState(initialServers[0] || null);
+    const [servers, setServers] = useState([]);
+    const [activeServer, setActiveServer] = useState(null);
 
-    // Estados para la creación
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [newServerName, setNewServerName] = useState('');
-    const [newServerOS, setNewServerOS] = useState('Ubuntu 22.04');
-
-    // Estados para la eliminación
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [serverToDelete, setServerToDelete] = useState(null);
 
+    const [loading, setLoading] = useState(true); // 👈 Nuevo estado de carga
+    const [error, setError] = useState(null); // 👈 Nuevo estado de error
     const [searchTerm, setSearchTerm] = useState('');
 
-    // [NUEVA FUNCIÓN] Manejador para cerrar el modal de creación y mostrar el toast si fue exitoso
-    const handleCloseNewServerModal = (creationSuccessful = false) => {
-        setIsCreateModalOpen(false);
-        if (creationSuccessful) {
-            // NewServerForm ya muestra su propio toast de éxito tras la simulación de envío,
-            // pero si tuviéramos que añadir los datos del servidor a la lista padre, 
-            // la lógica iría aquí. Por ahora, solo cerramos el modal.
+    // --- 1. FUNCIÓN CENTRAL DE FETCH (Recarga) ---
+    const fetchAndSetServers = useCallback(async (initialLoad = false) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const data = await getAllServers();
+            setServers(data);
+
+            if (data.length > 0) {
+                // Solo inicializamos o re-seleccionamos si es necesario
+                setActiveServer(prevActive => {
+                    if (initialLoad || !prevActive) {
+                        return data[0];
+                    }
+                    return prevActive; // Mantenemos el activo actual si ya existe
+                });
+            } else {
+                setActiveServer(null); // Si no hay datos, limpiamos el activo
+            }
+        } catch (err) {
+            console.error('Error al cargar los servidores:', err);
+            setError('Error al obtener los servidores. Asegúrate de que el backend esté funcionando.');
+            showToast('Error de conexión con el servidor.', 'error');
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [showToast]);
+
+    // --- 2. EFECTO DE CARGA INICIAL ---
+    useEffect(() => {
+        // Al montar, llamamos a la función con initialLoad=true
+        fetchAndSetServers(true);
+    }, [fetchAndSetServers]);
+
+    // --- 1. CREACIÓN DEL SCHEMA PARA EL DETAIL VIEWERCARD ---
+    const serverDetailsSchema = useMemo(() => {
+        return createServerSchema(activeServer);
+    }, [activeServer]);
 
     // Lógica de filtrado
     const filteredServers = useMemo(() => {
@@ -161,23 +118,29 @@ const ServersPage = () => {
         const lowerCaseSearch = searchTerm.toLowerCase();
         return servers.filter(srv =>
             srv.name.toLowerCase().includes(lowerCaseSearch) ||
-            srv.os.toLowerCase().includes(lowerCaseSearch) ||
-            srv.region.toLowerCase().includes(lowerCaseSearch) ||
-            srv.id.toLowerCase().includes(lowerCaseSearch)
+            srv.operatingSystem.toLowerCase().includes(lowerCaseSearch)
         );
     }, [servers, searchTerm]);
 
-    // Abre el Dialog de confirmación de eliminación
+    //Handlers
+    const handleCloseNewServerModal = (creationSuccessful = false) => {
+        setIsCreateModalOpen(false);
+        if (creationSuccessful) {
+            // NewServerForm ya muestra su propio toast de éxito tras la simulación de envío,
+            // pero si tuviéramos que añadir los datos del servidor a la lista padre, 
+            // la lógica iría aquí. Por ahora, solo cerramos el modal.
+        }
+    };
+
     const handleDeleteServer = (server) => {
         setServerToDelete(server);
         setIsDeleteModalOpen(true);
     };
 
-    // Finaliza la eliminación después de la confirmación
     const handleConfirmDelete = () => {
         if (!serverToDelete) return;
 
-        setServers(prev => prev.filter(srv => srv.id !== serverToDelete.id));
+        setServers(prev => prev.filter(srv => srv.name !== serverToDelete.name));
         showToast(`Servidor "${serverToDelete.name}" eliminado permanentemente.`, 'error');
 
         setIsDeleteModalOpen(false);
@@ -185,13 +148,12 @@ const ServersPage = () => {
     };
 
     const handleTableAction = (action, id) => {
-        const server = servers.find(srv => srv.id === id);
+        const server = servers.find(srv => srv.name === name);
         if (!server) return;
 
         if (action === 'delete') {
             handleDeleteServer(server);
         } else if (action === 'view') {
-            // 3. ✨ Actualizamos el estado del visor en lugar de navegar
             setActiveServer(server);
             showToast(`Visualizando detalles de ${server.name}.`, 'info');
         }
@@ -199,17 +161,6 @@ const ServersPage = () => {
 
     const handleFilterClick = () => {
         showToast('Abriendo opciones avanzadas de filtro de servidores.', 'info');
-    };
-
-    // Función para obtener la clase de estilo según el estado
-    const getStatusClass = (status) => {
-        switch (status) {
-            case 'Running': return styles.statusRunning;
-            case 'Stopped': return styles.statusStopped;
-            case 'Starting':
-            case 'Pending': return styles.statusStarting;
-            default: return 'text-gray-400';
-        }
     };
 
     // Definición de las columnas para el componente DataTable (MOCKS de renderizado)
@@ -220,8 +171,8 @@ const ServersPage = () => {
             render: (item) => (
                 // Asumiendo que el componente DataTable no requiere la importación de estilos de celda
                 <div
-                    className={`${styles.nameCellLink} ${item.id === activeServer?.id ? styles.activeName : ''}`}
-                    onClick={() => handleTableAction('view', item.id)}>
+                    className={`${styles.nameCellLink} ${item.name === activeServer?.name ? styles.activeName : ''}`}
+                    onClick={() => handleTableAction('view', item.name)}>
                     {item.name}
                 </div>
             )
@@ -238,13 +189,65 @@ const ServersPage = () => {
             // NOTA: 'TableActions' es un componente externo, asumimos que se renderiza correctamente
             render: (item) => (
                 <TableActions
-                    itemId={item.id}
-                    onViewDetails={(id) => handleTableAction('view', id)}
-                    onDelete={(id) => handleTableAction('delete', id)}
+                    itemId={item.name}
+                    onViewDetails={(name) => handleTableAction('view', name)}
+                    onDelete={(name) => handleTableAction('delete', name)}
                 />
             )
         },
-    ], [servers, activeServer]); // Dependencia del useMemo para que las funciones de acción usen el estado actual
+    ], [activeServer, servers]); // Dependencia del useMemo para que las funciones de acción usen el estado actual
+
+    // --- 5. CONTENIDO CONDICIONAL DE LA LISTA ---
+    const listContent = useMemo(() => {
+        if (loading) {
+            return (
+                <div className={styles.loadingState}>
+                    <Loader2 size={36} className="animate-spin" />
+                    <p>Cargando Servidores...</p>
+                </div>
+            );
+        }
+
+        if (error) {
+            return (
+                <div className={styles.emptyState}>
+                    <AlertTriangle size={48} className={styles.errorIcon} />
+                    <p>Ocurrió un error al cargar los datos.</p>
+                    <p className={styles.errorText}>{error}</p>
+                    <Button variant="secondary" onClick={() => fetchAndSetServers(true)}>Reintentar Carga</Button>
+                </div>
+            );
+        }
+
+        if (filteredServers.length === 0 && searchTerm) {
+            return (
+                <div className={styles.emptyState}>
+                    <AlertTriangle size={48} className={styles.emptyIcon} />
+                    <p>No se encontraron servidores que coincidan con "{searchTerm}".</p>
+                </div>
+            );
+        }
+
+        if (filteredServers.length === 0 && !searchTerm) {
+            return (
+                <div className={styles.emptyState}>
+                    <Server size={48} className={styles.emptyIcon} />
+                    <p>No tienes servidores activos. ¡Crea el primero para desplegar tu infraestructura!</p>
+                </div>
+            );
+        }
+
+        return (
+            <div className={styles.tableContainer}>
+                <DataTable
+                    data={filteredServers}
+                    columns={columns}
+                    initialSortBy="name"
+                    initialSortDirection="asc"
+                />
+            </div>
+        );
+    }, [loading, error, filteredServers, searchTerm, columns, fetchAndSetServers]);
 
     return (
         <div>
@@ -259,9 +262,22 @@ const ServersPage = () => {
 
                 {/* Columna de Visualización / Detalles */}
                 <div className={styles.visualizerColumn}>
-                    <DetailViewerCard
-                        item={activeServer} // ⬅️ Le pasamos el servidor activo
-                    />
+                    {serverDetailsSchema ? (
+                        <DetailViewerCard
+                            name={serverDetailsSchema.name}
+                            description={serverDetailsSchema.description}
+                            modelPath={serverDetailsSchema.modelPath}
+                            details={serverDetailsSchema.details}
+                            type={serverDetailsSchema.type}
+                            compatibilityItems={serverDetailsSchema.compatibilityItems}
+                        />
+                    ) : (
+                        // Placeholder si no hay servidor seleccionado
+                        <div className={styles.viewerCardPlaceholder}>
+                            <h3>Selecciona un Servidor</h3>
+                            <p>Haz clic en el nombre para visualizar los detalles.</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Columna de la Lista y Acciones */}
@@ -273,26 +289,7 @@ const ServersPage = () => {
                         searchPlaceholder="Buscar por nombre, OS, región o ID..."
                     />
 
-                    {/* Renderizado Condicional de la Tabla o Empty State */}
-                    {filteredServers.length === 0 && searchTerm ? (
-                        <div className={styles.emptyState}>
-                            <AlertTriangle size={48} className={styles.emptyIcon} />
-                            <p>No se encontraron servidores que coincidan con "{searchTerm}".</p>
-                        </div>
-                    ) : filteredServers.length === 0 && !searchTerm ? (
-                        <div className={styles.emptyState}>
-                            <Server size={48} className={styles.emptyIcon} />
-                            <p>No tienes servidores activos. ¡Crea el primero para desplegar tu infraestructura!</p>
-                        </div>
-                    ) : (
-                        <div className={styles.tableContainer}>
-                            <DataTable
-                                data={filteredServers}
-                                columns={columns}
-                                initialSortBy="name"
-                            />
-                        </div>
-                    )}
+                    {listContent}
 
                     <div className={styles.listColumnFooter}>
                         <Button
@@ -312,10 +309,10 @@ const ServersPage = () => {
             <Dialog
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}>
-                <NewServerForm 
+                <NewServerForm
                     // Pasamos la función de cierre para que el formulario la llame tras el envío exitoso
-                    onClose={handleCloseNewServerModal} 
-                />                
+                    onClose={handleCloseNewServerModal}
+                />
             </Dialog>
 
             <Dialog isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>

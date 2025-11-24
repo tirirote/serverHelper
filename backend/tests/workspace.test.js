@@ -1,6 +1,7 @@
 import request from 'supertest';
-import { db } from '../src/db/index.js';
 import { setupTestEnvironment } from './utils/setup.js';
+//BD
+import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
 
 const app = setupTestEnvironment();
 
@@ -11,10 +12,8 @@ const testNetwork = {
     gateway: '192.168.10.1',
 };
 
-beforeEach(() => {
-    db.workspaces = [];
-    db.racks = [];
-    db.networks = [testNetwork];
+afterAll(() => {
+    closeDbWatchers();
 });
 
 describe('Workspace Service API', () => {
@@ -26,14 +25,17 @@ describe('Workspace Service API', () => {
     };
 
     it('should create a new workspace', async () => {
+        await request(app).post('/api/networks').send(testNetwork);
         const res = await request(app).post('/api/workspaces').send(newWorkspace);
+        const db_updated = getDb();
 
         expect(res.statusCode).toEqual(201);
         expect(res.body.workspace).toHaveProperty('name', 'Workspace 1');
-        expect(db.workspaces.length).toBe(1);
+        expect(db_updated.workspaces.length).toBe(1);
     });
 
     it('should not create a workspace with a duplicate name', async () => {
+        await request(app).post('/api/networks').send(testNetwork);
         // En este test, creamos el workspace directamente para el escenario
         await request(app).post('/api/workspaces').send({
             name: 'Existing Workspace',
@@ -52,6 +54,7 @@ describe('Workspace Service API', () => {
     });
 
     it('should get all workspaces', async () => {
+        await request(app).post('/api/networks').send(testNetwork);
         await request(app).post('/api/workspaces').send({
             name: 'Workspace 1',
             description: '',
