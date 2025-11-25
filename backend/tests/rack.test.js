@@ -83,7 +83,6 @@ describe('Rack Service API', () => {
 
         // 3. Obtener Racks
         const res = await request(app).get(`/api/racks/${encodeURIComponent(testWorkspace.name)}`);
-        console.log(JSON.stringify(res, null, 2));
 
         // No se necesita sincronización aquí porque es una operación de lectura.
         expect(res.statusCode).toEqual(200);
@@ -135,7 +134,6 @@ describe('Rack Service API', () => {
             rackName: testRack.name,
             serverName: testServer.name
         });
-        console.log(JSON.stringify(resAddServer));
         expect(resAddServer.statusCode).toEqual(200); // Sanity check
 
         // 2. Obtener el costo de mantenimiento del Rack

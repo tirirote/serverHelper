@@ -224,6 +224,7 @@ export const updateServer = (req, res) => {
   try {
     const db = getDb();
     const servers = [...db.servers];
+    
     const { name } = req.params;
     const { id, components, rackName, ...newDetails } = req.body; // Extraer y descartar 'id'
 
@@ -302,14 +303,12 @@ export const getAllServers = (req, res) => {
 };
 
 export const getServerByName = (req, res) => {
-
   const { name } = req.params;
   const server = findServerByName(name, res);
   res.status(200).json({ server });
 };
 
 export const getAllComponents = (req, res) => {
-
   const { name } = req.params;
   const server = findServerByName(name, res);
   res.status(200).json({ components: server.components });

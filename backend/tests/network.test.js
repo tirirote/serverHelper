@@ -55,8 +55,6 @@ describe('Network Tests', () => {
         await request(app).post('/api/networks').send(newNetwork);
 
         const res = await request(app).get('/api/networks/Test%20Network');
-
-        console.log(JSON.stringify(res, null, 2));
         expect(res.statusCode).toBe(200);
         expect(res.body.network).toHaveProperty('name', 'Test Network');
     });

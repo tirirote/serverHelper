@@ -4,11 +4,9 @@ import { setupTestEnvironment } from './utils/setup.js';
 
 //BD
 import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
-const db = getDb();
+import { saveCollectionToDisk } from '../src/db/dbUtils.js';
 
 const app = setupTestEnvironment();
-const initialComponents = initialDBData.components;
-
 afterAll(() => {
     closeDbWatchers();
 });
@@ -69,7 +67,7 @@ describe('Component API (Simplified)', () => {
 
     it('should successfully update a component', async () => {
         const componentName = 'Intel Xeon E5';
-        const updatedDetails = { price: 1600, details: 'Precio y detalles actualizados' };
+        const updatedDetails = { type: 'CPU', price: 1600, details: 'Precio y detalles actualizados' };
         const res = await request(app).put(`/api/components/${encodeURIComponent(componentName)}`).send(updatedDetails);
 
         expect(res.statusCode).toBe(200);
@@ -82,7 +80,7 @@ describe('Component API (Simplified)', () => {
 
         expect(res.statusCode).toBe(200);
         expect(Array.isArray(res.body.components)).toBe(true);
-        expect(res.body.components.length).toBe(initialComponents.length);
+        expect(res.body.components.length).toBe(initialDBData.components.length);
         expect(res.body.components[0]).toHaveProperty('name');
     });
 

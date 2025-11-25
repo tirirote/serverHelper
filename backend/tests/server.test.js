@@ -95,7 +95,6 @@ describe('Server Service API (CRUD & Logic)', () => {
 
         const res = await request(app).put(`/api/servers/${encodeURIComponent(serverName)}`).send({ ...validServerBase, name: 'UpdatedServer', healthStatus: 'Warning' });
 
-        console.log(JSON.stringify(res, null, 2));
         // Forzar sincronización para verificar el estado de la DB
         const db_updated = getDb();
         const updatedServer = db_updated.servers.find(s => s.name === 'UpdatedServer');

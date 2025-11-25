@@ -20,7 +20,6 @@ describe('User Service API', () => {
         const res = await request(app)
             .post('/api/users')
             .send(newUser);
-
         const db_updated = getDb();
 
         expect(res.statusCode).toEqual(201);
@@ -55,10 +54,10 @@ describe('User Service API', () => {
 
     // Test para actualizar un usuario
     it('should update an existing user', async () => {
-        db.users.push({ username: 'userToUpdate', password: 'oldpassword' });
-        const res = await request(app)
-            .put('/api/users/userToUpdate')
-            .send({ newPassword: 'newpassword' });
+        const newUser = { username: 'userToUpdate', password: 'password123' };
+        await request(app).post('/api/users').send(newUser);
+        const res = await request(app).put('/api/users/userToUpdate').send({ newPassword: 'newpassword' });
+
 
         expect(res.statusCode).toEqual(200);
         expect(res.body.user.password).toBe('newpassword');
@@ -66,13 +65,17 @@ describe('User Service API', () => {
 
     // Test para eliminar un usuario
     it('should delete an existing user', async () => {
-        db.users.push({ username: 'userToDelete', password: 'pass' });
+        const newUser = { username: 'userToDelete', password: 'password123' };
+        await request(app).post('/api/users').send(newUser);
+
         const res = await request(app)
             .delete('/api/users/userToDelete');
 
+        const db_updated = getDb();
+
         expect(res.statusCode).toEqual(200);
         expect(res.body.message).toBe('Usuario eliminado con éxito.');
-        expect(db.users.length).toBe(0);
+        expect(db_updated.users.length).toBe(0);
     });
 
     // Test para manejar la eliminación de un usuario no existente

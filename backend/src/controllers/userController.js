@@ -5,21 +5,18 @@ import { saveCollectionToDisk } from '../db/dbUtils.js';
 
 
 //AUX
-const findUserByName = (username, res) => {
-
+const findUserByName = (name, res) => {
   const db = getDb();
-  const user = db.users.find(u => u.username === username);
-
+  const user = db.users.find(u => u.username === name);
   if (!user) {
     return res.status(404).json({ message: 'Usuario no encontrado.' });
   }
   return user;
 };
 
-const findUserIndexByName = (username, res) => {
-
+const findUserIndexByName = (name, res) => {
   const db = getDb();
-  const userIndex = db.users.findIndex(u => u.username === username);
+  const userIndex = db.users.findIndex(u => u.username === name);
 
   if (userIndex === -1) {
     return res.status(404).json({ message: 'Usuario no encontrado.' });
@@ -28,7 +25,6 @@ const findUserIndexByName = (username, res) => {
 };
 
 const findExistingUserByName = (username, res) => {
-
   const db = getDb();
   const existingUser = db.users.find(user => user.username === username);
 
@@ -37,8 +33,8 @@ const findExistingUserByName = (username, res) => {
   }
 };
 
-const validateUser = (req, res) => {
-  const { error, value } = userSchema.validate(req.body);
+const validateUser = (user, res) => {
+  const { error, value } = userSchema.validate(user, { stripUnknown: true });
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
@@ -52,10 +48,15 @@ export const createUser = (req, res) => {
     const db = getDb();
     const users = [...db.users];
 
+    const { username, password } = req.body;
     //1. Validamos el esquema del usuario.
-    const validUser = validateUser(req, res);
+    const userToValidate = {
+      username,
+      password
+    }
 
-    const { username, password } = validUser;
+    const validUser = validateUser(userToValidate, res);
+    if (validUser === res) return; // Si falla la validación 400
 
     //2. Comprobamos la existencia del usuario
     const existingUser = findExistingUserByName(username, res);
@@ -63,14 +64,20 @@ export const createUser = (req, res) => {
 
     // 5. Creación del objeto final (ya validado)
     const newUser = {
-      username,
-      password
+      ...validUser
     };
 
     // 4. PERSISTENCIA EN DISCO
     users.push(newUser);
     saveCollectionToDisk(users, 'users');
-    res.status(201).json({ message: 'Usuario creado con éxito', user: newUser });
+
+    const { password: _, ...userToReturn } = newUser;
+
+    res.status(201).json({
+      message: 'Usuario creado con éxito',
+      user: userToReturn
+    });
+
   } catch (error) {
     const status = error.status || 500;
     res.status(status).json({ message: error.message || 'Error interno del servidor.' });
@@ -80,18 +87,24 @@ export const createUser = (req, res) => {
 };
 
 export const deleteUser = (req, res) => {
+  try {
+    const db = getDb();
+    const users = [...db.users];
+    const { username } = req.params;
+    const initialLength = users.length;
 
-  const db = getDb();
-  const { username } = req.params;
-  const initialLength = db.users.length;
+    const updatedUsers = users.filter(user => user.username !== username);
 
-  db.users = db.users.filter(user => user.username !== username);
+    if (updatedUsers.length === initialLength) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
 
-  if (db.users.length === initialLength) {
-    return res.status(404).json({ message: 'Usuario no encontrado.' });
+    saveCollectionToDisk(updatedUsers, 'users');
+    res.status(200).json({ message: 'Usuario eliminado con éxito.' });
+  } catch (error) {
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message || 'Error interno del servidor.' });
   }
-
-  res.status(200).json({ message: 'Usuario eliminado con éxito.' });
 };
 
 export const updateUser = (req, res) => {
@@ -99,24 +112,52 @@ export const updateUser = (req, res) => {
   try {
     const db = getDb();
     const users = [...db.users];
-    const { userName } = req.params;
+
+    const { username } = req.params;
     const { newPassword, newUsername } = req.body;
-    //1. Validamos el esquema del usuario.
-    const foundUser = findUserByName(userName, res);
 
-    if (newUsername && newPassword) foundUser = { username: newUsername, password: newPassword }
+    // 1. Buscar el usuario y su índice.
+    // Asumimos que findUserByName devuelve el objeto 'user' o 'res' (si es 404).
+    let userToUpdate = findUserByName(username, res);
+    if (userToUpdate === res) return; // Error 404 manejado por findUserByName
 
-    const updatedUser = validateUser(foundUser, res);
+    // Asumimos que findUserIndexByName devuelve el índice o maneja el error internamente
+    const userIndex = findUserIndexByName(username, res);
+    if (userIndex === res) return; // Error 404 manejado por findUserIndexByName (si es necesario)
 
+    // 2. Aplicar las actualizaciones a una copia del usuario, manteniendo los campos originales.
+    const updatedFields = {};
+    if (newUsername) updatedFields.username = newUsername;
+    if (newPassword) updatedFields.password = newPassword;
+
+    // 3. Crear el objeto preliminar a validar, combinando el original con los cambios.
+    const preliminaryUser = {
+      ...userToUpdate,
+      ...updatedFields
+    };
+
+    // 4. Validar el esquema del usuario final.
+    // Asumimos que validateUser devuelve el objeto validado O 'res' (si es 400).
+    const validatedUserResult = validateUser(preliminaryUser, res);
+
+    if (validatedUserResult === res) return; // Error 400 manejado por validateUser
+
+    // 💡 El resultado validado es el usuario final.
+    const updatedUser = validatedUserResult;
+
+    // 5. Mutar la copia de la colección 'users'.
     users[userIndex] = updatedUser;
 
-    res.status(200).json({ message: 'Usuario actualizado con éxito', user });
+    saveCollectionToDisk(users, 'users');
+
+    res.status(200).json({
+      message: 'Usuario actualizado con éxito',
+      user: updatedUser
+    });
   } catch (error) {
     const status = error.status || 500;
     res.status(status).json({ message: error.message || 'Error interno del servidor.' });
   }
-
-
 };
 
 export const getAllUsers = (req, res) => {

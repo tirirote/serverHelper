@@ -1,13 +1,14 @@
 import { createApp } from '../../src/app.js';
 import { getDb } from '../../src/db/dbLoader.js';
 import { saveCollectionToDisk } from '../../src/db/dbUtils.js';
+import { initialDBData } from '../../src/db/sampleDBData.js';
 
 const db = getDb();
 
 const cleanDB = () => {
     beforeEach(() => {
         //Vaciamos la BD
-        db.components = [];
+        db.components = initialDBData.components;
         db.servers = [];
         db.networks = [];
         db.racks = [];
