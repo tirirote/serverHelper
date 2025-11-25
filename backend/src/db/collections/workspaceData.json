@@ -1,9 +1,1 @@
-[
-  {
-    "name": "TestWorkspace",
-    "network": "TestNet",
-    "racks": [
-      "TestRack"
-    ]
-  }
-]
+[]

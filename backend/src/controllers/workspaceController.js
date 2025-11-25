@@ -1,13 +1,13 @@
 import { workspaceSchema } from '../schemas/workspaceSchema.js';
 import { findNetworkByName } from './networkController.js';
 //BD
-import { saveCollectionToDisk, COLLECTION_NAMES } from '../db/dbUtils.js';
+import { saveCollectionToDisk } from '../db/dbUtils.js';
 import { getDb } from '../db/dbLoader.js';
 
 //AUX
 const validateWorkspace = (req, res) => {
   const { name } = req.body;
-  const { error } = workspaceSchema.validate(req.body);
+  const { error, value } = workspaceSchema.validate(req.body, { stripUnknown: true });
 
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
@@ -16,6 +16,7 @@ const validateWorkspace = (req, res) => {
   if (!name) {
     return res.status(400).json({ message: 'El nombre del workspace es obligatorio.' });
   }
+  return value;
 };
 
 const findExistingWorkspaceByName = (name, res) => {
@@ -54,11 +55,14 @@ export const createWorkspace = (req, res) => {
 
   const db = getDb();
   const workspaces = [...db.workspaces];
-  const { name, description, network } = req.body;
 
-  findNetworkByName(network, res);
+  // 2. Verificar existencia de la Network (respuesta rápida)
+  const existingNetwork = findNetworkByName(network, res);
+  if (existingNetwork === res) return;
 
-  validateWorkspace(req, res);
+  const validWorkspace = validateWorkspace(req, res);
+
+  const { name, description, network } = validWorkspace;
 
   findExistingWorkspaceByName(name, res);
 

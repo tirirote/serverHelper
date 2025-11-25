@@ -12,12 +12,14 @@ const cleanDB = () => {
         db.networks = [];
         db.racks = [];
         db.workspaces = [];
+        db.users = [];
         //Persistencia en el Disco para los tests
         saveCollectionToDisk(db.components, 'components');
         saveCollectionToDisk(db.servers, 'servers');
         saveCollectionToDisk(db.networks, 'networks');
         saveCollectionToDisk(db.racks, 'racks');
         saveCollectionToDisk(db.workspaces, 'workspaces');
+        saveCollectionToDisk(db.users, 'users');
     });
 }
 
