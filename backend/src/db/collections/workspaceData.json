@@ -1,10 +1,9 @@
 [
   {
-    "name": "Test Workspace",
-    "description": "A test workspace",
+    "name": "TestWorkspace",
+    "network": "TestNet",
     "racks": [
-      "Rack A1"
-    ],
-    "network": "WS_TestNet"
+      "TestRack"
+    ]
   }
 ]

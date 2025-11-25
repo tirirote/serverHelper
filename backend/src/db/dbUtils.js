@@ -34,7 +34,7 @@ export const saveCollectionToDisk = (collectionArray, collectionKey) => {
     const filename = COLLECTION_NAMES[collectionKey];
     
     if (!filename) {
-        logger.error('Intento de guardar colección desconocida.', { key: collectionKey });
+        //logger.error('Intento de guardar colección desconocida.', { key: collectionKey });
         throw new Error(`Colección no definida en COLLECTION_NAMES: ${collectionKey}`);
     }
 
@@ -43,9 +43,9 @@ export const saveCollectionToDisk = (collectionArray, collectionKey) => {
     try {
         // Escribe el array en el archivo JSON, usando null y 2 para un formato legible
         fs.writeFileSync(filePath, JSON.stringify(collectionArray, null, 2), 'utf8');
-        logger.debug(`Colección '${collectionKey}' guardada en disco.`, { path: filePath });
+        //logger.debug(`Colección '${collectionKey}' guardada en disco.`, { path: filePath });
     } catch (error) {
-        logger.error(`Error crítico al guardar la colección '${collectionKey}' en disco.`, { error: error.message, path: filePath });
+        //logger.error(`Error crítico al guardar la colección '${collectionKey}' en disco.`, { error: error.message, path: filePath });
         // Lanzar el error para que el controlador pueda responder con un 500
         throw new Error(`Fallo en la persistencia de datos para ${collectionKey}.`);
     }

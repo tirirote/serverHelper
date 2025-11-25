@@ -7,12 +7,13 @@ import { getDb } from '../db/dbLoader.js';
 import { saveCollectionToDisk, COLLECTION_NAMES } from '../db/dbUtils.js';
 
 //AUX
-const findExistingServer = (name, res) => {
+const findExistingServer = (serverName, res) => {
 
   const db = getDb();
-  const existingServer = db.servers.find(s => s.name === name);
+  const existingServer = db.servers.find(s => s.name === serverName);
   if (existingServer) {
-    return res.status(409).json({ message: 'Ya existe un servidor con este nombre.' });
+    res.status(409).json({ message: 'Ya existe un servidor con este nombre.' });
+    return res;
   }
 };
 
@@ -21,7 +22,8 @@ export const findServerByName = (serverName, res) => {
   const db = getDb();
   const server = db.servers.find(s => s.name === serverName);
   if (!server) {
-    return res.status(404).json({ message: 'Servidor no encontrado.' });
+    res.status(404).json({ message: 'Servidor no encontrado.' });
+    return res;
   }
   return server;
 };
@@ -31,23 +33,75 @@ const findServerIndexByName = (serverName, res) => {
   const db = getDb();
   const serverIndex = db.servers.findIndex(s => s.name === serverName);
   if (serverIndex === -1) {
-    return res.status(404).json({ message: 'Servidor no encontrado.' });
+    res.status(404).json({ message: 'Servidor no encontrado.' });
+    return res;
   }
   return serverIndex;
 };
 
-const validateServer = (server, res) => {
-  const { error } = serverSchema.validate(server);
-  if (error) {
-    return res.status(400).json({ message: error.details[0].message });
-  }
+//Validation
+export const preprocessAndValidateServerData = (rawServerData, network) => {
+  const { name, components: rawComponents, ipAddress, operatingSystem, healthStatus } = rawServerData;
+
+  // 1. Array Completo (con name y type) para CÁLCULO Y VALIDACIÓN MANUAL
+  const componentsWithType = rawComponents.map(c => ({
+    name: c.name,
+    type: c.type
+  }));
+
+  // Determinar el nombre del OS
+  const osComponent = componentsWithType.find(c => c.type === 'OS');
+  const osName = osComponent ? osComponent.name : operatingSystem;
+
+  // Calcular costos (Puros)
+  const totalPrice = calculateTotalCost(componentsWithType);
+  const totalMaintenanceCost = calculateTotalMaintenanceCost(componentsWithType);
+
+  // 2. Validación de Componentes (LANZA ERROR 400 si faltan tipos o si no existen en DB)
+  // Se usa el array completo aquí
+  validateComponents(componentsWithType);
+
+  // 3. Array Final (solo nombres) para la VALIDACIÓN JOI Y PERSISTENCIA
+  // 💡 CAMBIO CLAVE: Transformar el array de objetos a array de nombres
+  const componentNames = componentsWithType.map(c => c.name);
+
+  // 4. Objeto Completo para la validación Joi
+  const serverToValidate = {
+    name,
+    components: componentNames,
+    totalPrice,
+    totalMaintenanceCost,
+    network, // Clave: debe estar definida aquí
+    ipAddress,
+    operatingSystem: osName,
+    healthStatus: healthStatus || 'Unknown',
+  };
+
+  // 5. Validación Joi (Lanza 400 si los tipos/formatos son incorrectos)
+  const validatedServerDetails = validateServer(serverToValidate); // Asumimos que ahora es pura
+
+  // 6. Devolver el objeto final para la creación
+  return {
+    ...validatedServerDetails,
+    totalPrice: totalPrice, // Aseguramos que los costos estén presentes
+    totalMaintenanceCost: totalMaintenanceCost,
+  };
 };
 
-const validateServerDetails = (details, res) => {
-  const { error } = serverSchema.optional().validate(details);
+const validateServer = (serverToValidate, res) => {
+  const { error, value } = serverSchema.validate(serverToValidate, { stripUnknown: true });
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
+  return value;
+};
+
+const validateServerDetails = (serverDetails, res) => {
+  const { error, value } = serverSchema.optional().validate(serverDetails);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+  return value;
 };
 
 const validateComponents = (serverComponents, res) => {
@@ -110,18 +164,11 @@ export const createServer = (req, res) => {
   const db = getDb();
   const servers = [...db.servers];
   const workspaces = [...db.workspaces];
-  const {
-    name,
-    components: rawComponents,
-    rackName,
-    ipAddress,
-    operatingSystem,
-    healthStatus // Permitir inicialización, aunque el default está en el esquema
-  } = req.body;
+  const { name, rackName } = req.body;
 
+  // 1. Determinar Network (Se mantiene la respuesta rápida aquí, ya que interactúa con colecciones)
   let network;
 
-  // Determinar la red del servidor a partir del rack (si se proporciona)
   if (rackName) {
     const workspace = workspaces.find(w => w.racks.includes(rackName));
     if (workspace) {
@@ -133,59 +180,28 @@ export const createServer = (req, res) => {
     return res.status(400).json({ message: 'No se pudo determinar la red para el servidor.' });
   }
 
-  const components = rawComponents.map(c => ({
-    name: c.name,
-    type: c.type
-  }));
-
-  // Encontrar el nombre del OS entre los componentes, usando el tipo 'OS'
-  const osComponent = components.find(c => c.type === 'OS');
-  const osName = osComponent ? osComponent.name : operatingSystem;
-
-
+  // 2. Verificar existencia de la Network (respuesta rápida)
   const existingNetwork = findNetworkByName(network, res);
+  if (existingNetwork === res) return;
 
-  const serverToValidate = {
-    name,
-    // description ya no existe en el esquema Server
-    components,
-    totalPrice: calculateTotalCost(components),
-    totalMaintenanceCost: calculateTotalMaintenanceCost(components),
-    network,
-    ipAddress, // Nuevo campo
-    operatingSystem: osName, // Nuevo campo
-    healthStatus: healthStatus || 'Unknown', // Nuevo campo
-  };
-
-
-  let response;
-
-  response = validateServer(serverToValidate, res);
+  // 3. Verificar existencia de servidor (respuesta rápida 409)
+  let response = findExistingServer(name, res);
   if (response) return response;
 
-  response = findExistingServer(name, res);
-  if (response) return response;
+  // 4. Preprocesar y Validar todo (Costos, Componentes, Joi)
+  // Lanza ValidationError (status 400) si hay algún problema
+  const validatedServerData = preprocessAndValidateServerData(req.body, network);
 
-  response = validateComponents(components, res);
-  if (response) return response;
-
+  // 5. Creación del objeto final (ya validado)
   const newServer = {
     id: `server-${db.servers.length + 1}`,
-    name,
-    components: components,
-    totalPrice: serverToValidate.totalPrice,
-    totalMaintenanceCost: serverToValidate.totalMaintenanceCost,
+    ...validatedServerData,
     network: existingNetwork.name,
-
-    // Inicialización de los nuevos campos
-    ipAddress: ipAddress || 'N/A',
-    operatingSystem: osName || 'N/A',
-    healthStatus: healthStatus || 'Unknown',
-    rackId: rackName // Mantenemos la referencia al rack, útil para la navegación
+    rackId: rackName
   };
 
-  servers.push(newServer);
   // 4. PERSISTENCIA EN DISCO
+  servers.push(newServer);
   saveCollectionToDisk(servers, 'servers');
   res.status(201).json({ message: 'Servidor creado con éxito', server: newServer });
 };
@@ -205,56 +221,77 @@ export const deleteServerByName = (req, res) => {
 };
 
 export const updateServer = (req, res) => {
+  try {
+    const db = getDb();
+    const servers = [...db.servers];
+    const { name } = req.params;
+    const { id, components, rackName, ...newDetails } = req.body; // Extraer y descartar 'id'
 
-  const db = getDb();
-  const servers = [...db.servers];
-  const { name } = req.params;
-  const { id, components, rackName, ...newDetails } = req.body; // Extraer y descartar 'id'
+    // 1. Encontrar el servidor (Aún usa la versión 'respuesta rápida' que devuelve el índice o 'res')
+    const serverIndex = findServerIndexByName(name, res);
+    if (serverIndex === res) return; // findServerIndexByName ya envió 404
 
-  const serverIndex = findServerIndexByName(name, res);
-  if (typeof serverIndex !== 'number') return serverIndex;
+    const currentServer = servers[serverIndex];
 
-  const currentServer = servers[serverIndex];
+    // 2. Lógica si los COMPONENTES se están actualizando
+    if (components) {
+      const componentsWithType = components.map(c => ({
+        name: c.name,
+        type: c.type
+      }));
 
-  if (components) {
-    const filteredComponents = components.map(c => ({
-      name: c.name,
-      type: c.type
-    }));
+      // Validación de Componentes (Pura, lanza 400 si falla)
+      validateComponents(componentsWithType);
 
-    validateComponents(filteredComponents, res);
+      // Recálculo y asignación de costos
+      newDetails.totalPrice = calculateTotalCost(componentsWithType);
+      newDetails.totalMaintenanceCost = calculateTotalMaintenanceCost(componentsWithType);
 
-    newDetails.totalPrice = calculateTotalCost(filteredComponents);
-    newDetails.totalMaintenanceCost = calculateTotalMaintenanceCost(filteredComponents);
-    newDetails.components = filteredComponents;
+      // 💡 CORRECCIÓN CLAVE: Asignar el array de STRINGS (nombres) para el esquema Joi
+      newDetails.components = componentsWithType.map(c => c.name);
 
-    // Asegurar que el OperatingSystem se actualiza si los componentes cambian, usando el tipo 'OS'
-    const osComponent = filteredComponents.find(c => c.type === 'OS');
-    if (osComponent) {
-      newDetails.operatingSystem = osComponent.name;
+      // Asegurar que el OperatingSystem se actualiza
+      const osComponent = componentsWithType.find(c => c.type === 'OS');
+      if (osComponent) {
+        newDetails.operatingSystem = osComponent.name;
+      } else {
+        // Si se eliminó el OS, se establece un valor por defecto
+        newDetails.operatingSystem = 'N/A';
+      }
     }
+
+    // 3. Verificación de Network (Mantiene el patrón de 'respuesta rápida')
+    if (newDetails.network) {
+      let existingNetwork = findNetworkByName(newDetails.network, res);
+      if (existingNetwork === res) return;
+    }
+
+    // 4. Validación de los Detalles Restantes (Joi ahora recibe array de strings)
+    const validatedDetails = validateServerDetails(newDetails);
+
+    // 5. Actualizar el servidor en la copia y mantener la consistencia
+    const updatedServer = { ...currentServer, ...validatedDetails };
+
+    // El campo rackId debe mantenerse si no se proporciona
+    if (rackName === undefined) {
+      updatedServer.rackId = currentServer.rackId;
+    }
+
+    servers[serverIndex] = updatedServer;
+
+    // 6. Persistencia
+    saveCollectionToDisk(servers, 'servers');
+
+    res.status(200).json({
+      message: 'Servidor actualizado con éxito',
+      server: updatedServer
+    });
+  } catch (error) {
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message || 'Error interno del servidor.' });
   }
 
-  // Si la red se actualiza, verificar que existe (asumiendo que findExistingNetworkByName existe y usa findNetworkByName)
-  if (newDetails.network) {
-    let response = findNetworkByName(newDetails.network, res);
-    if (response && response.statusCode !== 200) return response; // Si findNetworkByName devuelve la respuesta de error 404
-  }
 
-  // Validar los detalles restantes de la solicitud con el esquema
-  let response = validateServerDetails(newDetails, res);
-  if (response) return response;
-
-  // Actualizar el servidor en la base de datos (usando el objeto validado o newDetails)
-  const updatedServer = { ...currentServer, ...newDetails };
-  servers[serverIndex] = updatedServer;
-
-  saveCollectionToDisk(servers, 'servers');
-
-  res.status(200).json({
-    message: 'Servidor actualizado con éxito',
-    server: updatedServer
-  });
 };
 
 export const getAllServers = (req, res) => {

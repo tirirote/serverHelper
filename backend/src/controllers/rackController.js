@@ -5,6 +5,7 @@ import { findServerByName } from './serverController.js';
 //BD
 import { getDb } from '../db/dbLoader.js';
 import { saveCollectionToDisk } from '../db/dbUtils.js';
+
 //AUX
 export const findRackByName = (rackName, res) => {
   const db = getDb();
@@ -195,24 +196,37 @@ export const getAllRacks = (req, res) => {
   res.status(200).json({ racks: racksInWorkspace });
 };
 
-// ...
-
 export const addServerToRack = (req, res) => {
   const db = getDb();
   const racks = [...db.racks];
-  const { rackName, serverName } = req.body;
+
+  // 1. Objeto Completo para la validación Joi
+    const serverToValidate = {
+        name,
+        components,
+        network, // Clave: debe estar definida aquí
+        ipAddress,
+        operatingSystem: osName,
+        healthStatus: healthStatus || 'Unknown',
+    };
+
+  // --- 1. Validar Joi de la Entrada ---
+  const validatedData = validateServer(serverToValidate, res);
+  if (validatedData === res) return; // Detiene el flujo si Joi falla (error 400)
+
+  const { rackName, serverName } = validatedData;
 
   // 1. Encontrar el rack (findRackByName devuelve 404 o el objeto)
   const rack = findRackByName(rackName, res);
-  if (rack.statusCode) return rack;
+  if (rack === res) return;
 
   // 2. Encontrar el servidor (findServerByName devuelve 404 o el objeto)
   const serverErrorOrObject = findServerByName(serverName, res);
-  if (serverErrorOrObject.statusCode) return serverErrorOrObject;
+  if (serverErrorOrObject === res) return;
 
   // 3. Verificar si el servidor ya está en el rack (findExistingServerInRack devuelve 409 o null)
   const existingServerError = findExistingServerInRack(serverName, rack, res);
-  if (existingServerError) return existingServerError;
+  if (existingServerError === res) return; // Error 409
 
   // 4. Mutar el rack en la copia (rack es una referencia al elemento dentro de 'racks')
   rack.servers.push(serverName);
