@@ -26,7 +26,7 @@ const DATA_DIR = path.resolve(__dirname, 'collections/');
 /**
  * Carga todos los archivos JSON de datos y actualiza la caché de la DB.
  */
-const loadAllCollectionsFromDisk = () => {
+const loadDbFromDiskOnce = () => {
     let newDb = {};
 
     for (const [key, filename] of Object.entries(collections)) {
@@ -35,16 +35,36 @@ const loadAllCollectionsFromDisk = () => {
             const data = fs.readFileSync(filePath, 'utf8');
             newDb[key] = JSON.parse(data);
         } catch (error) {
-            //console.error(`[DB LOADER ERROR] No se pudo cargar la colección ${key} (${filename}): ${error.message}`);
-            newDb[key] = dbCache[key] || [];
+
+            if (process.env.NODE_ENV === 'test') {
+                newDb[key] = [];
+            } else {
+                // En producción/desarrollo, usamos la caché como fallback
+                newDb[key] = dbCache[key] || [];
+            }
         }
     }
 
+    return newDb;
+};
+
+const loadAllCollectionsFromDisk = () => {
+    const newDb = loadDbFromDiskOnce();
     dbCache = newDb;
 };
 
-export const reloadDbCache = () => {
-    loadAllCollectionsFromDisk();
+export const getDb = () => {
+    // 💡 CONDICIÓN CLAVE: Si estamos en test, leemos el disco en cada llamada.
+    if (process.env.NODE_ENV === 'test') {
+        return loadDbFromDiskOnce();
+    }
+
+    // Si no es test (producción/desarrollo), usamos el Singleton/caché.
+    if (Object.keys(dbCache).length === 0) {
+        // Si la caché está vacía, la cargamos (esto solo ocurre la primera vez).
+        loadAllCollectionsFromDisk();
+    }
+    return dbCache;
 };
 
 /**
@@ -90,9 +110,4 @@ if (process.env.NODE_ENV !== 'test') {
 } else {
     // Cargar la DB la primera vez, sin iniciar el watcher
     loadAllCollectionsFromDisk();
-}
-// Exportar una función para que los servicios accedan a la versión actual de la DB
-export const getDb = () => {
-    reloadDbCache();
-    return dbCache;
 }

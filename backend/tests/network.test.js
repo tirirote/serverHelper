@@ -1,6 +1,6 @@
 import request from 'supertest';
 // BD
-import { getDb, closeDbWatchers, reloadDbCache } from '../src/db/dbLoader.js';
+import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
 import { resetTestDB } from '../src/db/dbUtils.js';
 import { createApp } from '../src/app.js';
 
@@ -38,8 +38,7 @@ describe('Network Tests', () => {
 
         const res = await request(app).post('/api/networks').send(newNetwork);
 
-        // 💡 SINCRONIZACIÓN: Forzar la recarga de la DB después de la escritura
-        reloadDbCache();
+        // 💡 SINCRONIZACIÓN: Forzar la recarga de la DB después de la escritura        
         const db_updated = getDb();
 
         expect(res.statusCode).toBe(201);
@@ -50,7 +49,7 @@ describe('Network Tests', () => {
     it('2. should return 409 if a network with the same name already exists', async () => {
         // 1. Crear la red (persiste el cambio)
         await request(app).post('/api/networks').send(newNetwork);
-        reloadDbCache();
+        
 
         // 2. Intentar crear duplicado
         const res = await request(app).post('/api/networks').send(newNetwork);
@@ -61,8 +60,7 @@ describe('Network Tests', () => {
 
     it('3. should get a network by name', async () => {
         // Crear la red para la búsqueda
-        await request(app).post('/api/networks').send(newNetwork);
-        reloadDbCache();
+        await request(app).post('/api/networks').send(newNetwork);        
 
         const res = await request(app).get('/api/networks/Test%20Network');
         expect(res.statusCode).toBe(200);
@@ -72,17 +70,14 @@ describe('Network Tests', () => {
     it('4. should successfully delete an existing network', async () => {
         // 1. Crear la red que se va a eliminar
         await request(app).post('/api/networks').send(networkToDelete);
-
-        // Obtener el conteo inicial (debe ser 1, ya que beforeEach limpia antes)
-        reloadDbCache();
+        
         const db_initial = getDb();
         const initialCount = db_initial.networks.length;
 
         // 2. Ejecutar la eliminación
         const res = await request(app).delete(`/api/networks/${encodeURIComponent(networkToDelete.name)}`);
 
-        // 💡 SINCRONIZACIÓN: Forzar la recarga después de la eliminación
-        reloadDbCache();
+        // 💡 SINCRONIZACIÓN: Forzar la recarga después de la eliminación        
         const db_updated = getDb();
 
         expect(res.statusCode).toBe(200);

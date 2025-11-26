@@ -2,7 +2,7 @@ import request from 'supertest';
 import { initialDBData } from '../src/db/sampleDBData.js';
 
 //BD
-import { getDb, closeDbWatchers, reloadDbCache } from '../src/db/dbLoader.js';
+import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
 import { resetTestDB } from '../src/db/dbUtils.js';
 import { createApp } from '../src/app.js';
 
@@ -34,8 +34,7 @@ describe('Component API (Simplified)', () => {
         // 2. Ejecutar la escritura (guarda en disco)
         const res = await request(app).post('/api/components').send(newComponent);
 
-        // 3. Forzar la sincronización (obtener la nueva referencia)
-        reloadDbCache();
+        // 3. Forzar la sincronización (obtener la nueva referencia)        
         const db_updated = getDb();
 
         expect(res.statusCode).toBe(201);
@@ -55,8 +54,7 @@ describe('Component API (Simplified)', () => {
         // 2. Ejecutar la eliminación (guarda en disco)
         const res = await request(app).delete(`/api/components/${encodeURIComponent(componentName)}`);
 
-        // 3. Forzar la sincronización
-        reloadDbCache();
+        // 3. Forzar la sincronización        
         const db_updated = getDb();
 
         expect(res.statusCode).toBe(200);

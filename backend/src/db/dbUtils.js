@@ -5,13 +5,12 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { logger } from '../utils/logger.js'; // Usamos el logger que implementamos
 import { initialDBData } from './sampleDBData.js';
-import { getDb, reloadDbCache } from './dbLoader.js';
 
 // Recrear __dirname para contexto de módulos ES6
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename); 
+const __dirname = path.dirname(__filename);
 
-const COLLECTIONS_DIR = path.resolve(__dirname, 'collections/'); 
+const COLLECTIONS_DIR = path.resolve(__dirname, 'collections/');
 
 // Constantes para referenciar los nombres de las colecciones y sus archivos
 export const COLLECTION_NAMES = {
@@ -25,7 +24,7 @@ export const COLLECTION_NAMES = {
 
 export const saveCollectionToDisk = (collectionArray, collectionKey) => {
     const filename = COLLECTION_NAMES[collectionKey];
-    
+
     if (!filename) {
         //logger.error('Intento de guardar colección desconocida.', { key: collectionKey });
         throw new Error(`Colección no definida en COLLECTION_NAMES: ${collectionKey}`);
@@ -65,12 +64,10 @@ export const resetTestDB = (dbInstance) => {
     dbInstance.components = initialDBData.components;
     dbInstance.workspaces = [];
     dbInstance.networks = [];
-    dbInstance.users = []; 
+    dbInstance.users = [];
     dbInstance.racks = [];
     dbInstance.servers = [];
 
     // 2. Persistencia en el Disco (Garantiza que el siguiente getDb() lea el estado limpio)
     persistAllCollections(dbInstance);
-    //3. Actualizamos la caché de la BD
-    reloadDbCache();
 };
