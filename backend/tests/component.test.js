@@ -1,13 +1,20 @@
 import request from 'supertest';
 import { initialDBData } from '../src/db/sampleDBData.js';
-import { setupTestEnvironment } from './utils/setup.js';
 
 //BD
-import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
-import { saveCollectionToDisk } from '../src/db/dbUtils.js';
+import { getDb, closeDbWatchers, reloadDbCache } from '../src/db/dbLoader.js';
+import { resetTestDB } from '../src/db/dbUtils.js';
+import { createApp } from '../src/app.js';
 
-const app = setupTestEnvironment();
+const app = createApp();
+
+beforeEach(() => {
+    const db = getDb();
+    resetTestDB(db);
+});
+
 afterAll(() => {
+    console.log('Cerrando watchers de la base de datos...');
     closeDbWatchers();
 });
 
@@ -28,6 +35,7 @@ describe('Component API (Simplified)', () => {
         const res = await request(app).post('/api/components').send(newComponent);
 
         // 3. Forzar la sincronización (obtener la nueva referencia)
+        reloadDbCache();
         const db_updated = getDb();
 
         expect(res.statusCode).toBe(201);
@@ -48,6 +56,7 @@ describe('Component API (Simplified)', () => {
         const res = await request(app).delete(`/api/components/${encodeURIComponent(componentName)}`);
 
         // 3. Forzar la sincronización
+        reloadDbCache();
         const db_updated = getDb();
 
         expect(res.statusCode).toBe(200);

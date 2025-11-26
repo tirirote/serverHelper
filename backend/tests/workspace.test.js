@@ -1,9 +1,9 @@
 import request from 'supertest';
-import { setupTestEnvironment } from './utils/setup.js';
 //BD
 import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
-
-const app = setupTestEnvironment();
+import { resetTestDB } from '../src/db/dbUtils.js';
+import { createApp } from '../src/app.js';
+const app = createApp();
 
 const testNetwork = {
     name: 'WS_TestNet',
@@ -12,7 +12,13 @@ const testNetwork = {
     gateway: '192.168.10.1',
 };
 
+beforeEach(() => {
+    const db = getDb();
+    resetTestDB(db);
+});
+
 afterAll(() => {
+    console.log('Cerrando watchers de la base de datos...');
     closeDbWatchers();
 });
 
@@ -21,11 +27,13 @@ describe('Workspace Service API', () => {
     const newWorkspace = {
         name: 'Workspace 1',
         description: 'A test workspace',
-        network: testNetwork.name,
+        network: 'WS_TestNet',
     };
 
     it('should create a new workspace', async () => {
+        //1. Creamos la red
         await request(app).post('/api/networks').send(testNetwork);
+
         const res = await request(app).post('/api/workspaces').send(newWorkspace);
         const db_updated = getDb();
 
@@ -35,14 +43,15 @@ describe('Workspace Service API', () => {
     });
 
     it('should not create a workspace with a duplicate name', async () => {
+        //1. Creamos la red
         await request(app).post('/api/networks').send(testNetwork);
-        // En este test, creamos el workspace directamente para el escenario
+        //2. Creamos el workspace
         await request(app).post('/api/workspaces').send({
             name: 'Existing Workspace',
             description: '',
             network: testNetwork.name
         });
-
+        //3. Lo volvemos a crear
         const res = await request(app).post('/api/workspaces').send({
             name: 'Existing Workspace',
             description: '',
@@ -53,8 +62,25 @@ describe('Workspace Service API', () => {
         expect(res.body).toHaveProperty('message', 'Ya existe un workspace con este nombre.');
     });
 
-    it('should get all workspaces', async () => {
+    it('should update a workspace', async () => {
+        // 1. Creamos la red
         await request(app).post('/api/networks').send(testNetwork);
+        // 2. Crear el workspace inicial
+        await request(app).post('/api/workspaces').send(newWorkspace);
+
+        const res = await request(app).put(`/api/workspaces/${encodeURIComponent(newWorkspace.name)}`).send({ ...newWorkspace, name: 'Updated Workspace' });
+
+        const db_updated = getDb();
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.workspace).toHaveProperty('name', 'Updated Workspace');
+        expect(db_updated.workspaces.length).toBe(1);
+    });
+
+    it('should get all workspaces', async () => {        
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 2. Creamos los workspaces
         await request(app).post('/api/workspaces').send({
             name: 'Workspace 1',
             description: '',
@@ -73,6 +99,9 @@ describe('Workspace Service API', () => {
     });
 
     it('should get a workspace by name', async () => {
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 2. Creamos el workspace
         await request(app).post('/api/workspaces').send({
             name: 'Target Workspace',
             description: 'This is the one.',

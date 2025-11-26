@@ -4,8 +4,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { logger } from '../utils/logger.js'; // Usamos el logger que implementamos
-
-// --- 1. Definición de Rutas y Constantes ---
+import { initialDBData } from './sampleDBData.js';
+import { getDb, reloadDbCache } from './dbLoader.js';
 
 // Recrear __dirname para contexto de módulos ES6
 const __filename = fileURLToPath(import.meta.url);
@@ -23,13 +23,6 @@ export const COLLECTION_NAMES = {
     networks: 'networkData.json',
 };
 
-// --- 2. Funciones de Utilidad ---
-
-/**
- * Persiste el array de una colección en su archivo JSON correspondiente.
- * * @param {Array} collectionArray - El array de datos actualizado (ej: [newServer, ...]).
- * @param {string} collectionKey - La clave de la colección (ej: COLLECTION_NAMES.servers).
- */
 export const saveCollectionToDisk = (collectionArray, collectionKey) => {
     const filename = COLLECTION_NAMES[collectionKey];
     
@@ -51,12 +44,33 @@ export const saveCollectionToDisk = (collectionArray, collectionKey) => {
     }
 };
 
-// --- 3. (Opcional) Función para obtener la ruta del archivo ---
-// Útil si necesitas la ruta en otro lado (ej: para scripts de backup)
 export const getCollectionPath = (collectionKey) => {
     const filename = COLLECTION_NAMES[collectionKey];
     if (!filename) {
         throw new Error(`Colección no definida: ${collectionKey}`);
     }
     return path.join(COLLECTIONS_DIR, filename);
+};
+
+export const persistAllCollections = (sourceDb) => {
+    for (const key in COLLECTION_NAMES) {
+        if (sourceDb[key]) {
+            saveCollectionToDisk(sourceDb[key], key);
+        }
+    }
+};
+
+export const resetTestDB = (dbInstance) => {
+    // 1. Limpiar/Restablecer el objeto DB en memoria (para el estado del módulo)
+    dbInstance.components = initialDBData.components;
+    dbInstance.workspaces = [];
+    dbInstance.networks = [];
+    dbInstance.users = []; 
+    dbInstance.racks = [];
+    dbInstance.servers = [];
+
+    // 2. Persistencia en el Disco (Garantiza que el siguiente getDb() lea el estado limpio)
+    persistAllCollections(dbInstance);
+    //3. Actualizamos la caché de la BD
+    reloadDbCache();
 };

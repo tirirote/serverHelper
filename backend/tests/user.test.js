@@ -1,14 +1,20 @@
 import request from 'supertest';
-import { setupTestEnvironment } from './utils/setup.js'
 
 //DB
 import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
+import { resetTestDB } from '../src/db/dbUtils.js';
+import { createApp } from '../src/app.js';
 
 // Configuración de un servidor de prueba
-const app = setupTestEnvironment();
+const app = createApp();
 
+beforeEach(() => {
+    const db = getDb();
+    resetTestDB(db);
+});
 
 afterAll(() => {
+    console.log('Cerrando watchers de la base de datos...');
     closeDbWatchers();
 });
 

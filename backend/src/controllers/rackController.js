@@ -1,6 +1,6 @@
 import { rackSchema } from '../schemas/rackSchema.js';
 import { findWorkspaceByName } from './workspaceController.js';
-import { findServerByName } from './serverController.js';
+import { findServerByName, validateServer } from './serverController.js';
 
 //BD
 import { getDb } from '../db/dbLoader.js';
@@ -22,7 +22,6 @@ const findExistingRackByName = (name, workspaceName, res) => {
   if (existingRack) {
     return res.status(409).json({ message: 'Ya existe un rack con este nombre en el workspace.' });
   }
-  return null;
 };
 
 const findRackIndexByWorkspace = (name, workspaceName, res) => {
@@ -48,72 +47,104 @@ const findExistingServerInRack = (serverName, rack, res) => {
   if (rack.servers.includes(serverName)) {
     return res.status(409).json({ message: 'El servidor ya está en este rack.' });
   }
-  return null;
 };
 
-const validateRack = (rack, res) => {
+const validateRack = (rackToValidate, res) => {
 
-  const { error, value } = rackSchema.validate(rack, { abortEarly: false, stripUnknown: true });
-
+  const { error, value } = rackSchema.validate(rackToValidate, { stripUnknown: true });
   if (error) {
-    return res.status(400).json({ message: error.details.map(d => d.message) });
-  }
-
-  const { name, workspaceName } = value;
-
-  if (!name || !workspaceName) {
-    return res.status(400).json({ message: 'El nombre del rack y el nombre del workspace son obligatorios.' });
+    return res.status(400).json({ message: error.details[0].message });
   }
 
   return value;
 };
 
+export const recalculateRackCosts = (rack) => {
+  // 1. Obtener la DB dentro de la función (siempre la versión más reciente)
+  const db = getDb();
+
+  let newTotalCost = 0;
+  let newTotalMaintenanceCost = 0;
+
+  const servers = db.servers;
+
+  // 2. Iterar sobre los nombres de los servidores en el rack
+  rack.servers.forEach(serverName => {
+    const server = servers.find(s => s.name === serverName);
+
+    if (server) {
+      // 💡 CRÍTICO: Usar el operador || 0 para manejar valores null o undefined
+      const serverCost = server.totalPrice || 0;
+      const serverMaintCost = server.totalMaintenanceCost || 0;
+
+      // Sumar al total
+      newTotalCost += serverCost;
+      newTotalMaintenanceCost += serverMaintCost;
+    }
+  });
+
+  // 3. Mutar el objeto rack con los nuevos totales
+  rack.totalCost = newTotalCost;
+  rack.totalMaintenanceCost = newTotalMaintenanceCost;
+};
+
 //API
 export const createRack = (req, res) => {
-  const db = getDb();
-  const racks = [...db.racks];
-  const workspaces = [...db.workspaces];
+  try {
+    const db = getDb();
+    const racks = [...db.racks];
+    const workspaces = [...db.workspaces];
 
-  // 1. Validar y obtener datos (validateRack debe devolver un error o el valor)
-  const validatedData = validateRack(req.body, res);
-  if (validatedData.statusCode) return validatedData; // Devolver error 400
+    const { name, units, workspaceName, powerStatus, healthStatus } = req.body;
 
-  const { name, units, workspaceName, powerStatus, healthStatus } = validatedData;
+    // 2. Buscar Workspace
+    const workspaceErrorOrObject = findWorkspaceByName(workspaceName, res);
+    if (workspaceErrorOrObject === res) return;
 
-  // 2. 💡 CORRECCIÓN DE FLUJO: Buscar Workspace (findWorkspaceByName devuelve error 404 o el objeto)
-  const workspaceErrorOrObject = findWorkspaceByName(workspaceName, res);
-  if (workspaceErrorOrObject.statusCode) return workspaceErrorOrObject; // Devolver error 404
+    // 3. Usar la copia del workspace
+    const workspaceIndex = workspaces.findIndex(ws => ws.name === workspaceName);
+    const workspace = workspaces[workspaceIndex];
 
-  // Usar la copia del workspace para la modificación
-  const workspaceIndex = workspaces.findIndex(ws => ws.name === workspaceName);
-  const workspace = workspaces[workspaceIndex];
+    //4. Creamos el rack
+    const newRack = {
+      name,
+      units: units || 42,
+      workspaceName,
 
-  // 3. 💡 CORRECCIÓN DE FLUJO: Comprobar existencia (findExistingRackByName devuelve error 409 o null)
-  const existingRackError = findExistingRackByName(name, workspaceName, res);
-  if (existingRackError) return existingRackError; // Devolver error 409
+      // Nuevos atributos con valores validados/por defecto
+      powerStatus: powerStatus || 'Off',
+      healthStatus: healthStatus || 'Unknown',
 
-  const newRack = {
-    id: `rack-${db.racks.length + 1}`,
-    name,
-    units: units || 42,
-    workspaceName,
+      servers: [],
+      totalCost: 0,
+      totalMaintenanceCost: 0,
+    };
 
-    // Nuevos atributos con valores validados/por defecto
-    powerStatus: powerStatus || 'Off',
-    healthStatus: healthStatus || 'Unknown',
+    // 5. Validar y obtener datos
+    const validatedRack = validateRack(newRack, res);
+    if (validatedRack === res) return;
 
-    servers: [],
-    totalCost: 0,
-    totalMaintenanceCost: 0,
-  };
+    // 5. Comprobar existencia
+    const existingRackError = findExistingRackByName(name, workspaceName, res);
+    if (existingRackError === res) return;
 
-  racks.push(newRack);
-  workspace.racks.push(newRack.name);
+    if (!workspace.racks) {
+      workspace.racks = [];
+    }
 
-  saveCollectionToDisk(racks, 'racks');
-  saveCollectionToDisk(workspaces, 'workspaces'); // Es vital guardar el workspace actualizado
+    workspace.racks.push(validatedRack.name);
+    racks.push(validatedRack);
 
-  res.status(201).json({ message: 'Rack creado con éxito', rack: newRack });
+    saveCollectionToDisk(racks, 'racks');
+    saveCollectionToDisk(workspaces, 'workspaces'); // Es vital guardar el workspace actualizado
+
+    res.status(201).json({ message: 'Rack creado con éxito', rack: validatedRack });
+
+  } catch (error) {
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message || 'Error interno del servidor.' });
+  }
+
 };
 
 export const deleteRackByName = (req, res) => {
@@ -199,44 +230,35 @@ export const getAllRacks = (req, res) => {
 export const addServerToRack = (req, res) => {
   const db = getDb();
   const racks = [...db.racks];
+  const { rackName, serverName } = req.body;
 
-  // 1. Objeto Completo para la validación Joi
-    const serverToValidate = {
-        name,
-        components,
-        network, // Clave: debe estar definida aquí
-        ipAddress,
-        operatingSystem: osName,
-        healthStatus: healthStatus || 'Unknown',
-    };
+  // 1. Buscamos el servidor
+  const serverToValidate = findServerByName(serverName, res);
+  if (serverToValidate === res) return;
 
-  // --- 1. Validar Joi de la Entrada ---
-  const validatedData = validateServer(serverToValidate, res);
-  if (validatedData === res) return; // Detiene el flujo si Joi falla (error 400)
+  // 2. Validamos el servidor encontrado
+  const validatedServer = validateServer(serverToValidate, res);
+  if (validatedServer === res) return; // Detiene el flujo si Joi falla (error 400)
 
-  const { rackName, serverName } = validatedData;
-
-  // 1. Encontrar el rack (findRackByName devuelve 404 o el objeto)
+  // 3. Encontrar el rack
   const rack = findRackByName(rackName, res);
   if (rack === res) return;
 
-  // 2. Encontrar el servidor (findServerByName devuelve 404 o el objeto)
-  const serverErrorOrObject = findServerByName(serverName, res);
-  if (serverErrorOrObject === res) return;
-
-  // 3. Verificar si el servidor ya está en el rack (findExistingServerInRack devuelve 409 o null)
+  // 3. Verificar si el servidor ya está en el rack
   const existingServerError = findExistingServerInRack(serverName, rack, res);
   if (existingServerError === res) return; // Error 409
 
   // 4. Mutar el rack en la copia (rack es una referencia al elemento dentro de 'racks')
   rack.servers.push(serverName);
 
+  recalculateRackCosts(rack);
+
   // 5. 💡 PERSISTENCIA
   saveCollectionToDisk(racks, 'racks'); // Guardar el array racks completo
 
   res.status(200).json({
     message: 'Servidor añadido al rack con éxito.',
-    rack
+    rack: rack
   });
 };
 
@@ -267,19 +289,27 @@ export const toggleRackPower = (req, res) => {
 };
 
 export const getRackMaintenanceCost = (req, res) => {
-  const { name } = req.params;
-  const db = getDb();
-  const rack = findRackByName(name, res)
+  try {
+    const { name } = req.params;
 
-  let totalMaintenanceCost = 0;
+    // 1. Buscar el rack (maneja 404 si no existe)
+    const rack = findRackByName(name, res);
+    console.log(JSON.stringify(rack,null, 2));
+    if (rack === res) return;
 
-  // Iterar sobre los servidores en el rack
-  rack.servers.forEach(serverName => {
-    const server = db.servers.find(s => s.name === serverName);
-    if (server && typeof server.totalMaintenanceCost === 'number') {
-      totalMaintenanceCost += server.totalMaintenanceCost;
-    }
-  });
+    // 2. 💡 Asegurar la existencia del coste y tomar el valor.
+    // Usamos el operador || 0 para evitar fallos si el campo no existiera (aunque no debería).
+    const maintenanceCost = rack.totalMaintenanceCost || 0;
 
-  res.status(200).json({ totalMaintenanceCost: totalMaintenanceCost.toFixed(2) });
+    // 3. Retornar el resultado formateado
+    res.status(200).json({
+      // 💡 Aplicamos .toFixed(2) sobre el valor seguro (que ya está precalculado)
+      totalMaintenanceCost: maintenanceCost.toFixed(2)
+    });
+
+  } catch (error) {
+    // En caso de errores inesperados
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message || 'Error interno del servidor.' });
+  }
 };

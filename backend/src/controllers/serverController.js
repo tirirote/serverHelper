@@ -8,12 +8,10 @@ import { saveCollectionToDisk, COLLECTION_NAMES } from '../db/dbUtils.js';
 
 //AUX
 const findExistingServer = (serverName, res) => {
-
   const db = getDb();
   const existingServer = db.servers.find(s => s.name === serverName);
   if (existingServer) {
-    res.status(409).json({ message: 'Ya existe un servidor con este nombre.' });
-    return res;
+    return res.status(409).json({ message: 'Ya existe un servidor con este nombre.' });
   }
 };
 
@@ -88,7 +86,7 @@ export const preprocessAndValidateServerData = (rawServerData, network) => {
   };
 };
 
-const validateServer = (serverToValidate, res) => {
+export const validateServer = (serverToValidate, res) => {
   const { error, value } = serverSchema.validate(serverToValidate, { stripUnknown: true });
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
@@ -161,49 +159,58 @@ export const calculateTotalMaintenanceCost = (serverComponents) => {
 
 export const createServer = (req, res) => {
 
-  const db = getDb();
-  const servers = [...db.servers];
-  const workspaces = [...db.workspaces];
-  const { name, rackName } = req.body;
+  try {
+    const db = getDb();
+    const servers = [...db.servers];
+    const workspaces = [...db.workspaces];
+    const { name, rackName } = req.body;
 
-  // 1. Determinar Network (Se mantiene la respuesta rápida aquí, ya que interactúa con colecciones)
-  let network;
+    // 1. Determinar Network (Se mantiene la respuesta rápida aquí, ya que interactúa con colecciones)
+    let network;
 
-  if (rackName) {
-    const workspace = workspaces.find(w => w.racks.includes(rackName));
-    if (workspace) {
-      network = workspace.network;
+    if (rackName) {
+      const workspace = workspaces.find(w => w.racks.includes(rackName));
+      if (workspace) {
+        network = workspace.network;
+      }
     }
+
+    if (!network) {
+      return res.status(400).json({ message: 'No se pudo determinar la red para el servidor.' });
+    }
+
+    // 2. Verificar existencia de la Network (respuesta rápida)
+    const existingNetwork = findNetworkByName(network, res);
+    if (existingNetwork === res) return;
+
+    // 3. Verificar existencia de servidor (respuesta rápida 409)
+    let response = findExistingServer(name, res);
+    if (response) return response;
+
+    // 4. Preprocesar y Validar todo (Costos, Componentes, Joi)
+    // Lanza ValidationError (status 400) si hay algún problema
+    const validatedServerData = preprocessAndValidateServerData(req.body, network);
+
+    // 5. Creación del objeto final (ya validado)
+    const newServer = {
+      ...validatedServerData,
+      network: existingNetwork.name,
+      rackId: rackName
+    };
+
+    // 4. PERSISTENCIA EN DISCO
+    servers.push(newServer);
+    saveCollectionToDisk(servers, 'servers');
+    res.status(201).json({
+      message: 'Servidor creado con éxito',
+      server: newServer
+    });
+
+  } catch (error) {
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message || 'Error interno del servidor.' });
   }
 
-  if (!network) {
-    return res.status(400).json({ message: 'No se pudo determinar la red para el servidor.' });
-  }
-
-  // 2. Verificar existencia de la Network (respuesta rápida)
-  const existingNetwork = findNetworkByName(network, res);
-  if (existingNetwork === res) return;
-
-  // 3. Verificar existencia de servidor (respuesta rápida 409)
-  let response = findExistingServer(name, res);
-  if (response) return response;
-
-  // 4. Preprocesar y Validar todo (Costos, Componentes, Joi)
-  // Lanza ValidationError (status 400) si hay algún problema
-  const validatedServerData = preprocessAndValidateServerData(req.body, network);
-
-  // 5. Creación del objeto final (ya validado)
-  const newServer = {
-    id: `server-${db.servers.length + 1}`,
-    ...validatedServerData,
-    network: existingNetwork.name,
-    rackId: rackName
-  };
-
-  // 4. PERSISTENCIA EN DISCO
-  servers.push(newServer);
-  saveCollectionToDisk(servers, 'servers');
-  res.status(201).json({ message: 'Servidor creado con éxito', server: newServer });
 };
 
 export const deleteServerByName = (req, res) => {
@@ -224,7 +231,7 @@ export const updateServer = (req, res) => {
   try {
     const db = getDb();
     const servers = [...db.servers];
-    
+
     const { name } = req.params;
     const { id, components, rackName, ...newDetails } = req.body; // Extraer y descartar 'id'
 

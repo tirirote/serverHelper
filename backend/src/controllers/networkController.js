@@ -16,12 +16,10 @@ export const findNetworkByName = (name, res) => {
 
 export const findExistingNetworkByName = (name, res) => {
   const db = getDb();
-
   const existingNetwork = db.networks.find(n => n.name === name);
   if (existingNetwork) {
     return res.status(409).json({ message: 'Ya existe una red con este nombre.' });
   }
-
   return existingNetwork;
 };
 

@@ -28,7 +28,6 @@ const DATA_DIR = path.resolve(__dirname, 'collections/');
  */
 const loadAllCollectionsFromDisk = () => {
     let newDb = {};
-    let successful = true;
 
     for (const [key, filename] of Object.entries(collections)) {
         const filePath = path.join(DATA_DIR, filename);
@@ -38,15 +37,14 @@ const loadAllCollectionsFromDisk = () => {
         } catch (error) {
             //console.error(`[DB LOADER ERROR] No se pudo cargar la colección ${key} (${filename}): ${error.message}`);
             newDb[key] = dbCache[key] || [];
-            successful = false;
         }
     }
 
-    // Si la carga fue exitosa, actualizamos la caché
-    if (successful || Object.keys(dbCache).length === 0) {
-        dbCache = newDb;
-        //console.log(`[DB LOADER] Base de datos recargada. Colecciones: ${Object.keys(dbCache).join(', ')}`);
-    }
+    dbCache = newDb;
+};
+
+export const reloadDbCache = () => {
+    loadAllCollectionsFromDisk();
 };
 
 /**
@@ -63,7 +61,6 @@ const setupDbWatcher = () => {
         // fs.watch monitorea el archivo.
         const watcher = fs.watch(filePath, (eventType, name) => {
             if (eventType === 'change') {
-                //console.log(`[DB WATCHER] Cambio detectado en ${name}. Recargando todas las colecciones...`);
                 // Cuando un archivo cambia (ej: por el script de seed), recargamos *todo*.
                 loadAllCollectionsFromDisk();
             }
@@ -88,7 +85,14 @@ export const closeDbWatchers = () => {
 };
 
 // Iniciar el sistema
-setupDbWatcher();
-
+if (process.env.NODE_ENV !== 'test') {
+    setupDbWatcher();
+} else {
+    // Cargar la DB la primera vez, sin iniciar el watcher
+    loadAllCollectionsFromDisk();
+}
 // Exportar una función para que los servicios accedan a la versión actual de la DB
-export const getDb = () => dbCache;
+export const getDb = () => {
+    reloadDbCache();
+    return dbCache;
+}

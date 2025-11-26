@@ -1,9 +1,10 @@
 import request from 'supertest';
-import { setupTestEnvironment } from './utils/setup.js';
 // BD
-import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
+import { getDb, closeDbWatchers, reloadDbCache } from '../src/db/dbLoader.js';
+import { resetTestDB } from '../src/db/dbUtils.js';
+import { createApp } from '../src/app.js';
 
-const app = setupTestEnvironment();
+const app = createApp();
 
 // Datos de prueba
 const newNetwork = {
@@ -19,7 +20,13 @@ const networkToDelete = {
     gateway: '10.0.0.1',
 };
 
+beforeEach(() => {
+    const db = getDb();
+    resetTestDB(db);
+});
+
 afterAll(() => {
+    console.log('Cerrando watchers de la base de datos...');
     closeDbWatchers();
 });
 
@@ -32,6 +39,7 @@ describe('Network Tests', () => {
         const res = await request(app).post('/api/networks').send(newNetwork);
 
         // 💡 SINCRONIZACIÓN: Forzar la recarga de la DB después de la escritura
+        reloadDbCache();
         const db_updated = getDb();
 
         expect(res.statusCode).toBe(201);
@@ -42,6 +50,7 @@ describe('Network Tests', () => {
     it('2. should return 409 if a network with the same name already exists', async () => {
         // 1. Crear la red (persiste el cambio)
         await request(app).post('/api/networks').send(newNetwork);
+        reloadDbCache();
 
         // 2. Intentar crear duplicado
         const res = await request(app).post('/api/networks').send(newNetwork);
@@ -53,6 +62,7 @@ describe('Network Tests', () => {
     it('3. should get a network by name', async () => {
         // Crear la red para la búsqueda
         await request(app).post('/api/networks').send(newNetwork);
+        reloadDbCache();
 
         const res = await request(app).get('/api/networks/Test%20Network');
         expect(res.statusCode).toBe(200);
@@ -64,6 +74,7 @@ describe('Network Tests', () => {
         await request(app).post('/api/networks').send(networkToDelete);
 
         // Obtener el conteo inicial (debe ser 1, ya que beforeEach limpia antes)
+        reloadDbCache();
         const db_initial = getDb();
         const initialCount = db_initial.networks.length;
 
@@ -71,6 +82,7 @@ describe('Network Tests', () => {
         const res = await request(app).delete(`/api/networks/${encodeURIComponent(networkToDelete.name)}`);
 
         // 💡 SINCRONIZACIÓN: Forzar la recarga después de la eliminación
+        reloadDbCache();
         const db_updated = getDb();
 
         expect(res.statusCode).toBe(200);

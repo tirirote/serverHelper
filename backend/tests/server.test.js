@@ -1,12 +1,11 @@
 import request from 'supertest';
-import { setupTestEnvironment } from './utils/setup.js';
 // BD
 import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
 import { initialDBData } from '../src/db/sampleDBData.js';
-import { saveCollectionToDisk } from '../src/db/dbUtils.js'; // 💡 Asegúrate de importar esto
-import { healthStatus } from '../src/schemas/types.js';
+import { resetTestDB } from '../src/db/dbUtils.js'; // 💡 Asegúrate de importar esto
+import { createApp } from '../src/app.js';
 
-const app = setupTestEnvironment();
+const app = createApp();
 const initialComponents = initialDBData.components;
 
 const testNetwork = { name: 'TestNet', ipAddress: '10.0.0.0', subnetMask: '255.255.255.0/24', gateway: '10.0.0.1' };
@@ -24,24 +23,11 @@ const validServerBase = {
 
 beforeEach(() => {
     const db = getDb();
-
-    // 1. Limpiar y establecer el estado inicial EN MEMORIA
-    db.servers = [];
-    db.components = initialDBData.components;
-    db.networks = [testNetwork];
-    db.workspaces = [testWorkspace];
-    db.racks = [testRack];
-
-    // 2. 💡 PERSISTIR EL ESTADO INICIAL A DISCO para que la API lo lea correctamente
-    // Esto es CLAVE para que los tests pasen de forma fiable.
-    saveCollectionToDisk(db.servers, 'servers');
-    saveCollectionToDisk(db.components, 'components');
-    saveCollectionToDisk(db.networks, 'networks');
-    saveCollectionToDisk(db.workspaces, 'workspaces');
-    saveCollectionToDisk(db.racks, 'racks');
+    resetTestDB(db);
 });
 
 afterAll(() => {
+    console.log('Cerrando watchers de la base de datos...');
     closeDbWatchers();
 });
 
@@ -50,12 +36,20 @@ afterAll(() => {
 describe('Server Service API (CRUD & Logic)', () => {
 
     it('1. should successfully create a new server and infer the network', async () => {
+        //1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        //2. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
+        //3. Creamos el rack
+        await request(app).post('/api/racks').send(testRack);
+
         const newServerData = { ...validServerBase, name: 'Network Server' };
         const initialCount = getDb().servers.length;
 
         const res = await request(app).post('/api/servers').send(newServerData);
 
         // Forzar la sincronización para la aserción
+        
         const db_updated = getDb();
 
         expect(res.statusCode).toEqual(201);
@@ -69,8 +63,15 @@ describe('Server Service API (CRUD & Logic)', () => {
     });
 
     it('2. should not create a server with a duplicate name', async () => {
+        //1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        //2. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
+        //3. Creamos el rack
+        await request(app).post('/api/racks').send(testRack);
+
         // 1. Crear el primer servidor (persiste el cambio)
-        await request(app).post('/api/servers').send(validServerBase);
+        await request(app).post('/api/servers').send(validServerBase);        
 
         // 2. Intentar crear duplicado
         const res = await request(app).post('/api/servers').send(validServerBase);
@@ -82,16 +83,23 @@ describe('Server Service API (CRUD & Logic)', () => {
     it('3. should return 400 if network cannot be inferred (no rack)', async () => {
         const invalidServer = { ...validServerBase, name: 'Invalid Server', rackName: undefined };
 
-        const res = await request(app).post('/api/servers').send(invalidServer);
-
+        const res = await request(app).post('/api/servers').send(invalidServer);        
+        
         expect(res.statusCode).toEqual(400);
         expect(res.body.message).toBe("No se pudo determinar la red para el servidor.");
     });
 
     it('4. should successfully update server components and recalculate costs', async () => {
+        //1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        //2. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
         const serverName = 'Server to Update';
+        //3. Creamos el rack
+        await request(app).post('/api/racks').send(testRack);
+
         // 1. Crear servidor inicial
-        await request(app).post('/api/servers').send({ ...validServerBase, name: serverName });        
+        await request(app).post('/api/servers').send({ ...validServerBase, name: serverName });
 
         const res = await request(app).put(`/api/servers/${encodeURIComponent(serverName)}`).send({ ...validServerBase, name: 'UpdatedServer', healthStatus: 'Warning' });
 
@@ -106,6 +114,13 @@ describe('Server Service API (CRUD & Logic)', () => {
     });
 
     it('5. should successfully add a component to a server and recalculate costs', async () => {
+        //1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        //2. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
+        //3. Creamos el rack
+        await request(app).post('/api/racks').send(testRack);
+
         const serverName = 'Server to Modify';
         await request(app).post('/api/servers').send({ ...validServerBase, name: serverName });
 
@@ -124,6 +139,13 @@ describe('Server Service API (CRUD & Logic)', () => {
     });
 
     it('6. should successfully delete an existing server', async () => {
+        //1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        //2. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
+        //3. Creamos el rack
+        await request(app).post('/api/racks').send(testRack);
+
         const serverName = 'Server to Delete';
         // 1. Crear el servidor (persiste el cambio)
         await request(app).post('/api/servers').send({ ...validServerBase, name: serverName });

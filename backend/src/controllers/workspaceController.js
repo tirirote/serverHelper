@@ -5,15 +5,14 @@ import { saveCollectionToDisk } from '../db/dbUtils.js';
 import { getDb } from '../db/dbLoader.js';
 
 //AUX
-const validateWorkspace = (req, res) => {
-  const { name } = req.body;
-  const { error, value } = workspaceSchema.validate(req.body, { stripUnknown: true });
+const validateWorkspace = (workspaceToValidate, res) => {
+  const { error, value } = workspaceSchema.validate(workspaceToValidate, { stripUnknown: true });
 
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  if (!name) {
+  if (!workspaceToValidate.name) {
     return res.status(400).json({ message: 'El nombre del workspace es obligatorio.' });
   }
   return value;
@@ -53,49 +52,78 @@ const findWorkspaceIndexByName = (name, res) => {
 //API
 export const createWorkspace = (req, res) => {
 
-  const db = getDb();
-  const workspaces = [...db.workspaces];
+  try {
+    const db = getDb();
+    const workspaces = [...db.workspaces];
+    const { name, description, network } = req.body;
 
-  // 2. Verificar existencia de la Network (respuesta rápida)
-  const existingNetwork = findNetworkByName(network, res);
-  if (existingNetwork === res) return;
+    // 1. Verificar existencia de la Network (respuesta rápida)
+    const existingNetwork = findNetworkByName(network, res);
+    if (existingNetwork === res) return;
 
-  const validWorkspace = validateWorkspace(req, res);
 
-  const { name, description, network } = validWorkspace;
+    //2. Creamos el workspace
+    const newWorkspace = {
+      name,
+      description: description || '',
+      racks: [],
+      network
+    };
 
-  findExistingWorkspaceByName(name, res);
+    //3. Verificamos la validez del workspace
+    const validWorkspace = validateWorkspace(newWorkspace, res);
+    if (validWorkspace === res) return;
 
-  const newWorkspace = {
-    name,
-    description: description || '',
-    racks: [],
-    network
-  };
-  workspaces.push(newWorkspace);
-  // 4. PERSISTENCIA EN DISCO
-  saveCollectionToDisk(workspaces, 'workspaces');
-  res.status(201).json({ message: 'Workspace creado con éxito', workspace: newWorkspace });
+    //3. Verificar la existencia el workspace
+    const existingWorkspace = findExistingWorkspaceByName(validWorkspace.name, res);
+    if (existingWorkspace === res) return;
+
+    workspaces.push(validWorkspace);
+    // 4. PERSISTENCIA EN DISCO
+    saveCollectionToDisk(workspaces, 'workspaces');
+    res.status(201).json({ message: 'Workspace creado con éxito', workspace: newWorkspace });
+
+  } catch (error) {
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message || 'Error interno del servidor.' });
+  }
 };
 
 export const updateWorkspace = (req, res) => {
+  try {
+    const db = getDb();
+    const workspaces = [...db.workspaces];
+    const { name } = req.params;
+    const updatedDetails = req.body;
 
-  const db = getDb();
-  const { name } = req.params;
-  const updatedDetails = req.body;
+    //1. Encontrar el workspace
+    const workspaceIndex = findWorkspaceIndexByName(name, res);
+    if(workspaceIndex === res) return;
+    
+    //2. Creamos la copia actualizada
+    const currentWorkspace = workspaces[workspaceIndex];
+    const updatedWorkspace = { ...currentWorkspace, ...updatedDetails };
 
-  const workspaceIndex = findWorkspaceIndexByName(name, res);
+    //3. Validamos el workspace actualizado
+    const validatedWorkspace = validateWorkspace(updatedWorkspace, res);
+    if (validatedWorkspace === res) return;
 
-  const updatedWorkspace = { ...db.workspaces[workspaceIndex], ...updatedDetails };
+    //5. Sobreescribimos la copia con el original
+    workspaces[workspaceIndex] = updatedWorkspace;
 
-  validateWorkspace(req, res);
+    // 6. Persistencia
+    saveCollectionToDisk(workspaces, 'workspaces');
 
-  db.workspaces[workspaceIndex] = updatedWorkspace;
+    res.status(200).json({
+      message: 'Workspace actualizado con éxito',
+      workspace: updatedWorkspace
+    });
+  } catch (error) {
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message || 'Error interno del servidor.' });
+  }
 
-  res.status(200).json({
-    message: 'Workspace actualizado con éxito',
-    workspace: db.workspaces[workspaceIndex]
-  });
+
 };
 
 export const deleteWorkspaceByName = (req, res) => {

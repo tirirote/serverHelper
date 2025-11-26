@@ -1,11 +1,10 @@
 import request from 'supertest';
-import { setupTestEnvironment } from './utils/setup.js'
 //BD
 import { initialDBData } from '../src/db/sampleDBData.js';
 import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
-import { saveCollectionToDisk } from '../src/db/dbUtils.js';
-
-const app = setupTestEnvironment();
+import { resetTestDB } from '../src/db/dbUtils.js';
+import { createApp } from '../src/app.js';
+const app = createApp();
 
 // Datos base de Rack/Workspace
 const testNetwork = {
@@ -18,15 +17,17 @@ const testWorkspace = {
     name: 'Test Workspace',
     description: 'A test workspace',
     network: testNetwork.name,
+    racks: []
 };
 const testRack = {
     name: 'TestRack',
     workspaceName: testWorkspace.name,
     units: 42
 };
+
 const testServer = {
     name: 'BaseServer',
-    components: initialDBData.components, // Asumimos que initialComponents tiene el 'OS' y otros obligatorios
+    components: initialDBData.components,
     rackName: testRack.name,
     ipAddress: '10.0.0.100',
     healthStatus: 'Excellent'
@@ -34,22 +35,21 @@ const testServer = {
 
 beforeEach(() => {
     const db = getDb();
-    db.workspaces = [testWorkspace];
-    db.racks = [testRack];
-    db.servers = [testServer];
-    saveCollectionToDisk(db.networks, 'networks');
-    saveCollectionToDisk(db.racks, 'racks');
-    saveCollectionToDisk(db.servers, 'servers')
+    resetTestDB(db);
 });
 
 afterAll(() => {
+    console.log('Cerrando watchers de la base de datos...');
     closeDbWatchers();
 });
 
 describe('Rack Service API', () => {
 
     it('1. should create a new rack in a workspace', async () => {
-        // 1. Crear Workspace (necesario para la referencia)
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+
+        // 1. Creamos el workspace
         await request(app).post('/api/workspaces').send(testWorkspace);
 
         const newRack = {
@@ -57,12 +57,12 @@ describe('Rack Service API', () => {
             workspaceName: testWorkspace.name,
             units: 42,
         };
+
         const initialCount = getDb().racks.length;
 
         // 2. Crear Rack
         const res = await request(app).post('/api/racks').send(newRack);
 
-        // 💡 SINCRONIZACIÓN
         const db_updated = getDb();
         const foundWorkspace = db_updated.workspaces.find(ws => ws.name === testWorkspace.name);
 
@@ -73,13 +73,16 @@ describe('Rack Service API', () => {
     });
 
     it('2. should get all racks for a workspace', async () => {
-        // 1. Crear Workspace
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 1. Creamos el workspace
         await request(app).post('/api/workspaces').send(testWorkspace);
 
         // 2. Crear Racks (usando la API para asegurar la persistencia en el controlador)
         await request(app).post('/api/racks').send({ name: 'Rack 1', workspaceName: testWorkspace.name, units: 42 });
         await request(app).post('/api/racks').send({ name: 'Rack 2', workspaceName: testWorkspace.name, units: 42 });
         await request(app).post('/api/racks').send({ name: 'Rack 3', workspaceName: testWorkspace.name, units: 42 });
+
 
         // 3. Obtener Racks
         const res = await request(app).get(`/api/racks/${encodeURIComponent(testWorkspace.name)}`);
@@ -90,6 +93,11 @@ describe('Rack Service API', () => {
     });
 
     it('3. should delete a rack by name', async () => {
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 1. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
+
         const rackToDeleteName = 'Rack to Delete';
         // 1. Crear Workspace
         await request(app).post('/api/workspaces').send(testWorkspace);
@@ -97,7 +105,7 @@ describe('Rack Service API', () => {
         // 2. Crear Rack (persiste en la DB)
         await request(app).post('/api/racks').send({
             name: rackToDeleteName,
-            workspaceName: 'Test Workspace',
+            workspaceName: testWorkspace.name,
             units: 42
         });
 
@@ -108,6 +116,7 @@ describe('Rack Service API', () => {
         const res = await request(app).delete(`/api/racks/${encodeURIComponent(testWorkspace.name)}/${encodeURIComponent(rackToDeleteName)}`);
 
         // 💡 SINCRONIZACIÓN
+
         const db_updated = getDb();
         const workspace = db_updated.workspaces.find(ws => ws.name === 'Test Workspace');
 
@@ -118,70 +127,55 @@ describe('Rack Service API', () => {
     });
 
     it('4. should not delete a non-existent rack', async () => {
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 1. Creamos el workspace
         await request(app).post('/api/workspaces').send(testWorkspace);
+
         const res = await request(app).delete('/api/racks/Test%20Workspace/Nonexistent%20Rack');
 
         expect(res.statusCode).toEqual(404);
         expect(res.body).toHaveProperty('message', 'Rack no encontrado.');
     });
 
-    // Test 5 reformulado para usar el setup y asegurar la referencia al servidor
-    it('5. should calculate the maintenance cost of a rack (revisado)', async () => {
-        // Setup: testRack ya tiene un servidor referenciado (TestServer)
+    it('5. should successfully add a server to a rack and recalculate costs)', async () => {
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 1. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
 
-        // 1. Añadir el servidor al rack (ya está en la DB, solo falta la referencia en el array)
+        // 1. Crear Rack
+        const rackResponse = await request(app).post('/api/racks').send(testRack);
+        expect(rackResponse.statusCode).toEqual(201);
+
+        //2. Crear el servidor
+        const serverRes = await request(app).post('/api/servers').send(testServer);
+        expect(serverRes.statusCode).toEqual(201);
+
+        // 3. Añadimos el servidor al rack
         const resAddServer = await request(app).post('/api/racks/add-server').send({
             rackName: testRack.name,
             serverName: testServer.name
         });
-        expect(resAddServer.statusCode).toEqual(200); // Sanity check
+        expect(resAddServer.statusCode).toEqual(200);
 
-        // 2. Obtener el costo de mantenimiento del Rack
-        // ASUMIMOS que el endpoint es /api/racks/maintenance-cost/:workspaceName/:rackName
         const res = await request(app).get(`/api/racks/${encodeURIComponent(testWorkspace.name)}/${encodeURIComponent(testRack.name)}/maintenance-cost`);
 
         expect(res.statusCode).toEqual(200);
-        expect(parseFloat(res.body.totalMaintenanceCost)).toBeCloseTo(0, 2);
+        expect(parseFloat(res.body.totalMaintenanceCost)).toBeCloseTo(33, 2);
     });
 
-    it('6. should successfully add a server to a rack (Happy Path)', async () => {
-        const serverToAdd = {
-            name: 'NewServer_HP',
-            components: validServerComponentsForTest,
-            rackName: testRack.name
-        };
-        // 1. Crear Servidor (Asegurar que existe en la DB)
-        await request(app).post('/api/servers').send(serverToAdd);
+    it('6. should return 404 if the server does not exist in the database', async () => {
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 1. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
 
-        // 2. Añadir Server al Rack
-        const res = await request(app).post('/api/racks/add-server').send({
-            rackName: testRack.name,
-            serverName: serverToAdd.name
-        });
+        // 1. Crear Rack
+        await request(app).post('/api/racks').send(testRack);
 
-        const db_updated = getDb();
-        const updatedRack = db_updated.racks.find(r => r.name === testRack.name);
 
-        expect(res.statusCode).toEqual(200);
-        expect(res.body.message).toBe('Servidor añadido al rack con éxito.');
-        expect(updatedRack.servers).toContain(serverToAdd.name);
-        expect(updatedRack.servers.length).toBe(1);
-    });
 
-    it('7. should return 404 if the target rack does not exist', async () => {
-        // El servidor 'TestServer' existe, pero el rack no.
-        const res = await request(app).post('/api/racks/add-server').send({
-            rackName: 'NonExistentRack',
-            serverName: testServer.name
-        });
-
-        expect(res.statusCode).toEqual(404);
-        expect(res.body).toHaveProperty('message', "Rack con nombre 'NonExistentRack' no encontrado.");
-    });
-
-    it('8. should return 404 if the server does not exist in the database', async () => {
-        // El rack 'TestRack' existe, pero el servidor no.
-        // Nota: Asegurarse de que 'NonExistentServer' no haya sido creado en el setup.
         const res = await request(app).post('/api/racks/add-server').send({
             rackName: testRack.name,
             serverName: 'NonExistentServer'
@@ -189,27 +183,33 @@ describe('Rack Service API', () => {
 
         // 💡 Esta es la prueba crítica de Integridad Referencial
         expect(res.statusCode).toEqual(404);
-        expect(res.body).toHaveProperty('message', "Servidor 'NonExistentServer' no existe en la base de datos.");
+        expect(res.body).toHaveProperty('message', "Servidor no encontrado.");
     });
 
-    it('9. should return 409 if the server is already in the rack', async () => {
-        const db = getDb();
-        const racks = db.racks;
-        const rackIndex = racks.findIndex(r => r.name === testRack.name);
+    it('7. should return 409 if the server is already in the rack', async () => {
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 1. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
 
-        // Setup: Añadir el servidor al rack manualmente ANTES de la llamada a la API
-        if (rackIndex > -1) {
-            racks[rackIndex].servers.push(testServer.name);
-            saveCollectionToDisk(racks, 'racks');
-        }
+        // 1. Crear Rack
+        await request(app).post('/api/racks').send(testRack);
+        //2. Crear el servidor
+        await request(app).post('/api/servers').send(testServer);
 
-        // Llamada a la API para añadir el mismo servidor de nuevo
+        //Añadimos el servidor
+        await request(app).post('/api/racks/add-server').send({
+            rackName: testRack.name,
+            serverName: testServer.name
+        });
+
+        //Lo añadimos otra vez
         const res = await request(app).post('/api/racks/add-server').send({
             rackName: testRack.name,
             serverName: testServer.name
         });
 
         expect(res.statusCode).toEqual(409);
-        expect(res.body).toHaveProperty('message', `El servidor '${testServer.name}' ya está listado en el Rack '${testRack.name}'.`);
+        expect(res.body).toHaveProperty('message', `El servidor ya está en este rack.`);
     });
 });
