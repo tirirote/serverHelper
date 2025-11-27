@@ -27,9 +27,9 @@ export const deleteComponent = async (componentName) => {
   }
 };
 
-export const updateComponent = async (componentId, componentData) => {
+export const updateComponent = async (componentName, componentData) => {
   try {
-    const response = await apiClient.put(`/components/${componentId}`, componentData);
+    const response = await apiClient.put(`/components/${componentName}`, componentData);
     return response.data;
   } catch (error) {
     throw error;
@@ -39,7 +39,7 @@ export const updateComponent = async (componentId, componentData) => {
 export const getComponentByName = async (componentName) => {
   try {
     const response = await apiClient.get(`/components/${componentName}`);
-    return response.data;
+    return response.data.component;
   } catch (error) {
     throw error;
   }
@@ -47,8 +47,8 @@ export const getComponentByName = async (componentName) => {
 
 export const getComponentPrice = async (componentName) => {
   try {
-    const response = await apiClient.get(`/components/${componentName}/price`);
-    return response.data;
+    const response = await apiClient.get(`/components/${componentName}`);
+    return response.data.component.price;
   } catch (error) {
     throw error;
   }
@@ -57,7 +57,7 @@ export const getComponentPrice = async (componentName) => {
 export const getComponentCompatibleList = async (componentName) => {
   try {
     const response = await apiClient.get(`/components/${componentName}/compatible`);
-    return response.data;
+    return response.data.component.compatibleList;
   } catch (error) {
     throw error;
   }
@@ -66,7 +66,7 @@ export const getComponentCompatibleList = async (componentName) => {
 export const getComponentDetails = async (componentName) => {
   try {
     const response = await apiClient.get(`/components/${componentName}/details`);
-    return response.data;
+    return response.data.component.details;
   } catch (error) {
     throw error;
   }
@@ -75,7 +75,7 @@ export const getComponentDetails = async (componentName) => {
 export const getComponentType = async (componentName) => {
   try {
     const response = await apiClient.get(`/components/${componentName}/type`);
-    return response.data;
+    return response.data.component.type;
   } catch (error) {
     throw error;
   }
@@ -84,7 +84,7 @@ export const getComponentType = async (componentName) => {
 export const getComponentMaintenanceCost = async (componentName) => {
   try {
     const response = await apiClient.get(`/components/${componentName}/maintenance-cost`);
-    return response.data;
+    return response.data.component.maintenanceCost;
   } catch (error) {
     throw error;
   }
@@ -93,7 +93,7 @@ export const getComponentMaintenanceCost = async (componentName) => {
 export const getComponentModelPath = async (componentName) => {
   try {
     const response = await apiClient.get(`/components/${componentName}/model-path`);
-    return response.data;
+    return response.data.component.modelPath;
   } catch (error) {
     throw error;
   }

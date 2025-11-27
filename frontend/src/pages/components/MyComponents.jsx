@@ -48,6 +48,8 @@ const MyComponents = () => {
             // Establecer el primer componente cargado como activo
             if (data && data.length > 0) {
                 setActiveComponent(data[0]);
+            } else {
+                setActiveComponent(null);
             }
 
         } catch (err) {
@@ -175,7 +177,21 @@ const MyComponents = () => {
             <div className={styles.contentGrid}>
                 {/* Columna de Visualización 3D */}
                 <div className={styles.visualizerColumn}>
-                    <DetailViewerCard item={activeComponent} />
+                    {activeComponent ? (
+                        <DetailViewerCard
+                            name={activeComponent.name}
+                            modelPath={activeComponent.modelPath}
+                            description={activeComponent.details}
+                            type={activeComponent.type}
+                            compatibilityItems={activeComponent.compatibleList}
+                            details={[]}
+                        />
+                    ) : (
+                        <div className={styles.emptyVisualizer}>
+                            {loading ? <Loader2 size={30} className="animate-spin" /> : <Server size={30} />}
+                            <p>{loading ? 'Buscando modelos 3D...' : 'No hay componente activo o inventario vacío.'}</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Columna de la Lista y Búsqueda */}
@@ -263,7 +279,7 @@ const MyComponents = () => {
                     </div>
                 </div>
             </Dialog>
-            
+
             <Dialog
                 isOpen={isNewComponentModalOpen}
                 onClose={() => handleCloseNewComponentModal(false)}
@@ -271,9 +287,9 @@ const MyComponents = () => {
                 hideConfirmButton={true}
             >
                 {/* El formulario gestiona su propio envío y cierre */}
-                <NewComponentForm 
+                <NewComponentForm
                     // Pasamos la función de cierre para que el formulario la llame tras el envío exitoso
-                    onClose={() => handleCloseNewComponentModal(true)} 
+                    onClose={() => handleCloseNewComponentModal(true)}
                 />
             </Dialog>
         </div>
