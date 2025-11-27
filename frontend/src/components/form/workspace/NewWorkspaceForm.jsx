@@ -8,6 +8,7 @@ import styles from '../Forms.module.css'; // Estilos genéricos para formularios
 
 //API Services
 import { getAllNetworks } from '../../../api/services/networkService.js'
+import { createWorkspace } from '../../../api/services/workspaceService.js';
 /**
  * Formulario para la creación de un nuevo Workspace.
  * * @param {Object} props - Propiedades del componente.
@@ -49,7 +50,7 @@ const NewWorkspaceForm = ({ onClose }) => {
         setSelectedNetworks(prev => prev.filter(item => item.id !== itemId));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (name.trim().length < 3) {
@@ -68,14 +69,27 @@ const NewWorkspaceForm = ({ onClose }) => {
             network: network.trim()
         };
 
-        console.log('Workspace creado (Simulación):', newWorkspaceData);
+        try {
+            // 💡 1. Llamada a la API con los datos del formulario
+            const newWorkspace = await createWorkspace(newWorkspaceData);
 
-        // Mostrar notificación de éxito
-        showToast(`Workspace '${name}' de tipo '${type}' creado exitosamente.`, 'success');
+            // 💡 2. Éxito: Mostrar notificación y cerrar el modal
+            showToast(`Workspace '${newWorkspace.name}' creado con éxito.`, 'success');
 
-        // Cerrar el modal, indicando éxito
-        onClose(true);
+            // Llama a onClose, pasando 'true' para indicar que la creación fue exitosa
+            // Esto le dirá a WorkspacesPage que recargue la lista.
+            onClose(true);
 
+        } catch (error) {
+            console.error('Error al crear workspace:', error);
+            const errorMessage = error.status === 400
+                ? `Error de validación: ${error.message}`
+                : 'Error al conectar con el servidor.';
+
+            showToast(errorMessage, 'error');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (

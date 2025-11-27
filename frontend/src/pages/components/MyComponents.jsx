@@ -19,6 +19,33 @@ import { getAllComponents } from '../../api/services/componentService.js';
 
 import styles from './MyComponents.module.css';
 
+const createComponentSchema = (componentItem) => {
+    // Si el componente es null o undefined, devolvemos null para que el renderizado condicional actúe.
+    if (!componentItem) {
+        return null;
+    }
+
+    // 💡 Definición de los detalles para la tabla de la tarjeta
+    const details = [
+        { label: 'Tipo', value: componentItem.type || 'N/A' },
+        { label: 'Precio (USD)', value: componentItem.price ? `$${componentItem.price.toFixed(2)}` : 'N/A' },
+        { label: 'Consumo (W)', value: componentItem.estimatedConsumption ? `${componentItem.estimatedConsumption} W` : 'N/A' },
+        { label: 'Costo Mantenimiento', value: componentItem.maintenanceCost ? `$${componentItem.maintenanceCost.toFixed(2)}` : 'N/A' },
+        // Puedes añadir más campos como vendor, versión, etc.
+    ];
+
+    return {
+        name: componentItem.name,
+        // Asumiendo que 'details' es la propiedad de descripción general en el componente.
+        description: componentItem.details || 'No hay descripción disponible para este componente.',
+        modelPath: componentItem.modelPath || 'assets/models/default.glb',
+        type: 'component', // Tipo fijo
+        details: details,
+        // Usamos la lista de compatibilidad para la propiedad 'compatibilityItems'
+        compatibilityItems: componentItem.compatibleList || [],
+    };
+};
+
 const MyComponents = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
@@ -134,6 +161,10 @@ const MyComponents = () => {
         }
     };
 
+    const detailsSchema = useMemo(() => {
+        return createComponentSchema(activeComponent);
+    }, [activeComponent]); // Se recalcula cada vez que activeComponent cambia
+
     // Definición de las columnas para el componente DataTable
     const columns = useMemo(() => [
         {
@@ -177,19 +208,21 @@ const MyComponents = () => {
             <div className={styles.contentGrid}>
                 {/* Columna de Visualización 3D */}
                 <div className={styles.visualizerColumn}>
-                    {activeComponent ? (
+                    {detailsSchema ? ( // 💡 El renderizado condicional usa el schema
                         <DetailViewerCard
-                            name={activeComponent.name}
-                            modelPath={activeComponent.modelPath}
-                            description={activeComponent.details}
-                            type={activeComponent.type}
-                            compatibilityItems={activeComponent.compatibleList}
-                            details={[]}
+                            name={detailsSchema.name}
+                            description={detailsSchema.description}
+                            modelPath={detailsSchema.modelPath}
+                            details={detailsSchema.details}
+                            type={detailsSchema.type}
+                            compatibilityItems={detailsSchema.compatibilityItems}
                         />
                     ) : (
-                        <div className={styles.emptyVisualizer}>
-                            {loading ? <Loader2 size={30} className="animate-spin" /> : <Server size={30} />}
-                            <p>{loading ? 'Buscando modelos 3D...' : 'No hay componente activo o inventario vacío.'}</p>
+                        <div className={styles.viewerCardPlaceholder}>
+                            <h3>
+                                {loading ? 'Cargando lista inicial...' : 'Selecciona un Componente'}
+                            </h3>
+                            <p>Haz clic en el nombre para visualizar los detalles.</p>
                         </div>
                     )}
                 </div>
