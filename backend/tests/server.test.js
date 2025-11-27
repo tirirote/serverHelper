@@ -21,9 +21,9 @@ const validServerBase = {
     healthStatus: 'Excellent'
 };
 
-beforeEach(() => {
-    const db = getDb();
-    resetTestDB(db);
+beforeEach(async () => {
+    const db = await getDb();
+    await resetTestDB(db);
 });
 
 afterAll(() => {    
@@ -43,13 +43,15 @@ describe('Server Service API (CRUD & Logic)', () => {
         await request(app).post('/api/racks').send(testRack);
 
         const newServerData = { ...validServerBase, name: 'Network Server' };
-        const initialCount = getDb().servers.length;
+
+        const db_initial = await getDb();
+        const initialCount = db_initial.servers.length;
 
         const res = await request(app).post('/api/servers').send(newServerData);
 
         // Forzar la sincronización para la aserción
         
-        const db_updated = getDb();
+        const db_updated = await getDb();
 
         expect(res.statusCode).toEqual(201);
         expect(res.body.server).toHaveProperty('network', 'TestNet'); // Red se infiere del Workspace
@@ -101,9 +103,8 @@ describe('Server Service API (CRUD & Logic)', () => {
         await request(app).post('/api/servers').send({ ...validServerBase, name: serverName });
 
         const res = await request(app).put(`/api/servers/${encodeURIComponent(serverName)}`).send({ ...validServerBase, name: 'UpdatedServer', healthStatus: 'Warning' });
-
         // Forzar sincronización para verificar el estado de la DB
-        const db_updated = getDb();
+        const db_updated = await getDb();
         const updatedServer = db_updated.servers.find(s => s.name === 'UpdatedServer');
 
         expect(res.statusCode).toEqual(200);
@@ -123,7 +124,7 @@ describe('Server Service API (CRUD & Logic)', () => {
         const serverName = 'Server to Modify';
         await request(app).post('/api/servers').send({ ...validServerBase, name: serverName });
 
-        const db_synced = getDb();
+        const db_synced = await getDb();
         const initialServer = db_synced.servers.find(s => s.name === serverName);
 
         const newComponentName = 'NVIDIA A100'; // Debe existir en initialDBData       
@@ -150,14 +151,14 @@ describe('Server Service API (CRUD & Logic)', () => {
         await request(app).post('/api/servers').send({ ...validServerBase, name: serverName });
 
         // 2. Obtener el conteo inicial (debe ser 1)
-        const db_before_delete = getDb();
+        const db_before_delete = await getDb();
         const initialCount = db_before_delete.servers.length;
 
         // 3. Ejecutar la eliminación
         const res = await request(app).delete(`/api/servers/${encodeURIComponent(serverName)}`);
 
         // 4. Forzar la sincronización y verificar
-        const db_updated = getDb();
+        const db_updated = await getDb();
 
         expect(res.statusCode).toEqual(200);
         expect(db_updated.servers.length).toBe(initialCount - 1);

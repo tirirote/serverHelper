@@ -4,6 +4,7 @@ import { initialDBData } from '../src/db/sampleDBData.js';
 import { getDb, closeDbWatchers } from '../src/db/dbLoader.js';
 import { resetTestDB } from '../src/db/dbUtils.js';
 import { createApp } from '../src/app.js';
+
 const app = createApp();
 
 // Datos base de Rack/Workspace
@@ -33,9 +34,9 @@ const testServer = {
     healthStatus: 'Excellent'
 };
 
-beforeEach(() => {
-    const db = getDb();
-    resetTestDB(db);
+beforeEach(async () => {
+    const db = await getDb();
+    await resetTestDB(db);
 });
 
 afterAll(() => {
@@ -57,12 +58,13 @@ describe('Rack Service API', () => {
             units: 42,
         };
 
-        const initialCount = getDb().racks.length;
+        const db_initial = await getDb();
+        const initialCount = db_initial.racks.length;
 
         // 2. Crear Rack
         const res = await request(app).post('/api/racks').send(newRack);
 
-        const db_updated = getDb();
+        const db_updated = await getDb();
         const foundWorkspace = db_updated.workspaces.find(ws => ws.name === testWorkspace.name);
 
         expect(res.statusCode).toEqual(201);
@@ -81,7 +83,6 @@ describe('Rack Service API', () => {
         await request(app).post('/api/racks').send({ name: 'Rack 1', workspaceName: testWorkspace.name, units: 42 });
         await request(app).post('/api/racks').send({ name: 'Rack 2', workspaceName: testWorkspace.name, units: 42 });
         await request(app).post('/api/racks').send({ name: 'Rack 3', workspaceName: testWorkspace.name, units: 42 });
-
 
         // 3. Obtener Racks
         const res = await request(app).get(`/api/racks/${encodeURIComponent(testWorkspace.name)}`);
@@ -109,14 +110,15 @@ describe('Rack Service API', () => {
         });
 
         // 3. Obtener conteo inicial (debe ser 1)
-        const initialCount = getDb().racks.length;
+        const db_initial = await getDb();
+        const initialCount = db_initial.racks.length;
 
         // 4. Eliminar Rack
         const res = await request(app).delete(`/api/racks/${encodeURIComponent(testWorkspace.name)}/${encodeURIComponent(rackToDeleteName)}`);
 
         // 💡 SINCRONIZACIÓN
 
-        const db_updated = getDb();
+        const db_updated = await getDb();
         const workspace = db_updated.workspaces.find(ws => ws.name === 'Test Workspace');
 
         expect(res.statusCode).toEqual(200);
@@ -276,20 +278,20 @@ describe('Rack Service API', () => {
             units: 20,
             healthStatus: 'Excellent',
             // Intentar actualizar campos protegidos (deben ser ignorados por el controlador)
-            workspaceName: 'ProtectedName', 
-            servers: ['ServerX'], 
+            workspaceName: 'ProtectedName',
+            servers: ['ServerX'],
         };
 
         const res = await request(app).put(`/api/racks/${encodeURIComponent(testRack.name)}`).send(updateData);
         expect(res.statusCode).toEqual(200);
-        
+
         // Verificar que los campos actualizables se modificaron
         expect(res.body.rack.units).toEqual(20);
         expect(res.body.rack.healthStatus).toEqual('Excellent');
-        
+
         // Verificar que los campos protegidos NO se modificaron
         expect(res.body.rack.workspaceName).toEqual(testWorkspace.name);
-        expect(res.body.rack.servers).toEqual([]); 
+        expect(res.body.rack.servers).toEqual([]);
     });
 
     it('14. should return 400 if validation fails on updated fields (e.g., units invalid type)', async () => {
@@ -305,6 +307,7 @@ describe('Rack Service API', () => {
         };
 
         const res = await request(app).put(`/api/racks/${encodeURIComponent(testRack.name)}`).send(updateData);
+        
         expect(res.statusCode).toEqual(400);
         expect(res.body).toHaveProperty('message');
     });

@@ -5,47 +5,59 @@ import { saveCollectionToDisk } from '../db/dbUtils.js';
 
 
 //AUX
-const findUserByName = (name, res) => {
-  const db = getDb();
+const findUserByName = async (name) => {
+  const db = await getDb();
+
   const user = db.users.find(u => u.username === name);
+
   if (!user) {
-    return res.status(404).json({ message: 'Usuario no encontrado.' });
+    const error = new Error('Usuario no encontrado.');
+    error.status = 404; // 💡 Adjuntar status
+    throw error;
   }
   return user;
 };
 
-const findUserIndexByName = (name, res) => {
-  const db = getDb();
+const findUserIndexByName = async (name) => {
+  const db = await getDb();
+
   const userIndex = db.users.findIndex(u => u.username === name);
 
   if (userIndex === -1) {
-    return res.status(404).json({ message: 'Usuario no encontrado.' });
+    const error = new Error('Usuario no encontrado.');
+    error.status = 404; // 💡 Adjuntar status
+    throw error;
   }
   return userIndex;
 };
 
-const findExistingUserByName = (username, res) => {
-  const db = getDb();
+const findExistingUserByName = async (username) => {
+  const db = await getDb();
+
   const existingUser = db.users.find(user => user.username === username);
 
   if (existingUser) {
-    return res.status(409).json({ message: 'El nombre de usuario ya existe.' });
+    const error = new Error('El nombre de usuario ya existe.');
+    error.status = 409; // 💡 Adjuntar status
+    throw error;
   }
 };
 
 const validateUser = (user, res) => {
   const { error, value } = userSchema.validate(user, { stripUnknown: true });
   if (error) {
-    return res.status(400).json({ message: error.details[0].message });
+    const error = new Error(error.details[0].message);
+    error.status = 400; // 💡 Adjuntar status
+    throw error;
   }
   return value;
 }
 
 //API
-export const createUser = (req, res) => {
+export const createUser = async (req, res) => {
   try {
 
-    const db = getDb();
+    const db = await getDb();
     const users = [...db.users];
 
     const { username, password } = req.body;
@@ -55,12 +67,10 @@ export const createUser = (req, res) => {
       password
     }
 
-    const validUser = validateUser(userToValidate, res);
-    if (validUser === res) return; // Si falla la validación 400
+    const validUser = validateUser(userToValidate);
 
     //2. Comprobamos la existencia del usuario
-    const existingUser = findExistingUserByName(username, res);
-    if (existingUser == res) return;
+    await findExistingUserByName(username);
 
     // 5. Creación del objeto final (ya validado)
     const newUser = {
@@ -69,7 +79,7 @@ export const createUser = (req, res) => {
 
     // 4. PERSISTENCIA EN DISCO
     users.push(newUser);
-    saveCollectionToDisk(users, 'users');
+    await saveCollectionToDisk(users, 'users');
 
     const { password: _, ...userToReturn } = newUser;
 
@@ -86,9 +96,9 @@ export const createUser = (req, res) => {
 
 };
 
-export const deleteUser = (req, res) => {
+export const deleteUser = async (req, res) => {
   try {
-    const db = getDb();
+    const db = await getDb();
     const users = [...db.users];
     const { username } = req.params;
     const initialLength = users.length;
@@ -99,18 +109,18 @@ export const deleteUser = (req, res) => {
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
 
-    saveCollectionToDisk(updatedUsers, 'users');
+    await saveCollectionToDisk(updatedUsers, 'users');
     res.status(200).json({ message: 'Usuario eliminado con éxito.' });
+
   } catch (error) {
     const status = error.status || 500;
     res.status(status).json({ message: error.message || 'Error interno del servidor.' });
   }
 };
 
-export const updateUser = (req, res) => {
-
+export const updateUser = async (req, res) => {
   try {
-    const db = getDb();
+    const db = await getDb();
     const users = [...db.users];
 
     const { username } = req.params;
@@ -118,11 +128,11 @@ export const updateUser = (req, res) => {
 
     // 1. Buscar el usuario y su índice.
     // Asumimos que findUserByName devuelve el objeto 'user' o 'res' (si es 404).
-    let userToUpdate = findUserByName(username, res);
+    let userToUpdate = await findUserByName(username);
     if (userToUpdate === res) return; // Error 404 manejado por findUserByName
 
     // Asumimos que findUserIndexByName devuelve el índice o maneja el error internamente
-    const userIndex = findUserIndexByName(username, res);
+    const userIndex = await findUserIndexByName(username);
     if (userIndex === res) return; // Error 404 manejado por findUserIndexByName (si es necesario)
 
     // 2. Aplicar las actualizaciones a una copia del usuario, manteniendo los campos originales.
@@ -138,7 +148,7 @@ export const updateUser = (req, res) => {
 
     // 4. Validar el esquema del usuario final.
     // Asumimos que validateUser devuelve el objeto validado O 'res' (si es 400).
-    const validatedUserResult = validateUser(preliminaryUser, res);
+    const validatedUserResult = validateUser(preliminaryUser);
 
     if (validatedUserResult === res) return; // Error 400 manejado por validateUser
 
@@ -148,33 +158,34 @@ export const updateUser = (req, res) => {
     // 5. Mutar la copia de la colección 'users'.
     users[userIndex] = updatedUser;
 
-    saveCollectionToDisk(users, 'users');
+    await saveCollectionToDisk(users, 'users');
 
     res.status(200).json({
       message: 'Usuario actualizado con éxito',
       user: updatedUser
     });
+
   } catch (error) {
     const status = error.status || 500;
     res.status(status).json({ message: error.message || 'Error interno del servidor.' });
   }
 };
 
-export const getAllUsers = (req, res) => {
+export const getAllUsers = async (req, res) => {
+  const db = await getDb();
 
-  const db = getDb();
   const usersWithoutPasswords = db.users.map(user => {
     const { password, ...rest } = user;
     return rest;
   });
+
   res.status(200).json(usersWithoutPasswords);
 };
 
-export const getUserByUsername = (req, res) => {
-
+export const getUserByUsername = async (req, res) => {
   const { username } = req.params;
 
-  const user = findUserByName(username, res);
+  const user = await findUserByName(username, res);
 
   const { password, ...userWithoutPassword } = user;
   res.status(200).json(userWithoutPassword);

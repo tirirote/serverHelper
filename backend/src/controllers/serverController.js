@@ -7,38 +7,47 @@ import { getDb } from '../db/dbLoader.js';
 import { saveCollectionToDisk, COLLECTION_NAMES } from '../db/dbUtils.js';
 
 //AUX
-const findExistingServer = (serverName, res) => {
-  const db = getDb();
+const findExistingServer = async (serverName) => {
+  const db = await getDb();
+
   const existingServer = db.servers.find(s => s.name === serverName);
+
   if (existingServer) {
-    return res.status(409).json({ message: 'Ya existe un servidor con este nombre.' });
+    const error = new Error('Ya existe un servidor con este nombre.');
+    error.status = 409; // 💡 Adjuntar status
+    throw error;
   }
 };
 
-export const findServerByName = (serverName, res) => {
+export const findServerByName = async (serverName) => {
+  const db = await getDb();
 
-  const db = getDb();
   const server = db.servers.find(s => s.name === serverName);
+
   if (!server) {
-    res.status(404).json({ message: 'Servidor no encontrado.' });
-    return res;
+    const error = new Error('Servidor no encontrado.');
+    error.status = 404; // 💡 Adjuntar status
+    throw error;
   }
+
   return server;
 };
 
-const findServerIndexByName = (serverName, res) => {
+const findServerIndexByName = async (serverName) => {
+  const db = await getDb();
 
-  const db = getDb();
   const serverIndex = db.servers.findIndex(s => s.name === serverName);
+
   if (serverIndex === -1) {
-    res.status(404).json({ message: 'Servidor no encontrado.' });
-    return res;
+    const error = new Error('Servidor no encontrado.');
+    error.status = 404; // 💡 Adjuntar status
+    throw error;
   }
   return serverIndex;
 };
 
 //Validation
-export const preprocessAndValidateServerData = (rawServerData, network) => {
+export const preprocessAndValidateServerData = async (rawServerData, network) => {
   const { name, components: rawComponents, ipAddress, operatingSystem, healthStatus } = rawServerData;
 
   // 1. Array Completo (con name y type) para CÁLCULO Y VALIDACIÓN MANUAL
@@ -52,12 +61,12 @@ export const preprocessAndValidateServerData = (rawServerData, network) => {
   const osName = osComponent ? osComponent.name : operatingSystem;
 
   // Calcular costos (Puros)
-  const totalPrice = calculateTotalCost(componentsWithType);
-  const totalMaintenanceCost = calculateTotalMaintenanceCost(componentsWithType);
+  const totalPrice = await calculateTotalCost(componentsWithType);
+  const totalMaintenanceCost = await calculateTotalMaintenanceCost(componentsWithType);
 
   // 2. Validación de Componentes (LANZA ERROR 400 si faltan tipos o si no existen en DB)
   // Se usa el array completo aquí
-  validateComponents(componentsWithType);
+  await validateComponents(componentsWithType);
 
   // 3. Array Final (solo nombres) para la VALIDACIÓN JOI Y PERSISTENCIA
   // 💡 CAMBIO CLAVE: Transformar el array de objetos a array de nombres
@@ -86,25 +95,33 @@ export const preprocessAndValidateServerData = (rawServerData, network) => {
   };
 };
 
-export const validateServer = (serverToValidate, res) => {
+export const validateServer = (serverToValidate) => {
   const { error, value } = serverSchema.validate(serverToValidate, { stripUnknown: true });
+
   if (error) {
-    return res.status(400).json({ message: error.details[0].message });
+    const validationError = new Error(error.details[0].message);
+    validationError.status = 400; // 💡 Adjuntar status
+    throw validationError;
   }
+
   return value;
 };
 
-const validateServerDetails = (serverDetails, res) => {
+const validateServerDetails = (serverDetails) => {
   const { error, value } = serverSchema.optional().validate(serverDetails);
+
   if (error) {
-    return res.status(400).json({ message: error.details[0].message });
+    const validationError = new Error(error.details[0].message);
+    validationError.status = 400; // 💡 Adjuntar status
+    throw validationError;
   }
+
   return value;
 };
 
-const validateComponents = (serverComponents, res) => {
+const validateComponents = async (serverComponents, res) => {
 
-  const db = getDb();
+  const db = await getDb();
 
   const serverComponentTypes = serverComponents.map(c => c.type);
 
@@ -125,7 +142,9 @@ const validateComponents = (serverComponents, res) => {
 
   for (const type of requiredTypes) {
     if (!serverComponentTypes.includes(type)) {
-      return res.status(400).json({ message: `Falta el componente obligatorio: ${type}.` });
+      const error = new Error(`Falta el componente obligatorio: ${type}.`);
+      error.status = 400; // 💡 Adjuntar status
+      throw error;
     }
   }
 
@@ -133,34 +152,37 @@ const validateComponents = (serverComponents, res) => {
   for (const component of serverComponents) {
     const dbComponent = db.components.find(c => c.name === component.name);
     if (!dbComponent) {
-      return res.status(400).json({ message: `El componente "${component.name}" no existe en la base de datos.` });
+      const error = new Error(`El componente "${component.name}" no existe en la base de datos.`);
+      error.status = 400; // 💡 Adjuntar status
+      throw error;
     }
   }
 };
 
 //API
-export const calculateTotalCost = (serverComponents) => {
+export const calculateTotalCost = async (serverComponents) => {
+  const db = await getDb();
 
-  const db = getDb();
   return serverComponents.reduce((total, component) => {
     const dbComponent = db.components.find(c => c.name === component.name);
     return total + (dbComponent ? dbComponent.price : 0);
   }, 0);
 };
 
-export const calculateTotalMaintenanceCost = (serverComponents) => {
+export const calculateTotalMaintenanceCost = async (serverComponents) => {
+  const db = await getDb();
 
-  const db = getDb();
   return serverComponents.reduce((total, component) => {
     const dbComponent = db.components.find(c => c.name === component.name);
     return total + (dbComponent && dbComponent.maintenanceCost ? dbComponent.maintenanceCost : 0);
   }, 0);
 };
 
-export const createServer = (req, res) => {
+export const createServer = async (req, res) => {
 
   try {
-    const db = getDb();
+    const db = await getDb();
+
     const servers = [...db.servers];
     const workspaces = [...db.workspaces];
     const { name, rackName } = req.body;
@@ -180,16 +202,14 @@ export const createServer = (req, res) => {
     }
 
     // 2. Verificar existencia de la Network (respuesta rápida)
-    const existingNetwork = findNetworkByName(network, res);
-    if (existingNetwork === res) return;
+    const existingNetwork = await findNetworkByName(network);
 
     // 3. Verificar existencia de servidor (respuesta rápida 409)
-    let response = findExistingServer(name, res);
-    if (response) return response;
+    await findExistingServer(name);
 
     // 4. Preprocesar y Validar todo (Costos, Componentes, Joi)
     // Lanza ValidationError (status 400) si hay algún problema
-    const validatedServerData = preprocessAndValidateServerData(req.body, network);
+    const validatedServerData = await preprocessAndValidateServerData(req.body, network);
 
     // 5. Creación del objeto final (ya validado)
     const newServer = {
@@ -200,7 +220,9 @@ export const createServer = (req, res) => {
 
     // 4. PERSISTENCIA EN DISCO
     servers.push(newServer);
-    saveCollectionToDisk(servers, 'servers');
+
+    await saveCollectionToDisk(servers, 'servers');
+
     res.status(201).json({
       message: 'Servidor creado con éxito',
       server: newServer
@@ -213,31 +235,37 @@ export const createServer = (req, res) => {
 
 };
 
-export const deleteServerByName = (req, res) => {
+export const deleteServerByName = async (req, res) => {
+  try {
+    const db = await getDb();
 
-  const db = getDb();
-  const servers = [...db.servers];
-  const { name } = req.params;
-  const updatedServers = servers.filter(s => s.name !== name);
+    const servers = [...db.servers];
+    const { name } = req.params;
+    const updatedServers = servers.filter(s => s.name !== name);
 
-  if (updatedServers.length === servers.length) {
-    return res.status(404).json({ message: 'Servidor no encontrado.' });
+    if (updatedServers.length === servers.length) {
+      return res.status(404).json({ message: 'Servidor no encontrado.' });
+    }
+    await saveCollectionToDisk(updatedServers, 'servers');
+    res.status(200).json({ message: 'Servidor eliminado con éxito.' });
+
+  } catch (error) {
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message || 'Error interno del servidor.' });
   }
-  saveCollectionToDisk(updatedServers, 'servers');
-  res.status(200).json({ message: 'Servidor eliminado con éxito.' });
+
 };
 
-export const updateServer = (req, res) => {
+export const updateServer = async (req, res) => {
   try {
-    const db = getDb();
+    const db = await getDb();
     const servers = [...db.servers];
 
     const { name } = req.params;
     const { id, components, rackName, ...newDetails } = req.body; // Extraer y descartar 'id'
 
     // 1. Encontrar el servidor (Aún usa la versión 'respuesta rápida' que devuelve el índice o 'res')
-    const serverIndex = findServerIndexByName(name, res);
-    if (serverIndex === res) return; // findServerIndexByName ya envió 404
+    const serverIndex = await findServerIndexByName(name);
 
     const currentServer = servers[serverIndex];
 
@@ -249,11 +277,11 @@ export const updateServer = (req, res) => {
       }));
 
       // Validación de Componentes (Pura, lanza 400 si falla)
-      validateComponents(componentsWithType);
+      await validateComponents(componentsWithType);
 
       // Recálculo y asignación de costos
-      newDetails.totalPrice = calculateTotalCost(componentsWithType);
-      newDetails.totalMaintenanceCost = calculateTotalMaintenanceCost(componentsWithType);
+      newDetails.totalPrice = await calculateTotalCost(componentsWithType);
+      newDetails.totalMaintenanceCost = await calculateTotalMaintenanceCost(componentsWithType);
 
       // 💡 CORRECCIÓN CLAVE: Asignar el array de STRINGS (nombres) para el esquema Joi
       newDetails.components = componentsWithType.map(c => c.name);
@@ -270,8 +298,7 @@ export const updateServer = (req, res) => {
 
     // 3. Verificación de Network (Mantiene el patrón de 'respuesta rápida')
     if (newDetails.network) {
-      let existingNetwork = findNetworkByName(newDetails.network, res);
-      if (existingNetwork === res) return;
+      await findNetworkByName(newDetails.network);
     }
 
     // 4. Validación de los Detalles Restantes (Joi ahora recibe array de strings)
@@ -288,7 +315,7 @@ export const updateServer = (req, res) => {
     servers[serverIndex] = updatedServer;
 
     // 6. Persistencia
-    saveCollectionToDisk(servers, 'servers');
+    await saveCollectionToDisk(servers, 'servers');
 
     res.status(200).json({
       message: 'Servidor actualizado con éxito',
@@ -302,36 +329,37 @@ export const updateServer = (req, res) => {
 
 };
 
-export const getAllServers = (req, res) => {
+export const getAllServers = async (req, res) => {
+  const db = await getDb();
 
-  const db = getDb();
   const servers = db.servers;
   res.status(200).json({ servers });
 };
 
-export const getServerByName = (req, res) => {
+export const getServerByName = async (req, res) => {
   const { name } = req.params;
-  const server = findServerByName(name, res);
+  const server = await findServerByName(name);
   res.status(200).json({ server });
 };
 
-export const getAllComponents = (req, res) => {
+export const getAllComponents = async (req, res) => {
   const { name } = req.params;
-  const server = findServerByName(name, res);
+  const server = await findServerByName(name);
   res.status(200).json({ components: server.components });
 };
 
-export const addComponentToServer = (req, res) => {
-  const db = getDb();
+export const addComponentToServer = async (req, res) => {
+  const db = await getDb();
+
   const servers = [...db.servers]; // Copia mutable
   const { serverName, componentName } = req.body;
 
   // 1. Encontrar el servidor
-  const serverIndex = findServerIndexByName(serverName, res);
+  const serverIndex = await findServerIndexByName(serverName);
   if (typeof serverIndex !== 'number') return serverIndex;
 
   // 2. Validar que el componente exista
-  const component = findComponentByName(componentName, res);
+  const component = await findComponentByName(componentName);
   if (!component || component.statusCode) return component;
 
   // 3. Añadir el componente al servidor
@@ -344,10 +372,10 @@ export const addComponentToServer = (req, res) => {
   }
 
   // 4. Recalcular costos
-  server.totalPrice = calculateTotalCost(server.components);
-  server.totalMaintenanceCost = calculateTotalMaintenanceCost(server.components);
+  server.totalPrice = await calculateTotalCost(server.components);
+  server.totalMaintenanceCost = await calculateTotalMaintenanceCost(server.components);
 
-  saveCollectionToDisk(servers, 'servers');
+  await saveCollectionToDisk(servers, 'servers');
 
   res.status(200).json({
     message: 'Componente añadido al servidor con éxito.',
@@ -355,10 +383,10 @@ export const addComponentToServer = (req, res) => {
   });
 };
 
-export const getMissingComponents = (req, res) => {
+export const getMissingComponents = async (req, res) => {
   const { name } = req.params;
 
-  const server = findServerByName(name, res);
+  const server = await findServerByName(name);
 
   // Usamos la lista mandatoryComponentTypes, asumiendo que incluye 'OS'
   const serverComponentTypes = server.components.map(c => c.type);
@@ -369,18 +397,18 @@ export const getMissingComponents = (req, res) => {
   res.status(200).json({ missing: missingComponents });
 };
 
-export const getServerTotalCost = (req, res) => {
+export const getServerTotalCost = async (req, res) => {
   const { name } = req.params;
 
-  const server = findServerByName(name, res);
+  const server = await findServerByName(name);
 
   res.status(200).json({ totalPrice: server.totalPrice });
 };
 
-export const getServerMaintenanceCost = (req, res) => {
+export const getServerMaintenanceCost = async (req, res) => {
   const { name } = req.params;
 
-  const server = findServerByName(name, res);
+  const server = await findServerByName(name);
 
   res.status(200).json({ totalMaintenanceCost: server.totalMaintenanceCost });
 };

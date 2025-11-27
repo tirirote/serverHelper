@@ -12,12 +12,12 @@ const testNetwork = {
     gateway: '192.168.10.1',
 };
 
-beforeEach(() => {
-    const db = getDb();
-    resetTestDB(db);
+beforeEach(async () => {
+    const db = await getDb();
+    await resetTestDB(db);
 });
 
-afterAll(() => {    
+afterAll(() => {
     closeDbWatchers();
 });
 
@@ -34,7 +34,7 @@ describe('Workspace Service API', () => {
         await request(app).post('/api/networks').send(testNetwork);
 
         const res = await request(app).post('/api/workspaces').send(newWorkspace);
-        const db_updated = getDb();
+        const db_updated = await getDb();
 
         expect(res.statusCode).toEqual(201);
         expect(res.body.workspace).toHaveProperty('name', 'Workspace 1');
@@ -69,14 +69,14 @@ describe('Workspace Service API', () => {
 
         const res = await request(app).put(`/api/workspaces/${encodeURIComponent(newWorkspace.name)}`).send({ ...newWorkspace, name: 'Updated Workspace' });
 
-        const db_updated = getDb();
+        const db_updated = await getDb();
 
         expect(res.statusCode).toEqual(200);
         expect(res.body.workspace).toHaveProperty('name', 'Updated Workspace');
         expect(db_updated.workspaces.length).toBe(1);
     });
 
-    it('should get all workspaces', async () => {        
+    it('should get all workspaces', async () => {
         // 1. Creamos la red
         await request(app).post('/api/networks').send(testNetwork);
         // 2. Creamos los workspaces

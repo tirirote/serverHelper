@@ -1,58 +1,78 @@
 import { componentSchema } from '../schemas/componentSchema.js'
-
 //BD
 import { getDb } from '../db/dbLoader.js';
 import { saveCollectionToDisk } from '../db/dbUtils.js';
 
 //AUX
-const findExistingComponentByName = (componentName, res) => {
-
-  const db = getDb();
+const findExistingComponentByName = async (componentName) => {
+  const db = await getDb();
+  
   const existingComponent = db.components.find(c => c.name === componentName);
+
   if (existingComponent) {
-    return res.status(409).json({ message: 'Ya existe un componente con este nombre.' });
+    const error = new Error('Ya existe un componente con este nombre.');
+    error.status = 409; // 💡 Adjuntar status
+    throw error;
   }
 };
 
-export const findComponentByName = (componentName, res) => {
-  const db = getDb();
+export const findComponentByName = async (componentName) => {
+  const db = await getDb();
+  
   const component = db.components.find(c => c.name === componentName);
+
   if (!component) {
-    return res.status(404).json({ message: 'Componente no encontrado.' });
+    const error = new Error('Componente no encontrado.');
+    error.status = 404; // 💡 Adjuntar status
+    throw error;
   }
+
   return component;
 
 };
 
-const findComponentIndexByName = (componentName, res) => {
-  const db = getDb();
+const findComponentIndexByName = async (componentName) => {
+  const db = await getDb();
+  
   const componentIndex = db.components.findIndex(c => c.name === componentName);
+
   if (componentIndex === -1) {
-    return res.status(404).json({ message: 'Componente no encontrado.' });
+    const error = new Error('Componente no encontrado.');
+    error.status = 404; // 💡 Adjuntar status
+    throw error;
   }
+
   return componentIndex;
 }
 
-const validateComponent = (componentToValidate, res) => {
+const validateComponent = (componentToValidate) => {
   const { error, value } = componentSchema.validate(componentToValidate, { stripUnknown: true });
+
   if (error) {
-    return res.status(400).json({ message: error.details[0].message });
+    const validationError = new Error(error.details[0].message);
+    validationError.status = 400; // 💡 Adjuntar status
+    throw validationError;
   }
+
   return value;
 }
 
-const validateComponentDetails = (componentDetails, res) => {
+const validateComponentDetails = (componentDetails) => {
   const { error, value } = componentSchema.optional().validate(componentDetails, { stripUnknown: true });
+  
   if (error) {
-    return res.status(400).json({ message: error.details[0].message });
+    const validationError = new Error(error.details[0].message);
+    validationError.status = 400; // 💡 Adjuntar status
+    throw validationError;
   }
+
   return value;
 };
 
 //API Methods
-export const createComponent = (req, res) => {
+export const createComponent = async (req, res) => {
   try {
-    const db = getDb();
+    const db = await getDb();
     const components = [...db.components];
     const rawComponentData = req.body;
 
@@ -60,16 +80,14 @@ export const createComponent = (req, res) => {
     const validatedComponent = validateComponent(rawComponentData);
 
     // 2. Comprobación de existencia (Pura, lanza 409)
-    findExistingComponentByName(validatedComponent.name);
+    await findExistingComponentByName(validatedComponent.name);
 
     // 3. Creación
-    const newComponent = {
-      ...validatedComponent
-    };
+    const newComponent = { ...validatedComponent };
 
     // 4. Persistencia
     components.push(newComponent);
-    saveCollectionToDisk(components, 'components');
+    await saveCollectionToDisk(components, 'components');
 
     res.status(201).json({
       message: 'Componente creado con éxito',
@@ -86,9 +104,9 @@ export const createComponent = (req, res) => {
 
 };
 
-export const deleteComponent = (req, res) => {
+export const deleteComponent = async (req, res) => {
   try {
-    const db = getDb();
+    const db = await getDb();
     const components = [...db.components];
     const { name } = req.params;
 
@@ -101,7 +119,7 @@ export const deleteComponent = (req, res) => {
     }
 
     // Persistencia
-    saveCollectionToDisk(updatedComponents, 'components');
+    await saveCollectionToDisk(updatedComponents, 'components');
     res.status(200).json({ message: 'Componente eliminado con éxito.' });
 
   } catch (error) {
@@ -110,21 +128,20 @@ export const deleteComponent = (req, res) => {
   }
 };
 
-export const updateComponent = (req, res) => {
+export const updateComponent = async (req, res) => {
   try {
-    const db = getDb();
+    const db = await getDb();
     const components = [...db.components];
     const { name } = req.params;
     const { ...newDetails } = req.body;
 
     // 1. Encontrar el índice (Híbrido, devuelve 'res' si es 404)
-    const componentIndex = findComponentIndexByName(name, res);
-    if (componentIndex === res) return;
+    const componentIndex = await findComponentIndexByName(name);
 
     const currentComponent = components[componentIndex];
 
     // 2. Validación de Joi para la actualización (Pura, lanza 400)
-    let validatedDetails = validateComponentDetails(newDetails, res);
+    let validatedDetails = validateComponentDetails(newDetails);
 
     if (!validatedDetails) {
       validatedDetails = {};
@@ -132,7 +149,7 @@ export const updateComponent = (req, res) => {
 
     // 3. Comprobación de duplicados si el nombre está siendo actualizado
     if (validatedDetails.name && validatedDetails.name !== currentComponent.name) {
-      findExistingComponentByName(validatedDetails.name); // Lanza 409 si el nuevo nombre ya existe
+      await findExistingComponentByName(validatedDetails.name); // Lanza 409 si el nuevo nombre ya existe
     }
 
     // 4. Aplicar cambios y asegurar el formato
@@ -143,7 +160,7 @@ export const updateComponent = (req, res) => {
 
     // 5. Persistencia
     components[componentIndex] = updatedComponent;
-    saveCollectionToDisk(components, 'components');
+    await saveCollectionToDisk(components, 'components');
 
     res.status(200).json({
       message: 'Componente actualizado con éxito',
@@ -159,50 +176,50 @@ export const updateComponent = (req, res) => {
   }
 };
 
-export const getAllComponents = (req, res) => {
-  const db = getDb();
+export const getAllComponents = async (req, res) => {
+  const db = await getDb();
   const components = db.components;
   res.status(200).json({ components });
 };
 
-export const getComponentByName = (req, res) => {
+export const getComponentByName = async (req, res) => {
   const { name } = req.params;
-  const component = findComponentByName(name, res);
+  const component = await findComponentByName(name);
   res.status(200).json({ component });
 };
 
-export const getComponentPrice = (req, res) => {
+export const getComponentPrice = async (req, res) => {
   const { name } = req.params;
-  const component = findComponentByName(name, res);
+  const component = await findComponentByName(name);
   res.status(200).json({ price: component.price });
 };
 
-export const getComponentMaintenanceCost = (req, res) => {
+export const getComponentMaintenanceCost = async (req, res) => {
   const { name } = req.params;
-  const component = findComponentByName(name, res);
+  const component = await findComponentByName(name);
   res.status(200).json({ maintenanceCost: component.maintenanceCost });
 };
 
-export const getComponentModelPath = (req, res) => {
+export const getComponentModelPath = async (req, res) => {
   const { name } = req.params;
-  const component = findComponentByName(name, res);
+  const component = await findComponentByName(name, res);
   res.status(200).json({ modelPath: component.modelPath });
 };
 
-export const getComponentCompatibleList = (req, res) => {
+export const getComponentCompatibleList = async (req, res) => {
   const { name } = req.params;
-  const component = findComponentByName(name, res);
+  const component = await findComponentByName(name);
   res.status(200).json({ compatibleList: component.compatibleList });
 };
 
-export const getComponentDetails = (req, res) => {
+export const getComponentDetails = async (req, res) => {
   const { name } = req.params;
-  const component = findComponentByName(name, res);
+  const component = await findComponentByName(name);
   res.status(200).json({ details: component.details });
 };
 
-export const getComponentType = (req, res) => {
+export const getComponentType = async (req, res) => {
   const { name } = req.params;
-  const component = findComponentByName(name, res);
+  const component = await findComponentByName(name);
   res.status(200).json({ type: component.type });
 };

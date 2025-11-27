@@ -8,9 +8,9 @@ import { createApp } from '../src/app.js';
 // Configuración de un servidor de prueba
 const app = createApp();
 
-beforeEach(() => {
-    const db = getDb();
-    resetTestDB(db);
+beforeEach(async () => {
+    const db = await getDb();
+    await resetTestDB(db);
 });
 
 afterAll(() => {    
@@ -25,7 +25,7 @@ describe('User Service API', () => {
         const res = await request(app)
             .post('/api/users')
             .send(newUser);
-        const db_updated = getDb();
+        const db_updated = await getDb();
 
         expect(res.statusCode).toEqual(201);
         expect(res.body.user).toHaveProperty('username');
@@ -35,7 +35,6 @@ describe('User Service API', () => {
 
     // Test para evitar crear un usuario con un nombre de usuario duplicado
     it('should not create a user with a duplicate username', async () => {
-        const db = getDb();
         const sameUser = { username: 'sameUser', password: 'password123' };
         //1. Creamos el usuario
         await request(app).post('/api/users').send(sameUser);
@@ -63,7 +62,6 @@ describe('User Service API', () => {
         await request(app).post('/api/users').send(newUser);
         const res = await request(app).put('/api/users/userToUpdate').send({ newPassword: 'newpassword' });
 
-
         expect(res.statusCode).toEqual(200);
         expect(res.body.user.password).toBe('newpassword');
     });
@@ -76,7 +74,7 @@ describe('User Service API', () => {
         const res = await request(app)
             .delete('/api/users/userToDelete');
 
-        const db_updated = getDb();
+        const db_updated = await getDb();
 
         expect(res.statusCode).toEqual(200);
         expect(res.body.message).toBe('Usuario eliminado con éxito.');

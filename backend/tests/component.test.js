@@ -8,12 +8,12 @@ import { createApp } from '../src/app.js';
 
 const app = createApp();
 
-beforeEach(() => {
-    const db = getDb();
-    resetTestDB(db);
+beforeEach(async () => {
+    const db = await getDb();
+    await resetTestDB(db);
 });
 
-afterAll(() => {    
+afterAll(() => {
     closeDbWatchers();
 });
 
@@ -33,11 +33,10 @@ describe('Component API (Simplified)', () => {
         // 2. Ejecutar la escritura (guarda en disco)
         const res = await request(app).post('/api/components').send(newComponent);
 
-        // 3. Forzar la sincronización (obtener la nueva referencia)        
-        const db_updated = getDb();
-
         expect(res.statusCode).toBe(201);
         expect(res.body.component).toHaveProperty('name', 'Test RAM');
+        
+        const db_updated = await getDb();
 
         // 4. Verificar la longitud con la nueva referencia
         expect(db_updated.components.length).toBe(initialDBData.components.length + 1);
@@ -46,27 +45,21 @@ describe('Component API (Simplified)', () => {
     it('should successfully delete a component', async () => {
         const componentName = 'Intel Xeon E5';
 
-        // 1. Obtener la longitud inicial
-        const db_initial = getDb();
-        const initialCount = db_initial.components.length;
-
         // 2. Ejecutar la eliminación (guarda en disco)
         const res = await request(app).delete(`/api/components/${encodeURIComponent(componentName)}`);
 
-        // 3. Forzar la sincronización        
-        const db_updated = getDb();
-
         expect(res.statusCode).toBe(200);
         expect(res.body.message).toBe('Componente eliminado con éxito.');
-
+        const db_updated = await getDb();
         // 4. Verificar la longitud con la nueva referencia
         expect(db_updated.components.length).toBe(initialDBData.components.length - 1);
     });
 
     it('should get a component by name', async () => {
         const componentName = 'Intel Xeon E5'; // Usar un componente de los datos iniciales
+
         const res = await request(app).get(`/api/components/${encodeURIComponent(componentName)}`);
-        const db_updated = getDb();
+
         expect(res.statusCode).toBe(200);
         expect(res.body.component).toHaveProperty('name', componentName);
     });
@@ -74,6 +67,7 @@ describe('Component API (Simplified)', () => {
     it('should successfully update a component', async () => {
         const componentName = 'Intel Xeon E5';
         const updatedDetails = { type: 'CPU', price: 1600, details: 'Precio y detalles actualizados' };
+
         const res = await request(app).put(`/api/components/${encodeURIComponent(componentName)}`).send(updatedDetails);
 
         expect(res.statusCode).toBe(200);

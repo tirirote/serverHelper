@@ -1,4 +1,4 @@
-import fs from 'fs';
+import * as fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -20,49 +20,64 @@ const collections = {
 // Objeto que mantiene la DB en memoria (inicialmente vacío)
 let dbCache = {};
 const watchers = []
-// Ruta base donde se encuentran tus archivos de datos
-const DATA_DIR = path.resolve(__dirname, 'collections/');
+// Ruta base donde se encuentran tus archivos de datos. En test usamos una
+// carpeta por worker para evitar que multiples procesos de jest se pisen.
+const DATA_DIR = process.env.NODE_ENV === 'test'
+    ? path.resolve(__dirname, `collections/test-${process.env.JEST_WORKER_ID || '0'}/`)
+    : path.resolve(__dirname, 'collections/');
 
 /**
  * Carga todos los archivos JSON de datos y actualiza la caché de la DB.
  */
-const loadDbFromDiskOnce = () => {
+const loadDbFromDiskOnce = async () => { // 💡 AHORA ES ASÍNCRONA
     let newDb = {};
+    const promises = [];
 
+    // Ensure the data directory exists (tests use per-worker dirs)
+    await fs.mkdir(DATA_DIR, { recursive: true });
+
+    // Recolectar las promesas de lectura para ejecutarlas en paralelo
     for (const [key, filename] of Object.entries(collections)) {
         const filePath = path.join(DATA_DIR, filename);
-        try {
-            const data = fs.readFileSync(filePath, 'utf8');
-            newDb[key] = JSON.parse(data);
-        } catch (error) {
 
-            if (process.env.NODE_ENV === 'test') {
-                newDb[key] = [];
-            } else {
-                // En producción/desarrollo, usamos la caché como fallback
-                newDb[key] = dbCache[key] || [];
+        // 💡 CREAR UNA PROMESA para la lectura y el parseo
+        const readAndParse = async () => {
+            try {
+                const data = await fs.readFile(filePath, 'utf8'); // 💡 AWAIT LECTURA
+                newDb[key] = JSON.parse(data);
+            } catch (error) {
+                // Manejo de fallbacks (como ya lo teníamos)
+                if (process.env.NODE_ENV === 'test') {
+                    newDb[key] = [];
+                } else {
+                    newDb[key] = dbCache[key] || [];
+                }
             }
-        }
+        };
+        promises.push(readAndParse());
     }
+
+    // Esperar a que todos los archivos se lean y parseen
+    await Promise.all(promises);
 
     return newDb;
 };
 
-const loadAllCollectionsFromDisk = () => {
-    const newDb = loadDbFromDiskOnce();
+const loadAllCollectionsFromDisk = async () => {
+    const newDb = await loadDbFromDiskOnce();
     dbCache = newDb;
 };
 
-export const getDb = () => {
+export const getDb = async () => {
     // 💡 CONDICIÓN CLAVE: Si estamos en test, leemos el disco en cada llamada.
     if (process.env.NODE_ENV === 'test') {
-        return loadDbFromDiskOnce();
+        return await loadDbFromDiskOnce();
     }
 
     // Si no es test (producción/desarrollo), usamos el Singleton/caché.
     if (Object.keys(dbCache).length === 0) {
         // Si la caché está vacía, la cargamos (esto solo ocurre la primera vez).
-        loadAllCollectionsFromDisk();
+        await loadAllCollectionsFromDisk();
     }
     return dbCache;
 };
