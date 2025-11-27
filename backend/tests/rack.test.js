@@ -39,7 +39,6 @@ beforeEach(() => {
 });
 
 afterAll(() => {
-    console.log('Cerrando watchers de la base de datos...');
     closeDbWatchers();
 });
 
@@ -211,5 +210,107 @@ describe('Rack Service API', () => {
 
         expect(res.statusCode).toEqual(409);
         expect(res.body).toHaveProperty('message', `El servidor ya está en este rack.`);
+    });
+
+    it('8. should successfully retrieve an existing rack by name and workspace', async () => {
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 1. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
+
+        const expectedRack = {
+            name: testRack.name,
+            units: 42,
+            workspaceName: testWorkspace.name,
+            powerStatus: 'Off',
+            healthStatus: 'Unknown',
+            servers: [],
+            totalCost: 0,
+            totalMaintenanceCost: 0
+        };
+
+        await request(app).post('/api/racks').send(expectedRack);
+
+        const res = await request(app).get(`/api/racks/${encodeURIComponent(testWorkspace.name)}/${encodeURIComponent(testRack.name)}`);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toHaveProperty('rack');
+        // Usamos toEqual/to.deep.equal para verificar el contenido del objeto
+        expect(res.body.rack).toEqual(expectedRack);
+    });
+
+    it('9. should return 404 if the rack does not exist in the specified workspace', async () => {
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 1. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
+
+        const expectedRack = {
+            name: testRack.name,
+            units: 42,
+            workspaceName: testWorkspace.name,
+            powerStatus: 'Off',
+            healthStatus: 'Unknown',
+            servers: [],
+            totalCost: 0,
+            totalMaintenanceCost: 0
+        };
+
+        await request(app).post('/api/racks').send(expectedRack);
+
+        const res = await request(app).get(`/api/racks/${encodeURIComponent('WrongWorkspace')}/${encodeURIComponent(testRack.name)}`);
+
+        expect(res.statusCode).toEqual(404);
+        expect(res.body).toHaveProperty('message');
+    });
+
+    it('13. should successfully update mutable rack properties (units, healthStatus)', async () => {
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 2. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
+        // 3. Creamos el rack
+        await request(app).post('/api/racks').send(testRack);
+
+        const updateData = {
+            units: 20,
+            healthStatus: 'Excellent',
+            // Intentar actualizar campos protegidos (deben ser ignorados por el controlador)
+            workspaceName: 'ProtectedName', 
+            servers: ['ServerX'], 
+        };
+
+        const res = await request(app).put(`/api/racks/${encodeURIComponent(testRack.name)}`).send(updateData);
+        expect(res.statusCode).toEqual(200);
+        
+        // Verificar que los campos actualizables se modificaron
+        expect(res.body.rack.units).toEqual(20);
+        expect(res.body.rack.healthStatus).toEqual('Excellent');
+        
+        // Verificar que los campos protegidos NO se modificaron
+        expect(res.body.rack.workspaceName).toEqual(testWorkspace.name);
+        expect(res.body.rack.servers).toEqual([]); 
+    });
+
+    it('14. should return 400 if validation fails on updated fields (e.g., units invalid type)', async () => {
+        // 1. Creamos la red
+        await request(app).post('/api/networks').send(testNetwork);
+        // 2. Creamos el workspace
+        await request(app).post('/api/workspaces').send(testWorkspace);
+        // 3. Creamos el rack
+        await request(app).post('/api/racks').send(testRack);
+
+        const updateData = {
+            units: 'veinte' // Tipo de dato incorrecto
+        };
+
+        const res = await request(app).put(`/api/racks/${encodeURIComponent(testRack.name)}`).send(updateData);
+        expect(res.statusCode).toEqual(400);
+        expect(res.body).toHaveProperty('message');
+    });
+
+    it('15. should return 404 if trying to update a non-existent rack', async () => {
+        const res = await request(app).put(`/api/racks/${encodeURIComponent('NonExistentRack')}`).send({ units: 1 });
+        expect(res.statusCode).toEqual(404);
     });
 });

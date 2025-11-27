@@ -17,8 +17,7 @@ beforeEach(() => {
     resetTestDB(db);
 });
 
-afterAll(() => {
-    console.log('Cerrando watchers de la base de datos...');
+afterAll(() => {    
     closeDbWatchers();
 });
 

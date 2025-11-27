@@ -7,12 +7,29 @@ import { getDb } from '../db/dbLoader.js';
 import { saveCollectionToDisk } from '../db/dbUtils.js';
 
 //AUX
-export const findRackByName = (rackName, res) => {
+const findRackByName = (rackName, res) => {
   const db = getDb();
   const rack = db.racks.find(r => r.name === rackName);
   if (!rack) {
     return res.status(404).json({ message: 'Rack no encontrado.' });
   }
+  return rack;
+};
+
+const findRackByWorkspaceAndName = (workspaceName, rackName, res) => {
+  const db = getDb();
+
+  const rack = db.racks.find(r =>
+    r.name === rackName && r.workspaceName === workspaceName
+  );
+
+  // 3. Manejo de error (Rack no encontrado o Rack/Workspace incorrecto)
+  if (!rack) {
+    // Usamos 404 para indicar que la combinación no existe.
+    return res.status(404).json({ message: `Rack '${rackName}' no encontrado en el workspace '${workspaceName}'.` });
+  }
+
+  // 4. Devolver el objeto rack encontrado
   return rack;
 };
 
@@ -184,7 +201,14 @@ export const updateRack = (req, res) => {
   const { name } = req.params;
 
   // 💡 CORRECCIÓN: Descartar campos que no deben ser actualizados si se envían.
-  const { id, workspaceName, ...updatedDetails } = req.body;
+  const {
+    id,
+    workspaceName,
+    servers,
+    totalCost,
+    totalMaintenanceCost,
+    ...updatedDetails
+  } = req.body;
 
   // 1. Encontrar el índice (findRackIndexByName devuelve 404 o el índice)
   const rackIndex = findRackIndexByName(name, res);
@@ -213,7 +237,7 @@ export const updateRack = (req, res) => {
 export const getRackByName = (req, res) => {
   const { name, workspaceName } = req.params;
 
-  const rack = findRackIndexByWorkspace(name, workspaceName, res)
+  const rack = findRackByWorkspaceAndName(workspaceName, name, res)
 
   res.status(200).json({ rack });
 };
@@ -238,15 +262,20 @@ export const addServerToRack = (req, res) => {
 
   // 2. Validamos el servidor encontrado
   const validatedServer = validateServer(serverToValidate, res);
-  if (validatedServer === res) return; // Detiene el flujo si Joi falla (error 400)
+  if (validatedServer === res) return;
 
-  // 3. Encontrar el rack
-  const rack = findRackByName(rackName, res);
-  if (rack === res) return;
+  //3. Buscamos el rack
+  const rackIndex = racks.findIndex(r => r.name === rackName);
+  if (rackIndex === -1) {
+    return res.status(404).json({ message: `Rack '${rackName}' no encontrado.` });
+  }
 
-  // 3. Verificar si el servidor ya está en el rack
-  const existingServerError = findExistingServerInRack(serverName, rack, res);
-  if (existingServerError === res) return; // Error 409
+  const rack = racks[rackIndex];
+
+  // 3. Verificar si el servidor ya está en el rack (Error 409)
+  if (rack.servers.includes(serverName)) {
+    return res.status(409).json({ message: 'El servidor ya está en este rack.' });
+  }
 
   // 4. Mutar el rack en la copia (rack es una referencia al elemento dentro de 'racks')
   rack.servers.push(serverName);
@@ -262,39 +291,12 @@ export const addServerToRack = (req, res) => {
   });
 };
 
-export const toggleRackPower = (req, res) => {
-  const db = getDb();
-  const racks = [...db.racks];
-  const { name } = req.params;
-
-  // 1. Encontrar el rack (findRackByName devuelve 404 o el objeto)
-  const rack = findRackByName(name, res);
-  if (rack.statusCode) return rack;
-
-  // 2. Cambiar el estado
-  const newStatus = rack.powerStatus === 'On' ? 'Off' : 'On';
-  rack.powerStatus = newStatus;
-
-  // 3. 💡 CORRECCIÓN DE FLUJO: Validar el rack (validateRack devuelve error 400 o el valor)
-  const validatedRack = validateRack(rack, res);
-  if (validatedRack.statusCode) return validatedRack;
-
-  // 4. 💡 PERSISTENCIA
-  saveCollectionToDisk(racks, 'racks');
-
-  res.status(200).json({
-    message: `Rack '${name}' encendido: ${newStatus}`,
-    powerStatus: newStatus
-  });
-};
-
 export const getRackMaintenanceCost = (req, res) => {
   try {
-    const { name } = req.params;
+    const { workspaceName, name } = req.params;
 
     // 1. Buscar el rack (maneja 404 si no existe)
-    const rack = findRackByName(name, res);
-    console.log(JSON.stringify(rack,null, 2));
+    const rack = findRackByWorkspaceAndName(workspaceName, name, res);
     if (rack === res) return;
 
     // 2. 💡 Asegurar la existencia del coste y tomar el valor.
