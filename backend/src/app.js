@@ -10,7 +10,7 @@ import serverRoutes from './routes/serverRoutes.js';
 import componentRoutes from './routes/componentRoutes.js';
 import networkRoutes from './routes/networkRoutes.js'
 
-const FRONTENTD_PORT = process.env.FRONTENTD_PORT || 5173
+const FRONTENTD_PORT = process.env.FRONTENTD_PORT || 3001
 
 export const createApp = () => {
     const app = express();
