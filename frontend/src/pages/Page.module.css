@@ -1,0 +1,114 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.contentGrid {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+}
+
+.visualizerColumn {
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+    align-items: center;
+    justify-content: center;
+    width: 60%;
+}
+
+/* Columna de la Lista (a la derecha) */
+.listColumn {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.listColumnFooter {
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    margin-top: 32px;
+    align-self: flex-end;
+    align-items: end;
+}
+
+/* Contenedor de la Tabla */
+.tableContainer {
+    width: 100%;
+}
+
+.details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.detailRow {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background-color: var(--color-gray-darkest);
+    border-radius: 8px;
+}
+
+.detailLabel {
+    font-weight: 400;
+    color: var(--color-white);
+}
+
+.detailValue {
+    font-weight: 400;
+    color: var(--color-gray-lightest);
+}
+
+/* --- Estilos de Tabla y Celdas --- */
+
+.idCell {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-gray-lightest); /* gray-500 */
+}
+
+/* Celda de Nombre (con estilo de enlace/click) */
+.nameCellLink {
+    font-weight: 600;
+    color: var(--color-gray-lightest);
+    cursor: pointer;
+    transition: color 0.15s ease-in-out;
+    padding: 2px 0; /* Espaciado para mejorar el área de clic */
+    transition: all 0.2 ease-in-out;
+}
+
+.nameCellLink:hover {
+    color: var(--color-white);
+}
+
+.activeName{
+    color: var(--color-white);
+    background-color: var(--color-gray-light);
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+.centerAlign {
+    text-align: center;
+}
+
+/* --- Empty State --- */
+.emptyState {
+    text-align: center;
+    padding: 50px;
+    background-color: var(--color-gray-darkest);
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.emptyIcon {
+    color: var(--color-gray-light);
+    margin-bottom: 15px;
+}
