@@ -1,11 +1,16 @@
 /* src/pages/ShopPage/ShopPageDetails.module.css */
+.page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
 
 .headerContainer {
     display: flex;
-    align-self: start;
+    align-self: flex-end;
+    justify-content: end;
     margin-top: 16px;
     margin-bottom: 32px;
-    width: 50%;
 }
 
 .productCard {

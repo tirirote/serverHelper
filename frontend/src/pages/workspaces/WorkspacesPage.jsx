@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { Trash2, AlertTriangle, Loader2, Globe, Plus } from 'lucide-react';
+import { Trash2, AlertTriangle, Loader2, Globe, Plus, CircleQuestionMark, Info } from 'lucide-react';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../components/ui/table/DataTable.jsx';
 import TableActions from '../../components/ui/table/TableActions.jsx';
 import Dialog from '../../components/ui/dialog/Dialog.jsx';
 import Button from '../../components/ui/button/Button.jsx';
-import styles from './WorkspacesPage.module.css';
+import styles from '../Page.module.css';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
 import NewWorkspaceForm from '../../components/form/workspace/NewWorkspaceForm.jsx';
@@ -90,9 +90,9 @@ const WorkspacesPage = () => {
     useEffect(() => {
         // Al montar, llamamos a la función con initialLoad=true
         fetchAndSetWorkspaces(true);
-    }, [fetchAndSetWorkspaces]); 
+    }, [fetchAndSetWorkspaces]);
 
-    
+
     // ... (filteredWorkspaces useMemo sin cambios)
     const filteredWorkspaces = useMemo(() => {
         if (!searchTerm) {
@@ -104,7 +104,7 @@ const WorkspacesPage = () => {
             ws.description.toLowerCase().includes(lowerCaseSearch)
         );
     }, [workspaces, searchTerm]);
-    
+
     // --- 3. GESTIÓN DE DATOS EXTRA (RACKS) AL SELECCIONAR UN WORKSPACE (Sin cambios) ---
     useEffect(() => {
         if (activeWorkspace) {
@@ -181,7 +181,7 @@ const WorkspacesPage = () => {
                 />
             )
         },
-    ], [activeWorkspace]); 
+    ], [activeWorkspace]);
 
     // Contenido condicional para la lista/tabla
     const listContent = useMemo(() => {
@@ -297,9 +297,14 @@ const WorkspacesPage = () => {
     };
 
     return (
-        <div>
+        <div className={styles.page}>
             <div className={styles.header}>
                 <h1>Workspaces</h1>
+                <Button
+                    variant="primary"
+                    onClick={() => showToast('Los Workspaces son entornos aislados para gestionar recursos.', 'info')}
+                > <Info size={20} />
+                </Button>
             </div>
 
             <div className={styles.contentGrid}>
@@ -355,10 +360,10 @@ const WorkspacesPage = () => {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
             >
-                    <NewWorkspaceForm
-                        onClose={handleCloseNewWorkspaceModal}
-                        onSubmit={handleCreateWorkspace}
-                    />
+                <NewWorkspaceForm
+                    onClose={handleCloseNewWorkspaceModal}
+                    onSubmit={handleCreateWorkspace}
+                />
             </Dialog>
 
             <Dialog

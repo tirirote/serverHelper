@@ -4,7 +4,6 @@ import Sidebar from './components/sidebar/Sidebar.jsx';
 import styles from './AppLayout.module.css';
 
 //Pages
-import ProfilePage from './pages/profile/ProfilePage.jsx';
 import WelcomePage from './pages/welcome/WelcomePage.jsx';
 import Playground from './pages/Playground.jsx';
 import Workspaces from './pages/workspaces/WorkspacesPage.jsx';
@@ -39,7 +38,7 @@ const AppLayout = () => {
             />
 
             <div className={`${styles.contentWrapper} ${isSidebarOpen ? styles.contentShift : ''}`}>
-                <main className={styles.mainContent}>
+                <div className={styles.mainContent}>
                     <Routes>
                         <Route path="/workspaces" element={<Workspaces />} />
                         <Route path="/workspaces/:workspaceId" element={<WorkspaceDetailsPage />} />
@@ -50,10 +49,10 @@ const AppLayout = () => {
                         <Route path="/components/:componentId" element={<Playground />} />
                         <Route path="/servers" element={<ServersPage />} />
                         <Route path="/servers/:serverId" element={<ServerDetailsPage />} />
-                        <Route path="/profile" element={<ProfilePage />} />
+                        <Route path="/playground" element={<Playground />} />
                         <Route path="*" element={<Workspaces />} />
                     </Routes>
-                </main>
+                </div>
             </div>
         </div>
     );

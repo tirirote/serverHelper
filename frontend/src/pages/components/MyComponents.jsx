@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBag, Server, Trash2, Zap, AlertTriangle, ArrowRight, XCircle, ChevronRight, Loader2, Plus } from 'lucide-react';
+import { ShoppingBag, Server, Trash2, Zap, AlertTriangle, ArrowRight, XCircle, ChevronRight, Loader2, Plus, Info } from 'lucide-react';
 
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../components/ui/table/DataTable.jsx';
@@ -199,12 +199,25 @@ const MyComponents = () => {
 
 
     return (
-        <div className={styles.myComponentsPage}>
-            <header className={styles.header}>
+        <div className={styles.page}>
+            <div className={styles.header}>
                 <h1>
                     Inventario de Componentes
                 </h1>
-            </header>
+                <div className={styles.headerButtons} >
+                    <Button
+                        variant="primary"
+                        onClick={handleGoToStore}
+                    >
+                        <ShoppingBag size={20} />Tienda
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => showToast('Gestiona los componentes instalados en tus servidores y racks. Selecciona un componente para ver su modelo 3D y detalles.', 'info')}
+                    > <Info size={20} />
+                    </Button>
+                </div>
+            </div>
 
             <div className={styles.contentGrid}>
                 {/* Columna de Visualización 3D */}
@@ -274,14 +287,6 @@ const MyComponents = () => {
                                 )}
                             </>
                         )}
-                    </div>
-                    <div className={styles.listColumnFooter}>                        
-                        <Button
-                            variant="primary"
-                            onClick={handleGoToStore}
-                        >
-                            <ShoppingBag size={20} />Tienda
-                        </Button>
                     </div>
                 </div>
             </div>

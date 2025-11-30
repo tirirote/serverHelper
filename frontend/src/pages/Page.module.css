@@ -1,3 +1,9 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
 .header {
     display: flex;
     justify-content: space-between;
@@ -5,19 +11,26 @@
     margin-bottom: 25px;
 }
 
+.headerButtons {
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+}
+
 .contentGrid {
     display: flex;
     flex-direction: row;
     align-items: start;
+    gap: 16px;
 }
 
 .visualizerColumn {
     display: flex;
-    flex-direction: column;
-    align-self: flex-start;
+    flex-direction: row;
+    align-self: center;
     align-items: center;
-    justify-content: center;
-    width: 60%;
+    justify-content: start;
+    width: 35%;
 }
 
 /* Columna de la Lista (a la derecha) */
@@ -71,7 +84,8 @@
 .idCell {
     font-size: 1rem;
     font-weight: 500;
-    color: var(--color-gray-lightest); /* gray-500 */
+    color: var(--color-gray-lightest);
+    /* gray-500 */
 }
 
 /* Celda de Nombre (con estilo de enlace/click) */
@@ -80,7 +94,8 @@
     color: var(--color-gray-lightest);
     cursor: pointer;
     transition: color 0.15s ease-in-out;
-    padding: 2px 0; /* Espaciado para mejorar el área de clic */
+    padding: 2px 0;
+    /* Espaciado para mejorar el área de clic */
     transition: all 0.2 ease-in-out;
 }
 
@@ -88,7 +103,7 @@
     color: var(--color-white);
 }
 
-.activeName{
+.activeName {
     color: var(--color-white);
     background-color: var(--color-gray-light);
     border-radius: 8px;

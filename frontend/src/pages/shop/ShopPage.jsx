@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { ShoppingCart, Server, Package, Cpu, HardDrive, PlusCircle, MemoryStick, Eye, Loader2, Plus } from 'lucide-react';
+import { ShoppingCart, Server, Package, Cpu, HardDrive, PlusCircle, MemoryStick, Eye, Loader2, Plus, Info } from 'lucide-react';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 import Button from '../../components/ui/button/Button.jsx';
@@ -22,7 +22,6 @@ const ShopPage = () => {
     const [error, setError] = useState(null);
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [cart, setCart] = useState([]);
 
     const fetchShopItems = useCallback(async () => {
         setLoading(true);
@@ -53,8 +52,8 @@ const ShopPage = () => {
         const lowerCaseSearch = searchTerm.toLowerCase();
         return shopItems.filter(item =>
             item.name.toLowerCase().includes(lowerCaseSearch) ||
-            item.description.toLowerCase().includes(lowerCaseSearch) ||
-            item.category.toLowerCase().includes(lowerCaseSearch)
+            item.details.toLowerCase().includes(lowerCaseSearch) ||
+            item.type.toLowerCase().includes(lowerCaseSearch)
         );
     }, [shopItems, searchTerm]);
 
@@ -145,10 +144,15 @@ const ShopPage = () => {
     };
 
     return (
-        <div>
-            <header>
+        <div className={styles.page}>
+            <div className={styles.header}>
                 <h1>Tienda</h1>
-            </header>
+                <Button
+                    variant="primary"
+                    onClick={() => showToast('Explora y adquiere componentes para tus servidores y racks. Usa el buscador para filtrar por tipo, nombre o descripción.', 'info')}
+                > <Info size={20} />
+                </Button>
+            </div>
 
             <div className={styles.headerContainer}>
                 <SearchFilterBar

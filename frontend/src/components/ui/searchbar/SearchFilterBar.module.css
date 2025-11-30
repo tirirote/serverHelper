@@ -4,6 +4,9 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+    width: inherit;
+    box-shadow: 0px 8px 0px 0px var(--color-gray-darkest);
+    border-radius: 8px;
 }
 
 .searchIcon {

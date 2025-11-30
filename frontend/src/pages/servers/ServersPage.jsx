@@ -251,7 +251,7 @@ const ServersPage = () => {
     }, [loading, error, filteredServers, searchTerm, columns, fetchAndSetServers]);
 
     return (
-        <div>
+        <div className={styles.page}>
             <header className={styles.header}>
                 <h1>
                     Mis Servidores

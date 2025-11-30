@@ -35,7 +35,8 @@
    font-size: 2rem;
    font-weight: 800;
    /* Negrita, el peso más alto para el título principal */
-   color: var(--color-white);
+   color: var(--color-orange);
+   padding-left: 16px;
  }
 
  h2,

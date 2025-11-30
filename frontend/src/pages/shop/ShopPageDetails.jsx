@@ -70,7 +70,7 @@ const ShopPageDetails = ({ onAddToCart }) => {
         // Si no se pasa onAddToCart (por ejemplo, la página se accede directamente), consideramos esto como "Compra directa".
         try {
             // Llama a API para marcar el componente como vendido
-            await updateComponent(item.name, { ...item , isSelled: true });
+            await updateComponent(item.name, { ...item, isSelled: true });
             showToast(`Compra realizada: ${item.name}`, 'success');
             // Navegar a la lista de componentes comprados
             navigate('/components');
@@ -85,83 +85,86 @@ const ShopPageDetails = ({ onAddToCart }) => {
     const compatibleList = item.compatibleComponents || item.compatibleWith || [];
 
     return (
-        <div>
+        <div className={styles.page}>
             <div className={styles.headerContainer}>
                 {/* Botón de Regreso */}
-                <Button variant="secondary" size="medium">
+                <Button
+                    variant="secondary"
+                    size="medium"
+                    onClick={() => navigate('/shop')}>
                     <ChevronLeft size={20} /> Volver
                 </Button>
             </div>
             <div className={styles.productCard}>
-                    
-                    <div className={styles.viewerColumn}>
-                        <div className={styles.viewerContainer}>
-                            <ModelViewer
-                                modelPath={item.modelPath}
-                                variant="default"
+
+                <div className={styles.viewerColumn}>
+                    <div className={styles.viewerContainer}>
+                        <ModelViewer
+                            modelPath={item.modelPath}
+                            variant="default"
+                        />
+                    </div>
+                    <p className={styles.viewerTip}>* Usa el ratón para rotar y hacer zoom en el modelo 3D.</p>
+                </div>
+
+                <div className={styles.infoColumn}>
+
+                    <div className={styles.namePriceContainer}>
+                        <h1 className={styles.productName}>{item.name}</h1>
+                        <span className={styles.priceTag}>{formatCurrency(item.price)}</span>
+                    </div>
+
+                    <p className={styles.description}>{item.details}</p>
+
+                    <div className={styles.infoSection}>
+
+                        <h2 className={styles.infoHeader}>Detalles</h2>
+
+                        <div className={styles.infoList}>
+
+                            <div className={styles.infoCard}>
+                                <label className={styles.infoLabel}>Tipo de Componente</label>
+                                <span className={styles.infoValue}>{item.type}</span>
+                            </div>
+                            <div className={styles.infoCard}>
+                                <label className={styles.infoLabel}>Coste de Mantenimiento</label>
+                                <span className={styles.infoValue}>{formatCurrency(item.maintenanceCost)}/mes</span>
+                            </div>
+                            <div className={styles.infoCard}>
+                                <label className={styles.infoLabel}>Consumo Estimado</label>
+                                <span className={styles.infoValue}>{item.estimatedConsumption}W /mes</span>
+                            </div>
+
+                        </div>
+
+                        <GenericList
+                            title='Compatible con'
+                            items={item.compatibleList} />
+                    </div>
+
+                    <div className={styles.purchaseControls}>
+                        <div className={styles.quantityControl}>
+                            <label htmlFor="quantity" className={styles.quantityLabel}>Cantidad</label>
+                            <NumberSelector
+                                value={quantity}
+                                min={1}
+                                max={255}
+                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                                unit=''
                             />
                         </div>
-                        <p className={styles.viewerTip}>* Usa el ratón para rotar y hacer zoom en el modelo 3D.</p>
+
+                        <Button
+                            variant={item.isSelled ? 'secondary' : 'primary'}
+                            onClick={handleAdd}
+                            disabled={item.isSelled}
+                        >
+                            <Plus size={24} />
+                            {item.isSelled ? 'Comprado' : `Añadir (${quantity})`}
+                        </Button>
                     </div>
+                </div>
 
-                    <div className={styles.infoColumn}>
-
-                        <div className={styles.namePriceContainer}>
-                            <h1 className={styles.productName}>{item.name}</h1>
-                            <span className={styles.priceTag}>{formatCurrency(item.price)}</span>
-                        </div>
-
-                        <p className={styles.description}>{item.details}</p>
-
-                        <div className={styles.infoSection}>
-                            
-                            <h2 className={styles.infoHeader}>Detalles</h2>
-                            
-                            <div className={styles.infoList}>
-
-                                <div className={styles.infoCard}>
-                                    <label className={styles.infoLabel}>Tipo de Componente</label>
-                                    <span className={styles.infoValue}>{item.type}</span>
-                                </div>
-                                <div className={styles.infoCard}>
-                                    <label className={styles.infoLabel}>Coste de Mantenimiento</label>
-                                    <span className={styles.infoValue}>{formatCurrency(item.maintenanceCost)}/mes</span>
-                                </div>
-                                <div className={styles.infoCard}>
-                                    <label className={styles.infoLabel}>Consumo Estimado</label>
-                                    <span className={styles.infoValue}>{item.estimatedConsumption}W /mes</span>
-                                </div>
-
-                            </div>
-
-                            <GenericList
-                                title='Compatible con'
-                                items={item.compatibleList} />
-                        </div>
-
-                        <div className={styles.purchaseControls}>
-                            <div className={styles.quantityControl}>
-                                <label htmlFor="quantity" className={styles.quantityLabel}>Cantidad</label>
-                                <NumberSelector
-                                    value={quantity}
-                                    min={1}
-                                    max={255}
-                                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                    unit=''
-                                />
-                            </div>
-
-                            <Button
-                                variant={item.isSelled ? 'secondary' : 'primary'}
-                                onClick={handleAdd}
-                                disabled={item.isSelled}
-                            >
-                                <Plus size={24} />
-                                {item.isSelled ? 'Comprado' : `Añadir (${quantity})`}
-                            </Button>
-                        </div>
-                    </div>
-                
             </div>
         </div>
     );
