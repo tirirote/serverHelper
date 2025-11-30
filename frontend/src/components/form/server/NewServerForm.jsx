@@ -8,7 +8,7 @@ import { useToast } from '../../ui/toasts/ToastProvider.jsx';
 import styles from '../Forms.module.css'; // Reutilizaremos los estilos del formulario de componente
 //API Services
 import { getAllComponents } from '../../../api/services/componentService.js';
-const NewServerForm = ({ onClose }) => {
+const NewServerForm = ({ onClose, onSubmit, racks = [] }) => {
     const { showToast } = useToast();
     const [serverName, setServerName] = useState('');
     const [details, setDetails] = useState('');
@@ -23,6 +23,8 @@ const NewServerForm = ({ onClose }) => {
     const [selectedItems, setSelectedItems] = useState([]);
     const [compatibleItems, setCompatibleItems] = useState([]);
     const [itemLoading, setItemLoading] = useState(true);
+    const [selectedRack, setSelectedRack] = useState(racks && racks.length > 0 ? racks[0] : null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Fetch de items disponibles
     useEffect(() => {
@@ -42,16 +44,24 @@ const NewServerForm = ({ onClose }) => {
         fetchItems();
     }, [showToast]);
 
+    useEffect(() => {
+        if (racks && racks.length > 0 && !selectedRack) {
+            setSelectedRack(racks[0]);
+        }
+    }, [racks]);
+
     // Función para manejar la adición de un componente desde el selector
     const handleAddItem = (newItem) => {
         setSelectedItems(prev => [...prev, newItem]);
+        setCompatibleItems(prev => [...prev, newItem]);
     };
 
     const handleRemoveItem = (itemId) => {
         setSelectedItems(prev => prev.filter(item => item.id !== itemId));
+        setCompatibleItems(prev => prev.filter(item => item.id !== itemId));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const serverData = {
@@ -63,11 +73,22 @@ const NewServerForm = ({ onClose }) => {
         };
 
         // Aquí iría la llamada a la API de creación de servidor (e.g., createServer(serverData))
-        console.log('Formulario de servidor enviado (mock). Datos:', serverData);
+        if (!selectedRack) {
+            showToast('Debes seleccionar un Rack destino antes de crear el servidor.', 'warning');
+            return;
+        }
 
-        // Simulación: Cerrar el modal y notificar al padre
-        // En un caso real, llamarías a onClose(true) si la API fue exitosa.
-        onClose(true);
+        try {
+            setIsSubmitting(true);
+            // Añadir `rackName` si se seleccionó uno
+            if (selectedRack) serverData.rackName = selectedRack.name || selectedRack.id;
+            if (onSubmit) {
+                await onSubmit(serverData);
+            }
+            onClose(true);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -118,6 +139,26 @@ const NewServerForm = ({ onClose }) => {
                     />
                     <span className={styles.currency}>W</span>
                 </div>
+                <div style={{ marginBottom: '12px' }}>
+                    <label>Rack destino</label>
+                    <GenericSelector
+                        availableItems={racks}
+                        compatibleItems={selectedRack ? [selectedRack] : []}
+                        onAddComponent={(rack) => {
+                            setSelectedRack(rack);
+                            setCompatibleItems([rack]);
+                        }}
+                        onRemoveComponent={() => {
+                            setSelectedRack(null);
+                            setCompatibleItems([]);
+                        }}
+                        isLoading={itemLoading || isLoading}
+                        selectorTitle="Rack destino"
+                        listTitle='Rack Seleccionado'
+                        singleSelection={true}
+                    />
+                </div>
+
                 <GenericSelector
                     availableItems={availableItems}
                     compatibleItems={compatibleItems}
@@ -129,7 +170,7 @@ const NewServerForm = ({ onClose }) => {
                 />
 
                 <div className={styles.doneButton}>
-                    <Button type="submit" variant="primary">Crear Servidor</Button>
+                    <Button type="submit" variant="primary" disabled={isSubmitting}>{isSubmitting ? 'CREATING...' : 'Crear Servidor'}</Button>
                 </div>
 
             </form>

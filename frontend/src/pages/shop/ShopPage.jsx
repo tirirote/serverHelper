@@ -9,7 +9,7 @@ import styles from './ShopPage.module.css';
 import { useNavigate } from 'react-router-dom';
 import NewComponentForm from '../../components/form/component/NewComponentForm.jsx';
 // API Services
-import { getAllComponents, createComponent } from '../../api/services/componentService.js'; // Importar la función de la API
+import { getAllComponents, createComponent, updateComponent } from '../../api/services/componentService.js'; // Importar la función de la API
 import Dialog from '../../components/ui/dialog/Dialog.jsx';
 
 const ShopPage = () => {
@@ -65,7 +65,7 @@ const ShopPage = () => {
 
             const newComponent = response.component;
             showToast(`Componente '${newComponent.name}' creado con éxito.`, 'success');
-            
+
             await fetchShopItems();
             setIsFormOpen(false);
 
@@ -75,33 +75,6 @@ const ShopPage = () => {
             throw err;
         }
     };
-    // Manejadores de carrito
-    const handleAddToCart = (item) => {
-        setCart(prevCart => {
-            const existingItem = prevCart.find(i => i.name === item.name);
-            if (existingItem) {
-                return prevCart.map(i =>
-                    i.name === item.name ? { ...i, quantity: i.quantity + 1 } : i
-                );
-            } else {
-                return [...prevCart, { ...item, quantity: 1 }];
-            }
-        });
-        showToast(`Añadido ${item.name} al carrito.`, 'success');
-    };
-
-    const handleCheckout = () => {
-        if (cart.length === 0) {
-            showToast('El carrito está vacío.', 'warning');
-            return;
-        }
-        showToast(`Simulando la compra de ${cart.length} artículos.`, 'info');
-        setCart([]); // Vaciar el carrito
-    };
-
-    const totalItemsInCart = useMemo(() =>
-        cart.reduce((sum, item) => sum + item.quantity, 0), [cart]
-    );
 
     const handleViewDetails = (item) => {
         try {
@@ -123,6 +96,10 @@ const ShopPage = () => {
         return (
             <div key={item.name} className={styles.itemCard}>
                 <div className={styles.itemNameContainer}>
+                    {/* Si el item ya está comprado, mostramos un overlay/badge */}
+                    {item.isSelled && (
+                        <div className={styles.soldBadge} title="Comprado">Comprado</div>
+                    )}
                     <h4 className={styles.itemName} title={item.name}>{item.name}</h4>
                 </div>
 
@@ -186,15 +163,6 @@ const ShopPage = () => {
                         <Plus size={20} />
                         Nuevo Componente
                     </Button>
-
-                    <Button
-                        variant="icon-only"
-                        onClick={handleCheckout}
-                        disabled={totalItemsInCart === 0}
-                    >
-                        <ShoppingCart size={20} />
-                        {totalItemsInCart}
-                    </Button>
                 </div>
 
 
@@ -223,15 +191,6 @@ const ShopPage = () => {
                 )}
             </div>
 
-            {/* Simulación de un carrito flotante simple (sin cambios) */}
-            {cart.length > 0 && (
-                <div className={styles.floatingCart}>
-                    <p>🛒 Carrito: {totalItemsInCart} artículos</p>
-                    <Button variant="success" size="small" onClick={handleCheckout}>
-                        Pagar
-                    </Button>
-                </div>
-            )}
             {/* NUEVO: Renderizado Condicional del Formulario */}
             <Dialog
                 isOpen={isFormOpen}

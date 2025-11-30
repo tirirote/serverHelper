@@ -11,12 +11,11 @@
 }
 
 .tableHeader {
-    display: flex;
-    justify-content: space-around;
-    grid-template-columns: auto;
+    display: grid;
+    align-items: center;
     grid-template-columns: repeat(var(--column-count), 1fr);
     background-color: var(--color-gray-dark);
-    padding: 4px 8px;
+    padding: 4px 32px;
     font-family: var(--font-body);
     font-size: 1rem;
     font-weight: 600;
@@ -28,7 +27,8 @@
 
 .headerCell {
     padding: 4px;
-    text-align: left;
+    text-align: start;
+    justify-self: start;
 }
 
 .tableBody {
@@ -66,9 +66,7 @@
 
 /* Estilo de Filas */
 .dataRow {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    display: grid;
     align-items: center;
     width: 100%;
     grid-template-columns: repeat(var(--column-count), 1fr);
@@ -77,6 +75,7 @@
     font-family: var(--font-body);
     color: var(--color-white);
     transition: all 0.2s ease-in-out;
+    padding: 8px 32px;
 }
 
 .dataRow:hover {
@@ -89,16 +88,23 @@
 }
 
 .dataCell {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
     padding: 4px;
     width: inherit;
     text-align: start;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+/* Utility classes for alignment */
+.centerAlign {
+    justify-self: center;
+    text-align: center;
+}
+
+.startAlign {
+    justify-self: start;
+    text-align: start;
 }
 
 .emptyState {

@@ -9,7 +9,7 @@ import styles from './WorkspacesPage.module.css';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
 import NewWorkspaceForm from '../../components/form/workspace/NewWorkspaceForm.jsx';
-
+import { useNavigate } from 'react-router-dom';
 // API Services
 import { getAllWorkspaces, createWorkspace } from '../../api/services/workspaceService.js';
 import { getAllRacks } from '../../api/services/rackService.js';
@@ -40,6 +40,7 @@ const createWorkspaceSchema = (workspaceItem, totalRacks, racksLoading, racksErr
 };
 
 const WorkspacesPage = () => {
+    const navigate = useNavigate();
     const { showToast } = useToast();
     const [workspaces, setWorkspaces] = useState([]);
     const [activeWorkspace, setActiveWorkspace] = useState(null);
@@ -242,6 +243,8 @@ const WorkspacesPage = () => {
         } else if (action === 'view') {
             setActiveWorkspace(workspace);
             showToast(`Visualizando detalles de ${workspace.name}.`, 'info');
+            // Navigate to workspace detail page and pass workspace in navigation state to avoid refetch
+            navigate(`/workspaces/${workspace.name}`, { state: { workspace } });
         } else if (action === 'edit') {
             showToast(`Simulando la edición para Workspace: ${workspace.name}`, 'info');
         }

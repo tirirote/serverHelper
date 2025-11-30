@@ -41,7 +41,7 @@ const NetworkConfigForm = ({ onClose, onSubmit }) => {
     return (
         <div className={styles.formContainer}>
             <div className={styles.header}>
-                <h1>New Network</h1>
+                <h1>Nueva Red</h1>
             </div>
 
             <form onSubmit={handleSubmit} className={styles.form}>

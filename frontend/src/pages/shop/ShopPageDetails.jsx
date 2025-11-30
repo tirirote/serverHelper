@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, PlusCircle, Wifi, DollarSign, Zap, List, ChevronsLeftIcon, ChevronLeft, Plus } from 'lucide-react';
+import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import ModelViewer from '../../components/3d/ModelViewer.jsx';
 import Button from '../../components/ui/button/Button.jsx';
 import styles from './ShopPageDetails.module.css';
@@ -7,6 +8,7 @@ import CompatibilityList from '../../components/form/component/CompatibilityList
 import GenericList from '../../components/ui/list/GenericList.jsx'
 import NumberSelector from '../../components/ui/numberSelector/NumberSelector.jsx';
 import { useParams, useNavigate } from 'react-router-dom';
+import { updateComponent } from '../../api/services/componentService.js';
 
 const ShopPageDetails = ({ onAddToCart }) => {
 
@@ -15,6 +17,8 @@ const ShopPageDetails = ({ onAddToCart }) => {
 
     // Estado local para la cantidad
     const [quantity, setQuantity] = useState(1);
+
+    const { showToast } = useToast();
 
     // Lectura y verificación del ítem en localStorage
     const item = useMemo(() => {
@@ -51,8 +55,29 @@ const ShopPageDetails = ({ onAddToCart }) => {
         );
     }
 
-    const handleAdd = () => {
-        onAddToCart(item, quantity);
+    const handleAdd = async () => {
+        // Si el componente ya está marcado como comprado, no permitir añadir/comprar otra vez
+        if (item?.isSelled) {
+            showToast('Este componente ya ha sido comprado.', 'info');
+            return;
+        }
+        // Si la página se usa en la tienda (con onAddToCart), delegamos en esa función para mantener el carrito.
+        if (typeof onAddToCart === 'function') {
+            onAddToCart(item, quantity);
+            return;
+        }
+
+        // Si no se pasa onAddToCart (por ejemplo, la página se accede directamente), consideramos esto como "Compra directa".
+        try {
+            // Llama a API para marcar el componente como vendido
+            await updateComponent(item.name, { ...item , isSelled: true });
+            showToast(`Compra realizada: ${item.name}`, 'success');
+            // Navegar a la lista de componentes comprados
+            navigate('/components');
+        } catch (err) {
+            console.error('Error actualizando el componente después de la compra:', err);
+            showToast('No se pudo completar la compra. Inténtalo de nuevo.', 'error');
+        }
     };
 
     const formatCurrency = (amount) => `${(amount || 0).toFixed(2)} €`;
@@ -122,15 +147,17 @@ const ShopPageDetails = ({ onAddToCart }) => {
                                     min={1}
                                     max={255}
                                     onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                                    unit=''
                                 />
                             </div>
 
                             <Button
-                                variant="primary"
+                                variant={item.isSelled ? 'secondary' : 'primary'}
                                 onClick={handleAdd}
+                                disabled={item.isSelled}
                             >
                                 <Plus size={24} />
-                                Añadir ({quantity})
+                                {item.isSelled ? 'Comprado' : `Añadir (${quantity})`}
                             </Button>
                         </div>
                     </div>

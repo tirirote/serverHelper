@@ -1,20 +1,18 @@
 .infoPill {
-    border-radius: 8px;
-    border: 4px solid var(--color-gray-light);
     display: flex;
     justify-content: start;
-    box-shadow: 0px 8px 0px var(--color-gray-darkest);
     transition: all 0.2s ease-in-out;
-    background-color: var(--color-gray-dark); /* Fondo base */
+    background-color: var(--color-gray-darkest); /* Fondo base */
+    border: 4px solid var(--color-gray-light);
     color: var(--color-gray-lightest); /* Texto base */
+    border-radius: 8px;
     width: 100%;
 }
 
 .content{
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 8px;
+    flex-direction: column;
+    align-items: start;
     width: 100%;
 }
 
@@ -22,8 +20,9 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    align-items: start;
+    align-items: center;
     width: 100%;
+    padding: 8px;
 }
 
 .value{
@@ -32,9 +31,8 @@
     align-items: center;
     font-size: 1rem;
     font-weight: 600;
-    background-color: var(--color-gray-darkest);
-    border-radius: 32px;
-    border: 4px solid var(--color-gray-light);
-    padding: 4px;
-    min-width: 50%;
+    min-width: 100%;
+    background-color: var(--color-gray-dark);
+    border-radius: 0px 0px 4px 4px;
+    padding: 2px 4px;
 }

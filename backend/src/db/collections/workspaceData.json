@@ -2,6 +2,14 @@
   {
     "name": "Workspace 1",
     "description": "A test workspace",
+    "racks": [
+      "rack de ejemplo"
+    ],
+    "network": "Test Network"
+  },
+  {
+    "name": "worspace nuevo",
+    "description": "prueba de crear un workspace",
     "racks": [],
     "network": "Test Network"
   }

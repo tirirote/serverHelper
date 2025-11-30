@@ -94,6 +94,7 @@
 
 .itemNameContainer {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 100%;
@@ -101,6 +102,18 @@
     background-color: var(--color-gray-dark);
     box-shadow: 0px 4px 0px var(--color-gray-light);
     padding: 8px 0px;
+}
+
+.soldBadge {
+    display: flex;
+    flex-direction: column;
+    width: 92%;
+    text-align: center;
+    background-color: var(--color-gray-darkest); /* green */
+    border-left: 4px solid var(--color-green);
+    color: var(--color-green);
+    padding: 2px 4px;
+    font-size: 0.9rem;
 }
 
 .itemName {

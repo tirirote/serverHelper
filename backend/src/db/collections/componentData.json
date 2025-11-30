@@ -15,9 +15,10 @@
     "price": 150,
     "maintenanceCost": 1,
     "estimatedConsumption": 5,
-    "isSelled": false,
+    "isSelled": true,
     "modelPath": "/assets/models/ram.glb",
-    "details": "Memoria de servidor."
+    "details": "Memoria de servidor.",
+    "compatibleList": []
   },
   {
     "type": "HardDisk",
@@ -25,9 +26,10 @@
     "price": 100,
     "maintenanceCost": 2,
     "estimatedConsumption": 10,
-    "isSelled": false,
+    "isSelled": true,
     "modelPath": "/assets/models/ssd.glb",
-    "details": "Almacenamiento rápido."
+    "details": "Almacenamiento rápido.",
+    "compatibleList": []
   },
   {
     "type": "BiosConfig",

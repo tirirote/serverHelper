@@ -69,11 +69,13 @@ const MyComponents = () => {
         try {
             // Llama a la función de API que usa apiClient.get('/components')
             const data = await getAllComponents();
-            setComponents(data);
+            // Mostrar únicamente componentes comprados (isSelled === true)
+            const purchased = data.filter(comp => comp.isSelled === true);
+            setComponents(purchased);
 
             // Establecer el primer componente cargado como activo
-            if (data && data.length > 0) {
-                setActiveComponent(data[0]);
+            if (purchased && purchased.length > 0) {
+                setActiveComponent(purchased[0]);
             } else {
                 setActiveComponent(null);
             }
@@ -273,14 +275,7 @@ const MyComponents = () => {
                             </>
                         )}
                     </div>
-                    <div className={styles.listColumnFooter}>
-                        <Button
-                            variant="primary"
-                            onClick={handleOpenNewComponentModal}
-                        >
-                            <Plus size={20} />
-                            Nuevo Componente
-                        </Button>
+                    <div className={styles.listColumnFooter}>                        
                         <Button
                             variant="primary"
                             onClick={handleGoToStore}
