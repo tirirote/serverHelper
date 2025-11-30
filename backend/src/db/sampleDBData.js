@@ -20,7 +20,7 @@ const sampleComponents = [
     { type: 'ServerChasis', name: 'Rack 1U Chassis', price: 300, maintenanceCost: 4, estimatedConsumption: 5, isSelled: false, modelPath: '/assets/models/server-closed.glb', details: 'Chasis físico del servidor.' },
     { type: 'NetworkInterface', name: '10G NIC SFP+', price: 150, maintenanceCost: 1, estimatedConsumption: 5, isSelled: false, modelPath: '/assets/models/ni.glb', details: 'Tarjeta de red 10G.' },
     { type: 'OS', name: 'Ubuntu Server 22.04', price: 0, maintenanceCost: 1.5, estimatedConsumption: 0, isSelled: false, modelPath: '/assets/models/os.glb', details: 'Sistema Operativo.' },
-    { type: 'GPU', name: 'NVIDIA A100', price: 5000, maintenanceCost: 15, estimatedConsumption: 300, isSelled: false, modelPath: null, details: 'GPU para IA/Cálculo.' },
+    { type: 'GPU', name: 'NVIDIA A100', price: 5000, maintenanceCost: 15, estimatedConsumption: 300, isSelled: false, modelPath: '/assets/models/gpu.glb', details: 'GPU para IA/Cálculo.' },
 ];
 
 // --- 2. DATOS DE REDES ---

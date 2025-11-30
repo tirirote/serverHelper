@@ -9,7 +9,7 @@ import styles from './ShopPage.module.css';
 import { useNavigate } from 'react-router-dom';
 import NewComponentForm from '../../components/form/component/NewComponentForm.jsx';
 // API Services
-import { getAllComponents } from '../../api/services/componentService.js'; // Importar la función de la API
+import { getAllComponents, createComponent } from '../../api/services/componentService.js'; // Importar la función de la API
 import Dialog from '../../components/ui/dialog/Dialog.jsx';
 
 const ShopPage = () => {
@@ -58,9 +58,22 @@ const ShopPage = () => {
         );
     }, [shopItems, searchTerm]);
 
-    const handleAddComponentSuccess = (newComponent) => {
-        // Añade el nuevo componente al principio del array de la tienda
-        setShopItems(prevItems => [newComponent, ...prevItems]);
+    const handleCreateComponent = async (componentData) => {
+        try {
+
+            const response = await createComponent(componentData);
+
+            const newComponent = response.component;
+            showToast(`Componente '${newComponent.name}' creado con éxito.`, 'success');
+            
+            await fetchShopItems();
+            setIsFormOpen(false);
+
+        } catch (err) {
+            console.error('Error creando componente:', err);
+            showToast('Error al crear componente.', 'error');
+            throw err;
+        }
     };
     // Manejadores de carrito
     const handleAddToCart = (item) => {
@@ -225,7 +238,7 @@ const ShopPage = () => {
                 onClose={() => setIsFormOpen(false)}>
                 <NewComponentForm
                     onClose={() => setIsFormOpen(false)}
-                    onAddSuccess={handleAddComponentSuccess}
+                    onSubmit={handleCreateComponent}
                 />
             </Dialog>
 

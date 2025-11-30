@@ -2,7 +2,6 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingBag, Server, Trash2, Zap, AlertTriangle, ArrowRight, XCircle, ChevronRight, Loader2, Plus } from 'lucide-react';
 
-// Componentes externos simulados
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../components/ui/table/DataTable.jsx';
 import TableActions from '../../components/ui/table/TableActions.jsx';
@@ -17,7 +16,7 @@ import { getAllComponents } from '../../api/services/componentService.js';
 
 // Componentes internos
 
-import styles from './MyComponents.module.css';
+import styles from '../Page.module.css';
 
 const createComponentSchema = (componentItem) => {
     // Si el componente es null o undefined, devolvemos null para que el renderizado condicional actúe.

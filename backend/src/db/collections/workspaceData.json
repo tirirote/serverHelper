@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "name": "Workspace 1",
+    "description": "A test workspace",
+    "racks": [],
+    "network": "Test Network"
+  }
+]

@@ -96,7 +96,7 @@
     "maintenanceCost": 15,
     "estimatedConsumption": 300,
     "isSelled": false,
-    "modelPath": null,
+    "modelPath": "/assets/models/gpu.glb",
     "details": "GPU para IA/Cálculo."
   }
 ]

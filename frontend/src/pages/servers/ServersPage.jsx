@@ -9,8 +9,9 @@ import Input from '../../components/ui/input/InputField.jsx';
 import Button from '../../components/ui/button/Button.jsx';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
-import styles from './ServersPage.module.css';
 import NewServerForm from '../../components/form/server/NewServerForm.jsx';
+
+import styles from '../Page.module.css';
 
 //API Services
 import { getAllServers, deleteServer, getServerTotalCost, getServerComponents } from '../../api/services/serverService.js';

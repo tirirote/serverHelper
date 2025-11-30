@@ -13,7 +13,8 @@ import {
   FolderOpen,
   LayoutDashboard,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Wifi
 } from 'lucide-react';
 
 //Logos
@@ -23,6 +24,7 @@ import Logo from '/assets/logo.png';
 const navItems = [
   //{ name: 'Dashboard', icon: <LayoutDashboard />, to: '/dashboard' },
   { name: 'Workspaces', icon: <FolderOpen />, to: '/workspaces' },
+  { name: 'Networks', icon: <Wifi />, to: '/networks' },
   { name: 'Shop', icon: <ShoppingBag />, to: '/shop' },
   { name: 'Components', icon: <Cpu />, to: '/components' },
   { name: 'Servers', icon: <Server />, to: '/servers' }

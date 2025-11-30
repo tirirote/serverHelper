@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-
+import chokidar from 'chokidar';
 // 1. RECREAR __dirname en contexto ES6
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -89,20 +89,19 @@ const setupDbWatcher = () => {
     // 1. Cargar la DB al iniciar
     loadAllCollectionsFromDisk();
 
-    // 2. Monitorear cada archivo de colección
-    for (const filename of Object.values(collections)) {
-        const filePath = path.join(DATA_DIR, filename);
+    // fs.watch monitorea el archivo.
+    const watcher = chokidar.watch(Object.values(collections).map(f => path.join(DATA_DIR, f)), {
+        ignoreInitial: true,
+        awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 50 }
+    });
 
-        // fs.watch monitorea el archivo.
-        const watcher = fs.watch(filePath, (eventType, name) => {
-            if (eventType === 'change') {
-                // Cuando un archivo cambia (ej: por el script de seed), recargamos *todo*.
-                loadAllCollectionsFromDisk();
-            }
-        });
+    watcher.on('change', (filePath) => {
+        console.log('[DB WATCHER] file changed:', filePath);
+        loadAllCollectionsFromDisk();
+    });
 
-        watchers.push(watcher);
-    }
+    watchers.push(watcher);
+
     console.log('[DB WATCHER] Monitoreo activo sobre los archivos de datos.');
 };
 
@@ -119,10 +118,13 @@ export const closeDbWatchers = () => {
     watchers.length = 0; // Vaciar el array
 };
 
+// Log environment and data path on startup (debug aid)
+console.log(`[DB LOADER] NODE_ENV=${process.env.NODE_ENV}, DATA_DIR=${DATA_DIR}`);
+
 // Iniciar el sistema
 if (process.env.NODE_ENV !== 'test') {
     setupDbWatcher();
 } else {
-    // Cargar la DB la primera vez, sin iniciar el watcher
+    // Cargar la DB la primera vez, sin iniciar el watcher (tests)
     loadAllCollectionsFromDisk();
 }

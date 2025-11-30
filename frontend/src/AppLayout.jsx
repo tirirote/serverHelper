@@ -15,6 +15,7 @@ import ServersPage from './pages/servers/ServersPage.jsx';
 import ServerDetailsPage from './pages/servers/ServerDetailsPage.jsx';
 import MyComponents from './pages/components/MyComponents.jsx';
 import DashboardPage from './pages/dashboard/DashboardPage.jsx';
+import NetworksPage from './pages/networks/NetworksPage.jsx';
 
 const AppLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -42,6 +43,7 @@ const AppLayout = () => {
                     <Routes>
                         <Route path="/workspaces" element={<Workspaces />} />
                         <Route path="/workspaces/:workspaceId" element={<WorkspaceDetailsPage />} />
+                        <Route path="/networks" element={<NetworksPage />} />
                         <Route path="/shop" element={<ShopPage />} />
                         <Route path="/shop/:itemName" element={<ShopPageDetails />} />
                         <Route path="/components" element={<MyComponents />} />

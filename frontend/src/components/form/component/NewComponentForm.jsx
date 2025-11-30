@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useToast } from '../../ui/toasts/ToastProvider.jsx';
+import { Loader2 } from 'lucide-react';
 
 import InputField from '../../ui/input/InputField.jsx';
 import NumberSelector from '../../ui/numberSelector/NumberSelector.jsx';
@@ -38,7 +39,7 @@ const dropdownItems = mandatoryComponentTypes.map(type => ({
     value: type
 }));
 
-const NewComponentForm = ({ onClose }) => {
+const NewComponentForm = ({ onClose, onSubmit }) => {
     // Requeridos
     const { showToast } = useToast();
     const [type, setType] = useState('DefaultType'); // Necesario para Joi.string().required()
@@ -49,9 +50,10 @@ const NewComponentForm = ({ onClose }) => {
     const [maintenanceCost, setMaintenanceCost] = useState(0);
     const [estimatedConsumption, setEstimatedConsumption] = useState(0);
     const [details, setDetails] = useState('');
-    const [modelPath, setModelPath] = useState(0);
-
+    const [modelPath, setModelPath] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     // Booleano y Lista
+
     const [isSelled, setIsSelled] = useState(false); // Joi.boolean().default(false)
     const [selectedComponents, setSelectedComponents] = useState([]); // Array de objetos {id, name}
 
@@ -59,9 +61,7 @@ const NewComponentForm = ({ onClose }) => {
 
 
     // FUNCIÓN PARA NumberSelector (AÑADIDO)
-    const handleNumberChange = (name, value) => {
-        setFormData(prev => ({ ...prev, [name]: value }));
-    }
+    // handleNumberChange removed: NumberSelector directly updates state via callbacks
 
     // handleTypeChange (ACTUALIZADO para asignar Model3DPath)
     const handleTypeChange = (newType) => {
@@ -71,7 +71,7 @@ const NewComponentForm = ({ onClose }) => {
         setModelPath(newModelPath);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (name.trim().length < 3) {
@@ -87,19 +87,22 @@ const NewComponentForm = ({ onClose }) => {
         const newComponentData = {
             type: type,
             name: name.trim(),
-            cost: parseFloat(cost) > 0 ? parseFloat(cost) : 0,
+            price: parseFloat(cost) > 0 ? parseFloat(cost) : 0,
+            compatibleList: [],
             maintenanceCost: maintenanceCost ? parseFloat(maintenanceCost) : null,
             estimatedConsumption: estimatedConsumption ? parseFloat(estimatedConsumption) : null,
-            compatibleList: selectedComponents.map(c => c.name),
             details: details.trim(),
-            isSelled: isSelled,
             modelPath: modelPath.trim() || null,
         };
 
-        console.log("Datos de Nuevo Componente enviados:", newComponentData);
+        console.log("Payload del nuevo componente:", newComponentData);
 
-        showToast(`Componentee '${name}' creado exitosamente.`, 'success');
-        onClose(true);
+        try {
+            setIsLoading(true);
+            if (onSubmit) await onSubmit(newComponentData);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -153,9 +156,10 @@ const NewComponentForm = ({ onClose }) => {
                     />
                 </div>
                 <div className={styles.doneButton}>
-                    <Button type="submit">DONE</Button>
+                    <Button type="submit" variant="primary" disabled={isLoading}>
+                        {isLoading ? <Loader2 size={18} /> : 'DONE'}
+                    </Button>
                 </div>
-
             </form>
         </div>
     );

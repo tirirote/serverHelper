@@ -38,19 +38,19 @@ const DashboardPage = () => {
             setError(null);
 
             try {
-                const [
-                    serversTotal,
-                    racksTotal,
-                    networksTotal,
-                    componentsTotal,
-                    workspacesTotal
-                ] = await Promise.all([
-                    getAllServers().length,
-                    getAllRacks().length,
-                    getAllNetworks().length,
-                    getAllComponents().length,
-                    getWorkspacesByName().length,
+                const [serversArray, racksArray, networksArray, componentsArray, workspacesArray] = await Promise.all([
+                    getAllServers(),
+                    getAllRacks(),
+                    getAllNetworks(),
+                    getAllComponents(),
+                    getWorkspacesByName(),
                 ]);
+
+                const serversTotal = (serversArray || []).length;
+                const racksTotal = (racksArray || []).length;
+                const networksTotal = (networksArray || []).length;
+                const componentsTotal = (componentsArray || []).length;
+                const workspacesTotal = (workspacesArray || []).length;
 
                 setStats({
                     totalServers: serversTotal,

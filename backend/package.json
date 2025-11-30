@@ -7,8 +7,8 @@
     "transform": {}
   },
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js",
+    "dev": "cross-env NODE_ENV=development nodemon src/index.js",
+    "start": "cross-env NODE_ENV=production node src/index.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "seed:up": "node src/db/scripts/seed-up.js",
     "seed:down": "node src/db/scripts/seed-down.js"
@@ -27,6 +27,7 @@
   "homepage": "https://github.com/tirirote/proyectoFCT#readme",
   "dependencies": {
     "axios": "^1.11.0",
+    "chokidar": "^5.0.0",
     "cors": "^2.8.5",
     "cross-env": "^10.1.0",
     "dotenv": "^17.2.1",
