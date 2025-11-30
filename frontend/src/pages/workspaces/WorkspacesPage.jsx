@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Trash2, AlertTriangle, Loader2, Globe, Plus } from 'lucide-react';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../components/ui/table/DataTable.jsx';
@@ -11,7 +11,7 @@ import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.
 import NewWorkspaceForm from '../../components/form/workspace/NewWorkspaceForm.jsx';
 
 // API Services
-import { getAllWorkspaces } from '../../api/services/workspaceService.js';
+import { getAllWorkspaces, createWorkspace } from '../../api/services/workspaceService.js';
 import { getAllRacks } from '../../api/services/rackService.js';
 
 
@@ -57,6 +57,8 @@ const WorkspacesPage = () => {
     const [racksError, setRacksError] = useState(null);
 
     // --- 1. FUNCIÓN CENTRAL DE FETCH (Reemplaza fetchInitialData y refetchWorkspaces) ---
+    const activeWorkspaceRef = useRef(activeWorkspace);
+
     const fetchAndSetWorkspaces = useCallback(async (initialLoad = false) => {
         setLoading(true);
         setError(null);
@@ -67,7 +69,8 @@ const WorkspacesPage = () => {
 
             // Solo seleccionamos el primer workspace si es la carga inicial
             // o si el workspace activo fue eliminado.
-            if (data.length > 0 && (initialLoad || !activeWorkspace)) {
+            const currentActive = activeWorkspaceRef.current;
+            if (data.length > 0 && (initialLoad || !currentActive)) {
                 setActiveWorkspace(data[0]);
             }
         } catch (err) {
@@ -77,7 +80,10 @@ const WorkspacesPage = () => {
         } finally {
             setLoading(false);
         }
-    }, [showToast]); // Mantener activeWorkspace para la lógica de re-selección
+    }, [showToast]); // don't include activeWorkspace to avoid refetch loop
+
+    // keep ref in sync
+    useEffect(() => { activeWorkspaceRef.current = activeWorkspace; }, [activeWorkspace]);
 
     // --- 2. EFECTO DE CARGA INICIAL ---
     useEffect(() => {
@@ -254,6 +260,18 @@ const WorkspacesPage = () => {
         }
     };
 
+    const handleCreateWorkspace = async (workspaceData) => {
+        try {
+            await createWorkspace(workspaceData);
+            showToast(`Workspace "${workspaceData.name}" creado.`, 'success');
+            await fetchAndSetWorkspaces();
+            setIsCreateModalOpen(false);
+        } catch (err) {
+            console.error('Error al crear workspace:', err);
+            throw err; // let the form display the error with toasts
+        }
+    };
+
     const handleConfirmDelete = () => {
         if (!workspaceToDelete) return;
 
@@ -334,9 +352,10 @@ const WorkspacesPage = () => {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
             >
-                <NewWorkspaceForm
-                    onClose={handleCloseNewWorkspaceModal}
-                />
+                    <NewWorkspaceForm
+                        onClose={handleCloseNewWorkspaceModal}
+                        onSubmit={handleCreateWorkspace}
+                    />
             </Dialog>
 
             <Dialog

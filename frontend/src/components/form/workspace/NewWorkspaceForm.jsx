@@ -8,13 +8,12 @@ import styles from '../Forms.module.css'; // Estilos genéricos para formularios
 
 //API Services
 import { getAllNetworks } from '../../../api/services/networkService.js'
-import { createWorkspace } from '../../../api/services/workspaceService.js';
 /**
  * Formulario para la creación de un nuevo Workspace.
  * * @param {Object} props - Propiedades del componente.
  * @param {function} props.onClose - Función para cerrar el modal o diálogo. Acepta un booleano (true si la creación fue exitosa).
  */
-const NewWorkspaceForm = ({ onClose }) => {
+const NewWorkspaceForm = ({ onClose, onSubmit }) => {
     const { showToast } = useToast();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -63,32 +62,26 @@ const NewWorkspaceForm = ({ onClose }) => {
             return;
         }
 
+        const selectedNetwork = selectedNetworks[0];
         const newWorkspaceData = {
             name: name.trim(),
             description: description.trim(),
-            network: network.trim()
+            network: selectedNetwork?.name || selectedNetwork?.id || ''
         };
 
         try {
-            // 💡 1. Llamada a la API con los datos del formulario
-            const newWorkspace = await createWorkspace(newWorkspaceData);
-
-            // 💡 2. Éxito: Mostrar notificación y cerrar el modal
-            showToast(`Workspace '${newWorkspace.name}' creado con éxito.`, 'success');
-
-            // Llama a onClose, pasando 'true' para indicar que la creación fue exitosa
-            // Esto le dirá a WorkspacesPage que recargue la lista.
-            onClose(true);
-
+            setIsLoading(true);
+            if (typeof onSubmit === 'function') {
+                await onSubmit(newWorkspaceData);
+            }
+            // If parent handled creation, indicate success to parent
+            onClose && onClose(true);
         } catch (error) {
             console.error('Error al crear workspace:', error);
-            const errorMessage = error.status === 400
-                ? `Error de validación: ${error.message}`
-                : 'Error al conectar con el servidor.';
-
+            const errorMessage = error?.response?.data?.message || error.message || 'Error al conectar con el servidor.';
             showToast(errorMessage, 'error');
         } finally {
-            setSubmitting(false);
+            setIsLoading(false);
         }
     };
 

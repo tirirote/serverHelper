@@ -31,14 +31,7 @@ const SearchFilterBar = ({
     };
 
     return (
-        <div className={styles.searchFilterBarContainer}>
-            <Button
-                onClick={onFilterClick}
-                variant="icon-only"
-                aria-label="Abrir opciones de filtrado"
-            >
-                <Funnel size={24} />
-            </Button>
+        <div className={styles.searchFilterBarContainer}>            
             <InputField
                 type="search"
                 placeholder={searchPlaceholder}
