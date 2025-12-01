@@ -1,11 +1,13 @@
-/* src/pages/Workspaces/WorkspaceDetailsPage.module.css */
+.page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
 
 .detailsContainer {
     padding: 40px;
     color: var(--color-white);
 }
-
-/* --- Header y Breadcrumbs --- */
 
 .header {
     display: flex;
@@ -20,49 +22,38 @@
     align-items: center;
     justify-content: end;
     gap: 16px;
+    margin-top: 16px;
 }
 
 .content {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    align-items: start;
+    gap: 16px;
+}
+
+.leftColumn {
+    display: flex;
+    flex-direction: row;
     align-self: center;
-    gap: 32px;
-    width: 100%;
-}
-
-.infoColumn{
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    text-align: center;
-    justify-content: space-between;
-    padding: 8px;
-    background-color: var(--color-gray-dark);
-    border: 4px solid var(--color-gray-light);
-    box-shadow:  0px 8px 0px 0px var(--color-gray-darkest);
-    border-radius: 8px;
+    justify-content: start;
+    width: 35%;
 }
 
-.infoPillsContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 8px
-}
-
-.racksColumn{
+.rightColumn {
     display: flex;
     flex-direction: column;
     width: 100%;
+    height: 70vh;
 }
 
-.rackGrid{
+.racksGallery{
     display: flex;
     gap: 32px;
     align-items: center;
     justify-content: center;
-    width: 50%;
+    width: 100%;
     height: 100%;
     background-color: var(--color-gray-dark);
     border: 4px solid var(--color-gray-light);
@@ -110,18 +101,26 @@
     gap: 16px;
 }
 
-/* --- Información Clave del Workspace --- */
-
 .headerInfo {
     display: flex;
+    flex-direction: column;
     align-self: center;
     justify-content: start;
     align-items: center;
     gap: 16px;
-    margin-top: 32px;
+    margin-bottom: 16px;
+    width: 100%;
+    background-color: var(--color-gray-darkest);
+    border-radius: 8px;
+}
+
+.infoGroup {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    padding: 16px;
     width: 100%;
 }
-/* --- Navegación por Pestañas (Tabs) --- */
 
 .tabs {
     display: flex;

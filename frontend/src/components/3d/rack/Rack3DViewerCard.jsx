@@ -25,7 +25,7 @@ const MODEL_PATHS = {
  * @param {object} props.rack - Objeto con los datos del rack (id, name, servers, cost, health, power).
  * @param {function} props.onAction - Callback para manejar acciones (ej: ver detalles).
  */
-const Rack3DViewerCard = ({ rack, onAction }) => {
+const Rack3DViewerCard = ({ rack, onAction, selected }) => {
     const { showToast } = useToast();
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -69,8 +69,10 @@ const Rack3DViewerCard = ({ rack, onAction }) => {
         }
     };
 
+    const rootClass = `${styles.card} ${selected ? styles.selected : ''}`;
+
     return (
-        <div className={styles.card} onClick={() => onAction('view', rack.id)} role="button" aria-label={`Ver detalles del Rack ${rack.name}`}
+        <div className={rootClass} onClick={() => onAction('view', rack.id)} role="button" aria-label={`Ver detalles del Rack ${rack.name}`}
         >
 
             {/* Nombre del Rack y Estado de Salud */}

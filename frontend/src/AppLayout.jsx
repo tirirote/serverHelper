@@ -15,6 +15,7 @@ import ServerDetailsPage from './pages/servers/ServerDetailsPage.jsx';
 import MyComponents from './pages/components/MyComponents.jsx';
 import DashboardPage from './pages/dashboard/DashboardPage.jsx';
 import NetworksPage from './pages/networks/NetworksPage.jsx';
+import MyRacksPage from './pages/racks/MyRacksPage.jsx';
 
 const AppLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -50,6 +51,7 @@ const AppLayout = () => {
                         <Route path="/servers" element={<ServersPage />} />
                         <Route path="/servers/:serverId" element={<ServerDetailsPage />} />
                         <Route path="/playground" element={<Playground />} />
+                        <Route path="/racks" element={<MyRacksPage />} />
                         <Route path="*" element={<Workspaces />} />
                     </Routes>
                 </div>

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-import { Home, Settings, Server, Package, PlusCircle, Wifi, Database, Trash, StickyNote, Eye, Loader2, Plus } from 'lucide-react';
+import { Home, Settings, Server, Package, PlusCircle, Wifi, Database, Trash, StickyNote, Eye, Loader2, Plus, Info } from 'lucide-react';
 import Button from '../../components/ui/button/Button.jsx';
 import DataTable from '../../components/ui/table/DataTable.jsx';
 import TableActions from '../../components/ui/table/TableActions.jsx';
@@ -12,6 +12,7 @@ import { getAllRacks, createRack, deleteRack } from '../../api/services/rackServ
 import { getWorkspacesByName } from '../../api/services/workspaceService.js';
 import styles from './WorkspaceDetailsPage.module.css';
 import InfoPill from '../../components/ui/infopill/InfoPill.jsx';
+import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
 import Rack3DViewerCard from '../../components/3d/rack/Rack3DViewerCard.jsx';
 
 // We'll fetch workspace data and racks via API instead of using mock data
@@ -24,9 +25,9 @@ const WorkspaceDetailsPage = () => {
     const [racksLoading, setRacksLoading] = useState(false);
     const [racksError, setRacksError] = useState(null);
     const [isRackModalOpen, setIsRackModalOpen] = useState(false);
+    const [selectedRack, setSelectedRack] = useState(null);
 
     const { showToast } = useToast();
-    const [activeTab, setActiveTab] = useState('dashboard');
     const [workspaceLoading, setWorkspaceLoading] = useState(true);
     // isRackModalOpen and newRackName moved above to keep related logic together
 
@@ -38,7 +39,6 @@ const WorkspaceDetailsPage = () => {
             await createRack(payload);
             showToast(`Rack "${payload.name}" creado en el Workspace ${workspace.name}`, 'success');
             setIsRackModalOpen(false);
-            await fetchRacks();
         } catch (err) {
             console.error('Error creating rack', err);
             const errorMessage = err?.response?.data?.message || err.message || 'Error al crear rack.';
@@ -66,7 +66,13 @@ const WorkspaceDetailsPage = () => {
         setRacksError(null);
         try {
             const data = await getAllRacks(workspace.name);
-            setRacks(data || []);
+            const list = data || [];
+            setRacks(list);
+            // Auto-select first rack if none selected or previous selection doesn't belong to this workspace
+            if (list.length > 0 && (!selectedRack || (selectedRack.workspaceName && selectedRack.workspaceName !== workspace.name))) {
+                setSelectedRack(list[0]);
+            }
+            return list;
         } catch (err) {
             console.error('Error al obtener racks:', err);
             setRacksError('Error');
@@ -87,16 +93,33 @@ const WorkspaceDetailsPage = () => {
     }, [workspaceId, location]);
 
     useEffect(() => {
+        // Whenever the workspace changes we should reset selection (for a new workspace)
+        setSelectedRack(null);
         if (workspace) fetchRacks();
     }, [workspace]);
 
-    const handleRackAction = (action, id) => {
+    const handleRackAction = async (action, id) => {
         const rack = racks.find(r => r.name === id || r.id === id);
         if (!rack) return;
 
         if (action === 'delete') {
-            // The card performs deletion; just refresh the racks list
-            fetchRacks();
+            // The card performs deletion; refresh the racks list and compute new selection
+            const wasSelected = selectedRack && (selectedRack.name === rack.name || selectedRack.id === rack.id);
+            const newList = await fetchRacks();
+            if (wasSelected) {
+                // After refresh, select first item if available, else clear
+                if (newList && newList.length > 0) {
+                    setSelectedRack(newList[0]);
+                } else {
+                    setSelectedRack(null);
+                }
+            }
+            return;
+        }
+
+        if (action === 'view') {
+            // Select for details view
+            setSelectedRack(rack);
             return;
         }
 
@@ -107,173 +130,111 @@ const WorkspaceDetailsPage = () => {
     const renderHeaderInfo = () => (
         // Se aplica la clase .headerInfo definida en el CSS externo
         <div>
-            <div className={styles.infoColumn}>
+            <div className={styles.headerInfo}>
                 <h2>Información</h2>
-                <div className={styles.infoPillsContainer}>
+                <div className={styles.infoGroup}>
                     <InfoPill label="Red Asignada" value={workspace.network || 'N/A'} />
                     <InfoPill label="Descripción" value={workspace.description} isDescription={true} />
                     <InfoPill label="Racks Asignados" value={racks.length} />
                 </div>
             </div>
-
         </div>
-
     );
 
     const renderRacksTab = () => (
         <>
-            <div className={styles.racksColumn}>
-                {/* Se usa una cuadrícula simple (no definida en el CSS provisto, por lo que usaremos una clase genérica) */}
-                <h2>Racks</h2>
-                <div className={styles.rackGrid}>
-                    {racksLoading ? (
-                        <div className={styles.loadingState}><Loader2 className="animate-spin" /></div>
-                    ) : (
-                        racks && racks.map(rack => (
-                            <Rack3DViewerCard
-                                key={rack.name || rack.id}
-                                rack={rack}
-                                onAction={handleRackAction} />
-                        ))
-                    )}
-                </div>
-                {(!racks || racks.length === 0) && (
-                    <div className={styles.emptyRackGrid} >
-                        Aún no hay Racks creados en este Workspace. ¡Comienza añadiendo uno!
-                    </div>
+            <div className={styles.racksGallery}>
+                {racksLoading ? (
+                    <div className={styles.loadingState}><Loader2 className="animate-spin" /></div>
+                ) : (
+                    racks && racks.map(rack => (
+                        <Rack3DViewerCard
+                            key={rack.name || rack.id}
+                            rack={rack}
+                            onAction={handleRackAction}
+                            selected={selectedRack && (selectedRack.name === rack.name || selectedRack.id === rack.id)} />
+                    ))
                 )}
             </div>
-        </>
-    );
-
-    // Columnas de la tabla de Inventario (usa TableActions que también es externo)
-    const inventoryColumns = [
-        { header: 'Componente', key: 'name' },
-        { header: 'Tipo', key: 'type' },
-        { header: 'Cantidad Disponible', key: 'quantity', className: 'text-center' },
-        {
-            header: 'Acciones',
-            key: 'actions',
-            className: 'text-center',
-            render: (item) => (
-                <TableActions
-                    itemId={item.id}
-                    onViewDetails={() => showToast(`Ver detalles de ${item.name}`, 'info')}
-                    onDelete={() => showToast(`Eliminando ${item.name}`, 'danger')}
-                />
-            )
-        }
-    ];
-
-    const renderInventoryTab = () => (
-        <>
-            <div className={styles.tabActions}>
-
-                <p className={styles.inventoryIntro}>
-                    Este inventario muestra los componentes físicos disponibles para construir servidores dentro de este Workspace.
-                </p>
-                <Button variant="secondary" onClick={() => showToast('Abriendo gestor de componentes...', 'info')}>
-                    <Package size={20} />
-                    Gestionar Componentes (WIP)
-                </Button>
-            </div>
-            {/* Aquí se utilizaría un DataTable o ComponentGallery para mostrar el inventario */}
-            <DataTable
-                data={(workspace && workspace.inventory) || []}
-                columns={inventoryColumns}
-                initialSortBy="name"
-            />
+            {(!racks || racks.length === 0) && (
+                <div className={styles.emptyRackGrid} >
+                    Aún no hay Racks creados en este Workspace. ¡Comienza añadiendo uno!
+                </div>
+            )}
         </>
     );
 
     const renderContent = () => {
-        switch (activeTab) {
-            case 'racks':
-                return renderRacksTab();
-            case 'inventory':
-                return renderInventoryTab();
-            default:
-                return renderRacksTab();
+        // If racks are still loading show the loader
+        if (racksLoading) {
+            return (
+                <>
+                    <div className={styles.content}>
+                        <div className={styles.leftColumn}>
+                            <DetailViewerCard />
+                        </div>
+                        <div className={styles.rightColumn}>
+                            <div className={styles.rackGrid}><Loader2 className="animate-spin" /></div>
+                        </div>
+                    </div>
+                </>
+            );
         }
+
+        // Standard two-column view: left detail view (placeholder if none selected), right gallery
+        return (
+            <>
+                <div className={styles.content}>
+                    <div className={styles.rightColumn}>
+                        {renderRacksTab()}
+                        <div className={styles.buttonGroup}>
+                            <Button variant="primary" onClick={() => setIsRackModalOpen(true)}>
+                                <Plus size={20} />
+                                Añadir Nuevo Rack
+                            </Button>
+                            <Button variant="primary" onClick={() => showToast('Abriendo Configuración...', 'info')}>
+                                <Settings size={20} />
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
     };
 
+    // Loading / missing workspace guards
     if (workspaceLoading) {
         return (
-            <div className={styles.workspacesPage}>
+            <div className={styles.page}>
                 <Loader2 className="animate-spin" /> Cargando workspace...
             </div>
         );
     }
 
     if (!workspace) {
-        return <div className={styles.workspacesPage}>Workspace no encontrado.</div>;
+        return <div className={styles.page}>Workspace no encontrado.</div>;
     }
 
     return (
-        <div>
+        <div className={styles.page}>
             <div className={styles.header}>
                 <h1>{workspace.name}</h1>
-            </div>
-            <div className={styles.buttonGroup}>
-                <Button variant="primary" onClick={() => setIsRackModalOpen(true)}>
-                    <Plus size={20} />
-                    Añadir Nuevo Rack
-                </Button>
-                <Button variant="primary" onClick={() => showToast('Abriendo Configuración...', 'info')}>
-                    <Settings size={20} />
-                </Button>
-                <Button variant="danger" onClick={() => showToast('Eliminando Workspace...', 'error')}>
-                    <Trash size={20} />
+                <Button
+                    variant="primary"
+                    onClick={() => showToast('Aquí verás la información más relevante sobre el workspace seleccionado.', 'info')}
+                > <Info size={20} />
                 </Button>
             </div>
-            <div className={styles.content}>
-                {renderHeaderInfo()}
-                {renderRacksTab()}
-
-            </div>
-
-
-            {/* Navegación por Pestañas */}
-            <div className={styles.tabs}>
-                <button
-                    className={`${styles.tabButton} ${activeTab === 'racks' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('racks')}
-                >
-                    <Server size={18} /> Racks & Servidores
-                </button>
-                <button
-                    className={`${styles.tabButton} ${activeTab === 'inventory' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('inventory')}
-                >
-                    <Package size={18} /> Inventario
-                </button>
-            </div>
-
-            <hr className={styles.divider} />
-
-            <div className={styles.content}>
-                {renderContent()}
-            </div>
-            <div className={styles.bottomActions}>
-
-            </div>
-
-
+            {renderHeaderInfo()}
+            {renderContent()}
             {/* Diálogo de Creación de Rack */}
             <Dialog
                 isOpen={isRackModalOpen}
-                onClose={() => setIsRackModalOpen(false)}
-            >
-                <form onSubmit={handleCreateRack} className={styles.dialogForm}>
-                    <header className={styles.dialogHeader}>
-                        <h2 className={styles.dialogTitle}>Añadir Nuevo Rack a {workspace.name}</h2>
-                    </header>
-
-                    <NewRackForm
-                        onClose={() => setIsRackModalOpen(false)}
-                        onSubmit={handleCreateRack}
-                        workspaces={[workspace]} />
-                </form>
+                onClose={() => setIsRackModalOpen(false)}>
+                <NewRackForm
+                    onClose={() => setIsRackModalOpen(false)}
+                    onSubmit={handleCreateRack}
+                    workspaces={[workspace]} />
             </Dialog>
         </div>
     );

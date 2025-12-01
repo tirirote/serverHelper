@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Plus, Loader2 } from 'lucide-react';
+import { Search, Plus, Loader2, ArrowLeftRight, Trash2 } from 'lucide-react';
 import Button from '../button/Button.jsx';
 import InputField from '../input/InputField.jsx';
 import NumberSelector from '../numberSelector/NumberSelector.jsx';
@@ -24,6 +24,9 @@ const GenericSelector = ({
     const [selectedComponent, setSelectedComponent] = useState(null);
     const [isFocused, setIsFocused] = useState(false);
 
+    // Determina si el desplegable debe ser visible
+    const hasSingleItem = singleSelection && compatibleItems.length > 0;
+
     // Usamos el ID del ítem si existe, sino el nombre, para ser más robustos
     const addedItemIdentifiers = compatibleItems.map(item => item.id || item.name);
 
@@ -35,13 +38,10 @@ const GenericSelector = ({
         if (!singleSelection) {
             return matchesSearch && !addedItemIdentifiers.includes(item.id || item.name);
         }
-
         // En modo selección única, solo filtramos por búsqueda.
         return matchesSearch;
     });
 
-    // Determina si el desplegable debe ser visible
-    const hasSingleItem = singleSelection && compatibleItems.length > 0;
     const isDropdownVisible = (isFocused || searchTerm) && filteredComponents.length > 0 && !selectedComponent && (!singleSelection || !hasSingleItem);
 
 
@@ -120,11 +120,37 @@ const GenericSelector = ({
         <div className={styles.componentSelector} >
             <label className={styles.label}>{selectorTitle}</label>
 
-            {/* Mensaje de ítem seleccionado en modo único */}
+            {/* Mensaje de ítem seleccionado en modo único (con acciones Cambiar / Limpiar) */}
             {hasSingleItem && (
-                <p className={styles.selectedItemText}>
-                    Seleccionado: {compatibleItems[0].name}
-                </p>
+                <div className={styles.singleSelectionRow}>
+                    <p className={styles.selectedItemText}>
+                        Seleccionado: {compatibleItems[0].name}
+                    </p>
+                    <div className={styles.singleSelectionActions}>
+                        <Button
+                            variant="icon-only"
+                            size="small"
+                            onClick={() => {
+                                // Ask parent to remove current selection and allow choosing again (open selector)
+                                if (onRemoveComponent) onRemoveComponent(compatibleItems[0]);
+                                setSelectedComponent(null);
+                                setSearchTerm('');
+                                setIsFocused(true);
+                            }}
+                        ><ArrowLeftRight size={20}/></Button>
+                        <Button
+                            variant="icon-only"
+                            size="small"
+                            onClick={() => {
+                                // Clear selection but keep dropdown closed
+                                if (onRemoveComponent) onRemoveComponent(compatibleItems[0]);
+                                setSelectedComponent(null);
+                                setSearchTerm('');
+                                setIsFocused(false);
+                            }}
+                        ><Trash2/></Button>
+                    </div>
+                </div>
             )}
 
             {/* El campo de búsqueda se oculta si ya hay un ítem seleccionado en modo único */}
@@ -138,6 +164,7 @@ const GenericSelector = ({
                         onBlur={handleBlur}
                         placeholder="Buscar..."
                     />
+
 
                     {/* Lista de Resultados Desplegable */}
                     {isDropdownVisible && (
