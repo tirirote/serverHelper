@@ -16,6 +16,7 @@ import MyComponents from './pages/components/MyComponents.jsx';
 import DashboardPage from './pages/dashboard/DashboardPage.jsx';
 import NetworksPage from './pages/networks/NetworksPage.jsx';
 import MyRacksPage from './pages/racks/MyRacksPage.jsx';
+import Simulation from './pages/simulation/Simulation.jsx';
 
 const AppLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -52,6 +53,7 @@ const AppLayout = () => {
                         <Route path="/servers/:serverId" element={<ServerDetailsPage />} />
                         <Route path="/playground" element={<Playground />} />
                         <Route path="/racks" element={<MyRacksPage />} />
+                        <Route path="/simulation" element={<Simulation />} />
                         <Route path="*" element={<Workspaces />} />
                     </Routes>
                 </div>

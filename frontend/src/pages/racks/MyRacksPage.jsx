@@ -40,6 +40,35 @@ const createWorkspaceSchema = (workspaceItem, totalRacks, racksLoading, racksErr
     };
 };
 
+const createRackSchema = (rackItem, workspaceItem, totalServers, serversLoading, serversError) => {
+    const serverValue = serversLoading
+        ? 'Cargando...'
+        : serversError
+            ? 'N/A (Error de API)'
+            : totalServers;
+
+    const details = [
+        { label: 'Nombre', value: rackItem.name },
+        { label: 'Unidades', value: rackItem.units },
+        { label: 'Servidores Totales', value: serverValue },
+        { label: 'Coste Total', value: rackItem.totalCost },
+        { label: 'Mantenimiento', value: rackItem.totalMaintenanceCost },
+        { label: 'Worksapce', value: rackItem.workspaceName },
+        { label: 'Salud', value: rackItem.healthStatus },
+        { label: 'Estado', value: rackItem.powerStatus },
+
+    ];
+
+    return {
+        name: rackItem.name,
+        description: rackItem.description,
+        modelPath: rackItem.modelPath,
+        type: 'rack',
+        details: details,
+        compatibilityItems: rackItem.servers || [],
+    };
+};
+
 const MyRacksPage = () => {
     // navigate previously used to go to workspace details — not needed here
     const { showToast } = useToast();
@@ -143,18 +172,7 @@ const MyRacksPage = () => {
     // detailsSchema now prefers selectedRack details if present; otherwise shows workspace info
     const detailsSchema = useMemo(() => {
         if (selectedRack) {
-            return {
-                name: selectedRack.name,
-                description: selectedRack.description,
-                modelPath: selectedRack.modelPath,
-                type: 'rack',
-                details: [
-                    { label: 'Unidades', value: selectedRack.units ?? '—' },
-                    { label: 'Estado Salud', value: selectedRack.healthStatus || '—' },
-                    { label: 'Power', value: selectedRack.powerStatus || '—' }
-                ],
-                compatibilityItems: selectedRack.servers || []
-            };
+            return createRackSchema(selectedRack, selectedRack.servers, racksLoading, racksError);
         }
 
         if (!activeWorkspace) return null;
@@ -240,7 +258,7 @@ const MyRacksPage = () => {
         }
     ], [selectedRack, activeWorkspace]);
 
-    
+
     const handleFilterClick = () => {
         showToast('Abriendo opciones avanzadas de filtro.', 'info');
     };

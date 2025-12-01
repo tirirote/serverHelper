@@ -12,6 +12,7 @@ import {
   Cpu,
   FolderOpen,
   LayoutDashboard,
+  Activity,
   ChevronLeft,
   ChevronRight,
   Wifi
@@ -27,7 +28,8 @@ const navItems = [
   { name: 'Racks', icon: <Server />, to: '/racks' },
   { name: 'Redes', icon: <Wifi />, to: '/networks' },
   { name: 'Tienda', icon: <ShoppingBag />, to: '/shop' },
-  { name: 'Inventario', icon: <Cpu />, to: '/components' }
+  { name: 'Inventario', icon: <Cpu />, to: '/components' },
+  { name: 'Simulation', icon: <Activity />, to: '/simulation' }
 ];
 
 const Sidebar = ({ isOpen, handleLogout, onToggle }) => {
