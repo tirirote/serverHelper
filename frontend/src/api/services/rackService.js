@@ -45,9 +45,9 @@ export const getMaintenanceCost = async (workspaceName, rackName) => {
   }
 };
 
-export const addServerToRack = async () => {
+export const addServerToRack = async (rackName, serverName) => {
   try {
-    const response = await apiClient.get(`/racks/add-server`);
+    const response = await apiClient.post(`/racks/add-server`, { rackName, serverName });
     return response.data;
   } catch (error) {
     throw error;

@@ -142,3 +142,29 @@
     color: var(--color-gray-light);
     margin-bottom: 15px;
 }
+
+/* Estilos para el dialogo */
+.dialogContent {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.dialogHeader {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.dialogBody {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    gap: 32px;
+    margin-top: 32px;
+}

@@ -37,6 +37,7 @@ const GenericList = ({ title, items, onRemoveItem }) => {
                 onClick={toggleCollapse}
                 className={styles.toggleButton}
                 aria-expanded={!isCollapsed}
+                type='button'
             >
                 <label className={styles.listTitle}>{title} ({items.length})</label>
                 {/* Icono de flecha que indica el estado actual */}
@@ -51,30 +52,32 @@ const GenericList = ({ title, items, onRemoveItem }) => {
                     // 💡 Cada ítem se envuelve en el Tooltip
                     <Tooltip key={item.id || index} data={item} delay={500}>
                         <div className={styles.listItem}>
-                            <span className={styles.itemName}>
-                                {item.name}
-                            </span>
-                            {/* Opcional: mostrar un contador si existe */}
-                            {item.count !== undefined && item.count !== null && (
-                                <span className={styles.itemCount}>
-                                    ({item.count})
-                                </span>
+                            <div className={styles.itemNameContainer}>
+                                <label className={styles.itemName}>{item.name}</label>
+                                {/* Opcional: mostrar un contador si existe */}
+                                {item.count !== undefined && item.count !== null && (
+                                    <span className={styles.itemCount}>
+                                        ({item.count})
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Botón de Eliminación: Agregado para cumplir con la funcionalidad de asignación/eliminación */}
+                            {onRemoveItem && (
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Previene la activación del Tooltip al hacer clic
+                                        onRemoveItem(item.id);
+                                    }}
+                                    className={styles.removeButton}
+                                    aria-label={`Eliminar ${item.name}`}
+                                >
+                                    <Trash2 size={16} />
+                                </button>
                             )}
                         </div>
-                        {/* Botón de Eliminación: Agregado para cumplir con la funcionalidad de asignación/eliminación */}
-                        {onRemoveItem && (
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation(); // Previene la activación del Tooltip al hacer clic
-                                    onRemoveItem(item.id);
-                                }}
-                                className={styles.removeButton}
-                                aria-label={`Eliminar ${item.name}`}
-                            >
-                                <Trash2 size={16} />
-                            </button>
-                        )}
+
                     </Tooltip>
                 ))}
             </div>

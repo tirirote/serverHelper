@@ -30,7 +30,7 @@ const NumberSelector = ({ title = 'Selecciona', value, unit = "€", min = -5, m
   return (
     <div className={styles.selectorContainer}>
 
-      <span className={styles.selectorLabel}>{title}</span>
+      {!title !== '' && !title && (<label className={styles.selectorLabel}>{title}</label>)}
       <div className={styles.selectorBody}>
         <button
           type='button'

@@ -11,9 +11,11 @@ import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.
 import GenericSelector from '../../components/ui/selector/GenericSelector.jsx';
 import NewWorkspaceForm from '../../components/form/workspace/NewWorkspaceForm.jsx';
 import NewRackForm from '../../components/form/rack/NewRackForm.jsx';
+import NewServerForm from '../../components/form/server/NewServerForm.jsx';
 // API Services
 import { getAllWorkspaces, createWorkspace } from '../../api/services/workspaceService.js';
-import { getAllRacks, createRack, deleteRack } from '../../api/services/rackService.js';
+import { getAllRacks, createRack, deleteRack, addServerToRack } from '../../api/services/rackService.js';
+import { createServer, getAllServers } from '../../api/services/serverService.js';
 
 
 // Mantenemos esta función de pre-procesamiento fuera del componente para que no se redefina.
@@ -89,6 +91,11 @@ const MyRacksPage = () => {
     const [racksError, setRacksError] = useState(null);
     const [selectedRack, setSelectedRack] = useState(null);
     const [isCreateRackModalOpen, setIsCreateRackModalOpen] = useState(false);
+    const [isCreateServerModalOpen, setIsCreateServerModalOpen] = useState(false);
+    const [isSelectOrCreateDialogOpen, setIsSelectOrCreateDialogOpen] = useState(false);
+    const [existingServers, setExistingServers] = useState([]);
+    const [serversLoading, setServersLoading] = useState(false);
+    const [serversError, setServersError] = useState(null);
 
     // --- 1. FUNCIÓN CENTRAL DE FETCH (Reemplaza fetchInitialData y refetchWorkspaces) ---
     const activeWorkspaceRef = useRef(activeWorkspace);
@@ -395,7 +402,7 @@ const MyRacksPage = () => {
     return (
         <div className={styles.page}>
             <div className={styles.header}>
-                <h1>My Racks</h1>
+                <h1>Dashboard</h1>
                 <Button
                     variant="primary"
                     onClick={() => showToast('Selecciona un workspace para gestionar racks y servidores dentro de él.', 'info')}
@@ -462,8 +469,33 @@ const MyRacksPage = () => {
                         {activeWorkspace ? (
                             <div style={{ display: 'flex', gap: 10 }}>
                                 <Button variant="primary" onClick={() => setIsCreateRackModalOpen(true)}>
-                                    <Plus size={20} style={{ marginRight: '5px' }} />
+                                    <Plus size={20} />
                                     Crear Rack en {activeWorkspace.name}
+                                </Button>
+                                <Button variant="primary" onClick={async () => {
+                                    // check backend for existing servers — if any exist, show a choice dialog
+                                    if (!selectedRack) return;
+                                    setServersLoading(true);
+                                    setServersError(null);
+                                    try {
+                                        const list = await getAllServers();
+                                        if (list && list.length > 0) {
+                                            setExistingServers(list);
+                                            setIsSelectOrCreateDialogOpen(true);
+                                        } else {
+                                            setIsCreateServerModalOpen(true);
+                                        }
+                                    } catch (err) {
+                                        console.error('Error fetching servers', err);
+                                        setServersError('Error cargando servidores');
+                                        // fallback to create if fetch fails
+                                        setIsCreateServerModalOpen(true);
+                                    } finally {
+                                        setServersLoading(false);
+                                    }
+                                }} disabled={!selectedRack}>
+                                    <Plus size={18} />
+                                    Añadir Servidor
                                 </Button>
                             </div>
                         ) : (
@@ -515,6 +547,94 @@ const MyRacksPage = () => {
                         }
                     }}
                     workspaces={[activeWorkspace]}
+                />
+            </Dialog>
+
+            {/* Create Server dialog (only when there is a selected rack) */}
+            {/* Select vs Create dialog (shown when servers exist) */}
+            <Dialog
+                isOpen={isSelectOrCreateDialogOpen}
+                onClose={() => setIsSelectOrCreateDialogOpen(false)}>
+                <div className={styles.dialogContent}>
+                    <div className={styles.dialogHeader}>
+                        <h2 className={styles.dialogTitle}>¿Seleccionar o crear servidor?</h2>
+                        <p>Hay servidores existentes en el sistema. ¿Quieres seleccionar uno para añadirlo al rack, o crear uno nuevo?</p>
+                    </div>
+                    <div className={styles.dialogBody}>
+
+                        {serversLoading ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Loader2 className="animate-spin" /> Cargando...</div>
+                        ) : serversError ? (
+                            <div className={styles.emptyState}><AlertTriangle /> Error cargando servidores</div>
+                        ) : (
+                            <GenericSelector
+                                availableItems={existingServers}
+                                compatibleItems={[]}
+                                onAddComponent={async (server) => {
+                                    // Attach selected server to the selected rack
+                                    if (!selectedRack) return showToast('Selecciona primero un rack', 'error');
+                                    try {
+                                        await addServerToRack(selectedRack.name, server.name);
+                                        // refresh racks
+                                        const updated = await getAllRacks(activeWorkspace.name);
+                                        setRacks(updated || []);
+                                        const updatedSelected = (updated || []).find(r => r.name === selectedRack.name);
+                                        setSelectedRack(updatedSelected || selectedRack);
+                                        showToast(`Servidor ${server.name} añadido al rack ${selectedRack.name}.`, 'success');
+                                    } catch (err) {
+                                        console.error('Error adding server to rack', err);
+                                        showToast(err?.response?.data?.message || err.message || 'Error al añadir servidor', 'error');
+                                    } finally {
+                                        setIsSelectOrCreateDialogOpen(false);
+                                    }
+                                }}
+                                isLoading={serversLoading}
+                                selectorTitle="Buscar servidor existente"
+                                listTitle="Servidor seleccionado"
+                                singleSelection={true}
+                            />
+                        )}
+                        <Button variant="primary" onClick={() => {
+                            setIsSelectOrCreateDialogOpen(false);
+                            setIsCreateServerModalOpen(true);
+                        }}>Crear servidor nuevo</Button>
+                    </div>
+                </div>
+            </Dialog>
+            <Dialog
+                isOpen={isCreateServerModalOpen}
+                onClose={() => setIsCreateServerModalOpen(false)}>
+                <NewServerForm
+                    racks={selectedRack ? [selectedRack, ...racks.filter(r => r.name !== selectedRack.name)] : racks}
+                    onClose={() => setIsCreateServerModalOpen(false)}
+                    onSubmit={async (serverData) => {
+                        // The form will include rackName (if selected) but we ensure it targets the selectedRack
+                        if (!selectedRack) {
+                            showToast('Selecciona primero un rack para añadir el servidor.', 'error');
+                            return;
+                        }
+                        try {
+                            // 1) Create the server object in the system
+                            const server = await createServer(serverData);
+
+                            // 2) Attach server to rack
+                            const serverName = server?.name || server.name || serverData.name;
+                            await addServerToRack(selectedRack.name, serverName);
+
+                            // 3) Refresh racks and selection
+                            const updated = await getAllRacks(activeWorkspace.name);
+                            setRacks(updated || []);
+                            const updatedSelected = (updated || []).find(r => r.name === selectedRack.name);
+                            setSelectedRack(updatedSelected || selectedRack);
+
+                            showToast(`Servidor ${serverName} añadido al rack ${selectedRack.name}.`, 'success');
+                        } catch (err) {
+                            console.error('Error creating/attaching server', err);
+                            showToast(err?.response?.data?.message || err.message || 'Error al crear o añadir el servidor', 'error');
+                        } finally {
+                            setIsCreateServerModalOpen(false);
+                        }
+                    }}
                 />
             </Dialog>
 

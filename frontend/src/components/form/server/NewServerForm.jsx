@@ -15,13 +15,12 @@ const NewServerForm = ({ onClose, onSubmit, racks = [] }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     // NUEVOS ESTADOS ESPECÍFICOS DE SERVIDOR
-    const [rackUnits, setRackUnits] = useState(1); // Unidades de rack (U)
-    const [consumption, setConsumption] = useState(100); // Consumo estimado en Watts (W)
 
     // Lista de compatibilidad simulada (puede ser Components, Racks, etc.)
     const [availableItems, setAvailableItems] = useState([]);
-    const [selectedItems, setSelectedItems] = useState([]);
-    const [compatibleItems, setCompatibleItems] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([]); // components selected
+    const [compatibleComponents, setCompatibleComponents] = useState([]);
+    const [compatibleRacks, setCompatibleRacks] = useState([]);
     const [itemLoading, setItemLoading] = useState(true);
     const [selectedRack, setSelectedRack] = useState(racks && racks.length > 0 ? racks[0] : null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,29 +46,41 @@ const NewServerForm = ({ onClose, onSubmit, racks = [] }) => {
     useEffect(() => {
         if (racks && racks.length > 0 && !selectedRack) {
             setSelectedRack(racks[0]);
+            setCompatibleRacks([racks[0]]);
         }
     }, [racks]);
 
     // Función para manejar la adición de un componente desde el selector
     const handleAddItem = (newItem) => {
         setSelectedItems(prev => [...prev, newItem]);
-        setCompatibleItems(prev => [...prev, newItem]);
+        setCompatibleComponents(prev => [...prev, newItem]);
     };
 
     const handleRemoveItem = (itemId) => {
         setSelectedItems(prev => prev.filter(item => item.id !== itemId));
-        setCompatibleItems(prev => prev.filter(item => item.id !== itemId));
+        setCompatibleComponents(prev => prev.filter(item => item.id !== itemId));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        console.log(selectedItems)
+
+        // sanitize components to avoid sending complex objects (possible circular refs)
         const serverData = {
-            serverName,
-            details,
-            rackUnits,
-            consumption,
-            compatibleItems
+            name: serverName,
+            components: selectedItems.map(item => ({
+                name: item.name,
+                type: item.type,
+                price: item.price,
+                maintenanceCost: item.maintenanceCost,
+                estimatedConsumption: item.estimatedConsumption,
+                isSelled: item.isSelled,
+                modelPath: item.modelPath
+            })),
+            description: details,
+            rackName: selectedRack?.name,
+            ipAddress: '10.0.0.2'
         };
 
         // Aquí iría la llamada a la API de creación de servidor (e.g., createServer(serverData))
@@ -81,7 +92,7 @@ const NewServerForm = ({ onClose, onSubmit, racks = [] }) => {
         try {
             setIsSubmitting(true);
             // Añadir `rackName` si se seleccionó uno
-            if (selectedRack) serverData.rackName = selectedRack.name || selectedRack.id;
+            if (selectedRack) serverData.rackName = selectedRack.name;
             if (onSubmit) {
                 await onSubmit(serverData);
             }
@@ -97,7 +108,6 @@ const NewServerForm = ({ onClose, onSubmit, racks = [] }) => {
                 <h1>Nuevo Servidor</h1>
             </div>
             <form onSubmit={handleSubmit} className={styles.form}>
-
                 {/* Nombre del Servidor */}
                 <InputField
                     label="Server Name"
@@ -115,60 +125,31 @@ const NewServerForm = ({ onClose, onSubmit, racks = [] }) => {
                     maxLength={255}
                     placeholder="Escribe especificaciones o detalles importantes..."
                 />
-
-                {/* Unidades de Rack (U) */}
-                <div className={styles.costContainer}> {/* Reutilizamos la clase costContainer para el diseño */}
-                    <label>Unidades de Rack (U)</label>
-                    <NumberSelector
-                        value={rackUnits}
-                        min={1}
-                        max={10}
-                        onChange={setRackUnits}
-                    />
-                    <span className={styles.currency}>U</span>
-                </div>
-
-                {/* Consumo Estimado (Watts) */}
-                <div className={styles.costContainer}>
-                    <label>Consumo Estimado (W)</label>
-                    <NumberSelector
-                        value={consumption}
-                        min={50}
-                        step={10}
-                        onChange={setConsumption}
-                    />
-                    <span className={styles.currency}>W</span>
-                </div>
-                <div style={{ marginBottom: '12px' }}>
-                    <label>Rack destino</label>
-                    <GenericSelector
-                        availableItems={racks}
-                        compatibleItems={selectedRack ? [selectedRack] : []}
-                        onAddComponent={(rack) => {
-                            setSelectedRack(rack);
-                            setCompatibleItems([rack]);
-                        }}
-                        onRemoveComponent={() => {
-                            setSelectedRack(null);
-                            setCompatibleItems([]);
-                        }}
-                        isLoading={itemLoading || isLoading}
-                        selectorTitle="Rack destino"
-                        listTitle='Rack Seleccionado'
-                        singleSelection={true}
-                    />
-                </div>
-
+                <GenericSelector
+                    availableItems={racks}
+                    compatibleItems={compatibleRacks}
+                    onAddComponent={(rack) => {
+                        setSelectedRack(rack);
+                        setCompatibleRacks([rack]);
+                    }}
+                    onRemoveComponent={() => {
+                        setSelectedRack(null);
+                        setCompatibleRacks([]);
+                    }}
+                    isLoading={itemLoading || isLoading}
+                    selectorTitle="Rack destino"
+                    listTitle='Rack Seleccionado'
+                    singleSelection={true}
+                />
                 <GenericSelector
                     availableItems={availableItems}
-                    compatibleItems={compatibleItems}
+                    compatibleItems={compatibleComponents}
                     onAddComponent={handleAddItem}
                     onRemoveComponent={handleRemoveItem}
                     isLoading={itemLoading || isLoading}
                     selectorTitle="Busca Componentes"
                     listTitle='Componentes Seleccionados'
                 />
-
                 <div className={styles.doneButton}>
                     <Button type="submit" variant="primary" disabled={isSubmitting}>{isSubmitting ? 'CREATING...' : 'Crear Servidor'}</Button>
                 </div>

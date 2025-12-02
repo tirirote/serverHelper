@@ -5,6 +5,32 @@
     background-color: var(--color-gray-darkest);
     border-radius: 8px;
     width: inherit;
+    max-height: 128px;
+    overflow-y: scroll;
+    /* Estilos de la barra de desplazamiento para WebKit */
+    /* Ancho de la barra de desplazamiento */
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    /* Fondo del track de la barra de desplazamiento */
+    &::-webkit-scrollbar-track {
+        background: var(--color-gray-darkest);
+        border-radius: 4px;
+    }
+
+    /* El "thumb" o la parte arrastrable de la barra */
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--color-gray-dark);
+        border-radius: 4px;
+        border: 3px solid var(--color-gray-light);
+    }
+
+    /* Estilo del thumb al pasar el cursor por encima */
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: var(--color-gray-lightest);
+        border-color: var(--color-white);
+    }
 }
 .toggleButton {
     display: flex;
@@ -69,6 +95,14 @@
     background-color: var(--color-gray-light);
 }
 
+.itemNameContainer {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    
+}
+
 .itemName {
     font-weight: 400;
     color: var(--color-white);
@@ -76,6 +110,20 @@
 
 .itemCount {
     font-weight: 400;
-    color: #6b7280;
+    color: var(--color-gray-light);
     font-size: 13px;
+}
+
+.removeButton {
+    background-color: var(--color-gray-darkest);
+    padding: 8px;
+    border-radius: 32px;
+    color: var(--color-white);
+    border: none;
+}
+
+.removeButton:hover {
+    background-color: var(--color-gray-dark);
+    color: var(--color-white);
+    border: none;
 }

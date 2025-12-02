@@ -12,7 +12,7 @@ export const getAllServers = async () => {
 export const createServer = async (serverData) => {
   try {
     const response = await apiClient.post('/servers', serverData);
-    return response.data;
+    return response.data.server;
   } catch (error) {
     throw error;
   }

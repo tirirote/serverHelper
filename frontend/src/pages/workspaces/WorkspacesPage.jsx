@@ -40,7 +40,6 @@ const createWorkspaceSchema = (workspaceItem, totalRacks, racksLoading, racksErr
 };
 
 const WorkspacesPage = () => {
-    const navigate = useNavigate();
     const { showToast } = useToast();
     const [workspaces, setWorkspaces] = useState([]);
     const [activeWorkspace, setActiveWorkspace] = useState(null);
@@ -243,8 +242,6 @@ const WorkspacesPage = () => {
         } else if (action === 'view') {
             setActiveWorkspace(workspace);
             showToast(`Visualizando detalles de ${workspace.name}.`, 'info');
-            // Navigate to workspace detail page and pass workspace in navigation state to avoid refetch
-            navigate(`/workspaces/${workspace.name}`, { state: { workspace } });
         } else if (action === 'edit') {
             showToast(`Simulando la edición para Workspace: ${workspace.name}`, 'info');
         }

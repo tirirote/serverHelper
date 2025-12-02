@@ -17,7 +17,10 @@ const GenericSelector = ({
     isLoading,
     selectorTitle = 'Añadir Componentes Compatible',
     listTitle = 'Componentes Asignados',
-    singleSelection = false }) => {
+    singleSelection = false,
+    // New prop: allowQuantity controls whether the quantity selector is shown
+    // and used when adding items in multi-selection mode.
+    allowQuantity = true }) => {
     const { showToast } = useToast();
     const [searchTerm, setSearchTerm] = useState('');
     const [quantity, setQuantity] = useState(1);
@@ -60,6 +63,11 @@ const GenericSelector = ({
 
     // 4. Manejador de Adición
     const handleAdd = (itemToAdd = selectedComponent) => {
+        // guard against receiving a DOM/SyntheticEvent as the first arg
+        if (itemToAdd && typeof itemToAdd === 'object' && itemToAdd.currentTarget === undefined && itemToAdd.nativeEvent) {
+            // looks like an event object — fall back to selectedComponent
+            itemToAdd = selectedComponent;
+        }
         if (!itemToAdd || (!singleSelection && quantity <= 0)) {
             showToast('Selecciona un componente y, si aplica, una cantidad válida.', 'warning');
             return;
@@ -71,13 +79,14 @@ const GenericSelector = ({
             showToast(`Se seleccionó: ${itemToAdd.name}.`, 'info');
         } else {
             // MODO SELECCIÓN MÚLTIPLE: Llamar a onAddComponent con el ítem y la cantidad.
+            const usedCount = allowQuantity ? quantity : 1;
             const newCompatibleItem = {
                 ...itemToAdd,
                 name: itemToAdd.name,
-                count: quantity,
+                count: usedCount,
             };
             onAddComponent(newCompatibleItem);
-            showToast(`Se agregó ${quantity}x ${itemToAdd.name} a la lista.`, 'info');
+            showToast(`Se agregó ${usedCount}x ${itemToAdd.name} a la lista.`, 'info');
         }
 
         // Resetear el estado para la próxima adición
@@ -184,25 +193,26 @@ const GenericSelector = ({
                 </div>
             )}
 
-
             {/* Configuración de Cantidad y Botón de Añadir (Solo visible en modo múltiple y si hay algo seleccionado) */}
             {!singleSelection && selectedComponent && (
                 <div className={styles.addComponentArea}>
                     <p className={styles.selectedItemText}>
                         Seleccionado: {selectedComponent.name}
                     </p>
-                    <div className={styles.quantityAndButton}>
-                        <NumberSelector
-                            value={quantity}
-                            min={1}
-                            max={100}
-                            onChange={setQuantity}
-                        />
+                            <div className={styles.quantityAndButton}>
+                                {allowQuantity && (
+                                    <NumberSelector
+                                        value={quantity}
+                                        min={1}
+                                        max={100}
+                                        onChange={setQuantity}
+                                        unit=''
+                                    />
+                                )}
                         <Button
                             variant="secondary"
                             size="small"
-                            onClick={handleAdd}
-                            style={{ width: 'auto' }}
+                            onClick={() => handleAdd()}
                         >
                             <Plus size={18} /> Añadir
                         </Button>
