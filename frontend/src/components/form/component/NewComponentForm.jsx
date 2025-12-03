@@ -23,15 +23,15 @@ const mandatoryComponentTypes = [
 ];
 
 const typeToModelPath = {
-    'CPU': '/assets/3d/cpu.glb',
-    'RAM': '/assets/3d/ram_stick.glb',
-    'HardDisk': '/assets/3d/hdd.glb',
-    'BiosConfig': '/assets/3d/chip.glb',
-    'Fan': '/assets/3d/server_fan.glb',
-    'PowerSupply': '/assets/3d/power_supply.glb',
-    'ServerChasis': '/assets/3d/server_chasis.glb',
-    'NetworkInterface': '/assets/3d/nic_card.glb',
-    'OS': '/assets/3d/os_icon.glb',
+    'CPU': '/assets/models/cpu.glb',
+    'RAM': '/assets/models/ram.glb',
+    'HardDisk': '/assets/models/harddisk.glb',
+    'BiosConfig': '/assets/models/os.glb',
+    'Fan': '/assets/models/fan.glb',
+    'PowerSupply': '/assets/models/power_supply.glb',
+    'ServerChasis': '/assets/models/server-closed.glb',
+    'NetworkInterface': '/assets/models/ni.glb',
+    'OS': '/assets/models/os.glb',
 };
 
 const dropdownItems = mandatoryComponentTypes.map(type => ({
