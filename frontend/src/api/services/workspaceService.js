@@ -9,6 +9,15 @@ export const createWorkspace = async (workspaceData) => {
     }
 };
 
+export const deleteWorkspace = async (name) => {
+    try {
+        const response = await apiClient.delete(`/workspaces/${name}`);
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const getAllWorkspaces = async () => {
     try {
         const response = await apiClient.get('/workspaces');

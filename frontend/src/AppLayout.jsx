@@ -4,7 +4,6 @@ import Sidebar from './components/sidebar/Sidebar.jsx';
 import styles from './AppLayout.module.css';
 
 //Pages
-import WelcomePage from './pages/welcome/WelcomePage.jsx';
 import Playground from './pages/Playground.jsx';
 import Workspaces from './pages/workspaces/WorkspacesPage.jsx';
 import WorkspaceDetailsPage from './pages/workspaces/WorkspaceDetailsPage.jsx';
@@ -13,11 +12,10 @@ import ShopPageDetails from './pages/shop/ShopPageDetails.jsx';
 import ServersPage from './pages/servers/ServersPage.jsx';
 import ServerDetailsPage from './pages/servers/ServerDetailsPage.jsx';
 import MyComponents from './pages/components/MyComponents.jsx';
-import DashboardPage from './pages/dashboard/DashboardPage.jsx';
 import NetworksPage from './pages/networks/NetworksPage.jsx';
 import MyRacksPage from './pages/racks/MyRacksPage.jsx';
 import Simulation from './pages/simulation/Simulation.jsx';
-
+import DashboardPage from './pages/dashboard/DashboardPage.jsx';
 const AppLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const handleSidebarToggle = () => {
@@ -42,6 +40,7 @@ const AppLayout = () => {
             <div className={`${styles.contentWrapper} ${isSidebarOpen ? styles.contentShift : ''}`}>
                 <div className={styles.mainContent}>
                     <Routes>
+                        <Route path="/dashboard" element={<DashboardPage />} />
                         <Route path="/workspaces" element={<Workspaces />} />
                         <Route path="/workspaces/:workspaceId" element={<WorkspaceDetailsPage />} />
                         <Route path="/networks" element={<NetworksPage />} />

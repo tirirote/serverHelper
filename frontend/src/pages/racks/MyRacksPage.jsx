@@ -12,64 +12,14 @@ import GenericSelector from '../../components/ui/selector/GenericSelector.jsx';
 import NewWorkspaceForm from '../../components/form/workspace/NewWorkspaceForm.jsx';
 import NewRackForm from '../../components/form/rack/NewRackForm.jsx';
 import NewServerForm from '../../components/form/server/NewServerForm.jsx';
+import { createWorkspaceSchema, createRackSchema } from '../../components/ui/detailViewer/detailSchemas.js';
 // API Services
 import { getAllWorkspaces, createWorkspace } from '../../api/services/workspaceService.js';
 import { getAllRacks, createRack, deleteRack, addServerToRack } from '../../api/services/rackService.js';
 import { createServer, getAllServers } from '../../api/services/serverService.js';
 
 
-// Mantenemos esta función de pre-procesamiento fuera del componente para que no se redefina.
-const createWorkspaceSchema = (workspaceItem, totalRacks, racksLoading, racksError) => {
-    const racksValue = racksLoading
-        ? 'Cargando...'
-        : racksError
-            ? 'N/A (Error de API)'
-            : totalRacks;
-
-    const details = [
-        { label: 'Nombre', value: workspaceItem.name },
-        { label: 'Red', value: workspaceItem.network ? workspaceItem.network.name : 'N/A' },
-        { label: 'Racks Totales', value: racksValue },
-    ];
-
-    return {
-        name: workspaceItem.name,
-        description: workspaceItem.description,
-        modelPath: workspaceItem.modelPath,
-        type: 'workspace',
-        details: details,
-        compatibilityItems: workspaceItem.compatibleWith || [],
-    };
-};
-
-const createRackSchema = (rackItem, workspaceItem, totalServers, serversLoading, serversError) => {
-    const serverValue = serversLoading
-        ? 'Cargando...'
-        : serversError
-            ? 'N/A (Error de API)'
-            : totalServers;
-
-    const details = [
-        { label: 'Nombre', value: rackItem.name },
-        { label: 'Unidades', value: rackItem.units },
-        { label: 'Servidores Totales', value: serverValue },
-        { label: 'Coste Total', value: rackItem.totalCost },
-        { label: 'Mantenimiento', value: rackItem.totalMaintenanceCost },
-        { label: 'Worksapce', value: rackItem.workspaceName },
-        { label: 'Salud', value: rackItem.healthStatus },
-        { label: 'Estado', value: rackItem.powerStatus },
-
-    ];
-
-    return {
-        name: rackItem.name,
-        description: rackItem.description,
-        modelPath: rackItem.modelPath,
-        type: 'rack',
-        details: details,
-        compatibilityItems: rackItem.servers || [],
-    };
-};
+// Using shared schema builder functions from detailSchemas
 
 const MyRacksPage = () => {
     // navigate previously used to go to workspace details — not needed here

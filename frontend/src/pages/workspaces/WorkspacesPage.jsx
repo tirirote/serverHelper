@@ -8,36 +8,15 @@ import Button from '../../components/ui/button/Button.jsx';
 import styles from '../Page.module.css';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
+import { createWorkspaceSchema } from '../../components/ui/detailViewer/detailSchemas.js';
 import NewWorkspaceForm from '../../components/form/workspace/NewWorkspaceForm.jsx';
 import { useNavigate } from 'react-router-dom';
 // API Services
-import { getAllWorkspaces, createWorkspace } from '../../api/services/workspaceService.js';
+import { getAllWorkspaces, createWorkspace, deleteWorkspace } from '../../api/services/workspaceService.js';
 import { getAllRacks } from '../../api/services/rackService.js';
 
 
-// Mantenemos esta función de pre-procesamiento fuera del componente para que no se redefina.
-const createWorkspaceSchema = (workspaceItem, totalRacks, racksLoading, racksError) => {
-    const racksValue = racksLoading
-        ? 'Cargando...'
-        : racksError
-            ? 'N/A (Error de API)'
-            : totalRacks;
-
-    const details = [
-        { label: 'Nombre', value: workspaceItem.name },
-        { label: 'Red', value: workspaceItem.network ? workspaceItem.network.name : 'N/A' },
-        { label: 'Racks Totales', value: racksValue },
-    ];
-
-    return {
-        name: workspaceItem.name,
-        description: workspaceItem.description,
-        modelPath: workspaceItem.modelPath,
-        type: 'workspace',
-        details: details,
-        compatibilityItems: workspaceItem.compatibleWith || [],
-    };
-};
+// use shared createWorkspaceSchema from detailSchemas
 
 const WorkspacesPage = () => {
     const { showToast } = useToast();
@@ -272,21 +251,20 @@ const WorkspacesPage = () => {
         }
     };
 
-    const handleConfirmDelete = () => {
-        if (!workspaceToDelete) return;
+    const handleConfirmDelete = async () => {
 
-        // Lógica de eliminación en el frontend (idealmente, esto debería ser una llamada a la API)
-        const updatedWorkspaces = workspaces.filter(ws => ws.name !== workspaceToDelete.name);
-        setWorkspaces(updatedWorkspaces);
+        try {
+            if (!workspaceToDelete) return;
 
-        // Si eliminamos el workspace activo, seleccionamos el primero restante
-        if (activeWorkspace?.name === workspaceToDelete.name) {
-            setActiveWorkspace(updatedWorkspaces[0] || null);
+            await deleteWorkspace(workspaceToDelete.name);
+            showToast(`Workspace "${workspaceToDelete.name}" eliminado.`, 'success');
+            setIsDeleteModalOpen(false);
+            setWorkspaceToDelete(null);
+        } catch (err) {
+            console.error('Error al eliminar workspace:', err);
+            throw err; // let the form display the error with toasts
         }
 
-        showToast(`Workspace "${workspaceToDelete.name}" eliminado.`, 'error');
-        setIsDeleteModalOpen(false);
-        setWorkspaceToDelete(null);
     };
 
     const handleFilterClick = () => {
@@ -368,26 +346,16 @@ const WorkspacesPage = () => {
                 onClose={() => setIsDeleteModalOpen(false)}
             >
                 <div className={styles.dialogContent}>
-                    <header className={`${styles.dialogHeader} ${styles.dialogDanger}`}>
-                        <AlertTriangle size={24} style={{ marginRight: '10px' }} />
-                        <h2 className={styles.dialogTitle}>Confirmar Eliminación: {workspaceToDelete?.name}</h2>
-                    </header>
+                    <div className={styles.dialogHeader}>
+                        <h2>Vas a eliminar: {workspaceToDelete?.name}</h2>
+                    </div>
 
                     <div className={styles.dialogBody}>
-                        <p className={styles.dialogWarningText}>
+                        <p>
                             Estás a punto de eliminar el workspace <strong>{workspaceToDelete?.name}</strong>.
                             Esta acción es irreversible y toda la información asociada se perderá.
                             ¿Estás seguro de continuar?
                         </p>
-                    </div>
-
-                    <footer className={styles.dialogFooter}>
-                        <Button
-                            variant="secondary"
-                            onClick={() => setIsDeleteModalOpen(false)}
-                        >
-                            Cancelar
-                        </Button>
                         <Button
                             variant="danger"
                             onClick={handleConfirmDelete}
@@ -395,7 +363,7 @@ const WorkspacesPage = () => {
                             <Trash2 size={18} />
                             Eliminar Permanentemente
                         </Button>
-                    </footer>
+                    </div>
                 </div>
             </Dialog>
         </div>
