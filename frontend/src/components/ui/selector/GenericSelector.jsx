@@ -127,71 +127,73 @@ const GenericSelector = ({
 
     return (
         <div className={styles.componentSelector} >
-            <label className={styles.label}>{selectorTitle}</label>
-
-            {/* Mensaje de ítem seleccionado en modo único (con acciones Cambiar / Limpiar) */}
-            {hasSingleItem && (
-                <div className={styles.singleSelectionRow}>
-                    <p className={styles.selectedItemText}>
-                        Seleccionado: {compatibleItems[0].name}
-                    </p>
-                    <div className={styles.singleSelectionActions}>
-                        <Button
-                            variant="icon-only"
-                            size="small"
-                            onClick={() => {
-                                // Ask parent to remove current selection and allow choosing again (open selector)
-                                if (onRemoveComponent) onRemoveComponent(compatibleItems[0]);
-                                setSelectedComponent(null);
-                                setSearchTerm('');
-                                setIsFocused(true);
-                            }}
-                        ><ArrowLeftRight size={20}/></Button>
-                        <Button
-                            variant="icon-only"
-                            size="small"
-                            onClick={() => {
-                                // Clear selection but keep dropdown closed
-                                if (onRemoveComponent) onRemoveComponent(compatibleItems[0]);
-                                setSelectedComponent(null);
-                                setSearchTerm('');
-                                setIsFocused(false);
-                            }}
-                        ><Trash2/></Button>
-                    </div>
-                </div>
-            )}
-
-            {/* El campo de búsqueda se oculta si ya hay un ítem seleccionado en modo único */}
-            {(!singleSelection || !hasSingleItem) && (
-                <div className={styles.searchAndSelect}>
-                    <InputField
-                        icon={<Search size={20} />}
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        onFocus={handleFocus}
-                        onBlur={handleBlur}
-                        placeholder="Buscar..."
-                    />
-
-
-                    {/* Lista de Resultados Desplegable */}
-                    {isDropdownVisible && (
-                        <div className={styles.resultsDropdown}>
-                            {filteredComponents.map(item => (
-                                <div
-                                    key={item.id}
-                                    className={styles.resultItem}
-                                    onMouseDown={(e) => e.preventDefault()}
-                                    onClick={() => handleSelectComponent(item)}
-                                >
-                                    {item.name} <span className={styles.categoryBadge}>{item.type}</span>
-                                </div>
-                            ))}
+            <div className={styles.selectorHeader}>
+                <label>{selectorTitle}</label>
+                {/* Mensaje de ítem seleccionado en modo único (con acciones Cambiar / Limpiar) */}
+                {hasSingleItem && (
+                    <div className={styles.singleSelectionRow}>
+                        <p className={styles.selectedItemText}>
+                            Seleccionado: {compatibleItems[0].name}
+                        </p>
+                        <div className={styles.singleSelectionActions}>
+                            <Button
+                                variant="icon-only"
+                                size="small"
+                                onClick={() => {
+                                    // Ask parent to remove current selection and allow choosing again (open selector)
+                                    if (onRemoveComponent) onRemoveComponent(compatibleItems[0]);
+                                    setSelectedComponent(null);
+                                    setSearchTerm('');
+                                    setIsFocused(true);
+                                }}
+                            ><ArrowLeftRight size={20} /></Button>
+                            <Button
+                                variant="icon-only"
+                                size="small"
+                                onClick={() => {
+                                    // Clear selection but keep dropdown closed
+                                    if (onRemoveComponent) onRemoveComponent(compatibleItems[0]);
+                                    setSelectedComponent(null);
+                                    setSearchTerm('');
+                                    setIsFocused(false);
+                                }}
+                            ><Trash2 size={20} /></Button>
                         </div>
-                    )}
-                </div>
-            )}
+                    </div>
+                )}
+
+                {/* El campo de búsqueda se oculta si ya hay un ítem seleccionado en modo único */}
+                {(!singleSelection || !hasSingleItem) && (
+                    <div className={styles.searchAndSelect}>
+                        <InputField
+                            icon={<Search size={20} />}
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            onFocus={handleFocus}
+                            onBlur={handleBlur}
+                            placeholder="Buscar..."
+                        />
+
+
+                        {/* Lista de Resultados Desplegable */}
+                        {isDropdownVisible && (
+                            <div className={styles.resultsDropdown}>
+                                {filteredComponents.map(item => (
+                                    <div
+                                        key={item.id}
+                                        className={styles.resultItem}
+                                        onMouseDown={(e) => e.preventDefault()}
+                                        onClick={() => handleSelectComponent(item)}
+                                    >
+                                        {item.name} <span className={styles.categoryBadge}>{item.type}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
 
             {/* Configuración de Cantidad y Botón de Añadir (Solo visible en modo múltiple y si hay algo seleccionado) */}
             {!singleSelection && selectedComponent && (
@@ -199,16 +201,16 @@ const GenericSelector = ({
                     <p className={styles.selectedItemText}>
                         Seleccionado: {selectedComponent.name}
                     </p>
-                            <div className={styles.quantityAndButton}>
-                                {allowQuantity && (
-                                    <NumberSelector
-                                        value={quantity}
-                                        min={1}
-                                        max={100}
-                                        onChange={setQuantity}
-                                        unit=''
-                                    />
-                                )}
+                    <div className={styles.quantityAndButton}>
+                        {allowQuantity && (
+                            <NumberSelector
+                                value={quantity}
+                                min={1}
+                                max={100}
+                                onChange={setQuantity}
+                                unit=''
+                            />
+                        )}
                         <Button
                             variant="secondary"
                             size="small"
@@ -228,7 +230,8 @@ const GenericSelector = ({
                     title={listTitle} // Customizado con listTitle
                 />
             )}
-        </div >
+        </div>
+
     );
 };
 

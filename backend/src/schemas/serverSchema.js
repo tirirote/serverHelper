@@ -8,7 +8,8 @@ export const serverSchema = Joi.object({
   totalPrice: Joi.number(),
   totalMaintenanceCost: Joi.number(),
   healthStatus: Joi.string().valid(...healthStatus).default('Unknown'),
-  network: Joi.string(),
+  rackName: Joi.string().optional().allow(null),
+  network: Joi.string().optional().allow(null),
   ipAddress: Joi.string().ip({ version: ['ipv4'] }).optional().allow(''),
   operatingSystem: Joi.string().optional().allow('')
 });

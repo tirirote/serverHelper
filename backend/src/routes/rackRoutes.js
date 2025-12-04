@@ -6,7 +6,8 @@ import {
   deleteRackByName,
   getRackMaintenanceCost,
   updateRack,
-  addServerToRack
+  addServerToRack,
+  removeServerFromRack
   
 } from '../controllers/rackController.js';
 
@@ -19,5 +20,6 @@ router.get('/:workspaceName', getAllRacks);
 router.get('/:workspaceName/:name', getRackByName);
 router.get('/:workspaceName/:name/maintenance-cost', getRackMaintenanceCost);
 router.post('/add-server', addServerToRack);
+router.put('/remove-server', removeServerFromRack)
 
 export default router;

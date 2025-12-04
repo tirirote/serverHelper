@@ -82,3 +82,20 @@ export const createComponentSchema = (componentItem) => {
     compatibilityItems: componentItem.compatibleList || componentItem.compatibleWith || []
   };
 };
+
+export const createNetworkSchema = (networkItem) => {
+  if (!networkItem) return null;
+  const details = [
+    { label: 'Dirección Ip', value: networkItem.ipAddress || 'N/A' },
+    { label: 'Máscara de Red', value: networkItem.subnetMask || 'N/A' },
+    { label: 'Puerta del Enlace', value: networkItem.gateway || 'N/A' }
+  ];
+
+  return {
+    name: networkItem.name,
+    description: networkItem.details || networkItem.description || '',
+    modelPath: networkItem.modelPath || '',
+    type: 'network',
+    details,
+  };
+};

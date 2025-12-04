@@ -14,7 +14,9 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: inherit;
+  width: 100%;
+  height: fit-content;
+  align-self: center;
 }
 
 /* --- Variantes de Botones --- */
@@ -109,7 +111,7 @@
 
 /* Botón de solo icono */
 .icon-only {
-  background-color: var(--color-gray-darkest);
+  background-color: var(--color-gray-dark);
   color: var(--color-gray-lightest);
   border-radius: 8px;
   border: solid 4px var(--color-gray-light);
@@ -119,6 +121,7 @@
   align-items: center;
   padding: 8px;
   justify-content: center;
+  width: fit-content;
 }
 
 .icon-only:hover {
@@ -128,8 +131,8 @@
 }
 
 .icon-only:active {
-  background-color: var(--color-gray-lightest);
-  transform: translateY(4px);
+  background-color: var(--color-white);
+  color: var(--color-gray-darkest);
   box-shadow: none;
 }
 

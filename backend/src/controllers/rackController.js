@@ -266,6 +266,31 @@ export const getAllRacks = async (req, res) => {
   res.status(200).json({ racks: racksInWorkspace });
 };
 
+export const getRackMaintenanceCost = async (req, res) => {
+  try {
+    const { workspaceName, name } = req.params;
+
+    // 1. Buscar el rack (maneja 404 si no existe)
+    const rack = await findRackByWorkspaceAndName(workspaceName, name);
+
+    // 2. 💡 Asegurar la existencia del coste y tomar el valor.
+    // Usamos el operador || 0 para evitar fallos si el campo no existiera (aunque no debería).
+    const maintenanceCost = rack.totalMaintenanceCost || 0;
+
+    // 3. Retornar el resultado formateado
+    res.status(200).json({
+      // 💡 Aplicamos .toFixed(2) sobre el valor seguro (que ya está precalculado)
+      totalMaintenanceCost: maintenanceCost.toFixed(2)
+    });
+
+  } catch (error) {
+    // En caso de errores inesperados
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message || 'Error interno del servidor.' });
+  }
+};
+
+//Rack - Server interactions
 export const addServerToRack = async (req, res) => {
   try {
     const db = await getDb();
@@ -312,26 +337,50 @@ export const addServerToRack = async (req, res) => {
   }
 };
 
-export const getRackMaintenanceCost = async (req, res) => {
+export const removeServerFromRack = async (req, res) => {
   try {
-    const { workspaceName, name } = req.params;
+    const db = await getDb();
+    const racks = [...db.racks];
 
-    // 1. Buscar el rack (maneja 404 si no existe)
-    const rack = await findRackByWorkspaceAndName(workspaceName, name);
+    // 1. Extraer los parámetros
+    const { rackName, serverName } = req.body;
 
-    // 2. 💡 Asegurar la existencia del coste y tomar el valor.
-    // Usamos el operador || 0 para evitar fallos si el campo no existiera (aunque no debería).
-    const maintenanceCost = rack.totalMaintenanceCost || 0;
+    // 2. Buscar el índice del rack
+    const rackIndex = racks.findIndex(r => r.name === rackName);
+    if (rackIndex === -1) {
+      // Manejo de error estandarizado
+      return res.status(404).json({ message: `Rack '${rackName}' no encontrado.` });
+    }
 
-    // 3. Retornar el resultado formateado
+    const rack = racks[rackIndex];
+
+    // 3. Buscar el índice del servidor dentro del array 'servers' del rack
+    const serverIndexInRack = rack.servers.indexOf(serverName);
+
+    // 4. Verificar si el servidor existe en el rack (si no existe, lo consideramos un error 404/409 o simplemente éxito)
+    if (serverIndexInRack === -1) {
+      // Podríamos devolver un 404 si el servidor no está donde se espera.
+      return res.status(404).json({ message: `Servidor '${serverName}' no se encuentra en el rack '${rackName}'.` });
+    }
+
+    // 5. Mutar la copia del rack: eliminar el servidor del array
+    rack.servers.splice(serverIndexInRack, 1);
+
+    // 6. Recalcular los costos del rack
+    await recalculateRackCosts(rack); // Usa la función helper existente
+
+    // 7. Persistencia
+    await saveCollectionToDisk(racks, 'racks'); // Guardar el array racks completo
+
     res.status(200).json({
-      // 💡 Aplicamos .toFixed(2) sobre el valor seguro (que ya está precalculado)
-      totalMaintenanceCost: maintenanceCost.toFixed(2)
+      message: 'Servidor eliminado del rack con éxito.',
+      rack: rack
     });
 
   } catch (error) {
-    // En caso de errores inesperados
     const status = error.status || 500;
-    res.status(status).json({ message: error.message || 'Error interno del servidor.' });
+    res.status(status).json({
+      message: error.message || 'Error interno del servidor.'
+    });
   }
 };

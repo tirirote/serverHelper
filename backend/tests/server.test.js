@@ -26,7 +26,7 @@ beforeEach(async () => {
     await resetTestDB(db);
 });
 
-afterAll(() => {    
+afterAll(() => {
     closeDbWatchers();
 });
 
@@ -50,12 +50,12 @@ describe('Server Service API (CRUD & Logic)', () => {
         const res = await request(app).post('/api/servers').send(newServerData);
 
         // Forzar la sincronización para la aserción
-        
+
         const db_updated = await getDb();
 
         expect(res.statusCode).toEqual(201);
         expect(res.body.server).toHaveProperty('network', 'TestNet'); // Red se infiere del Workspace
-        expect(res.body.server).toHaveProperty('rackId', testRack.name);
+        expect(res.body.server).toHaveProperty('rackName', testRack.name);
         expect(db_updated.servers.length).toBe(initialCount + 1); // 💡 Sincronización OK
         // 💡 NUEVAS ASERCIONES PARA COMPONENTES
         const componentsArray = res.body.server.components;
@@ -72,7 +72,7 @@ describe('Server Service API (CRUD & Logic)', () => {
         await request(app).post('/api/racks').send(testRack);
 
         // 1. Crear el primer servidor (persiste el cambio)
-        await request(app).post('/api/servers').send(validServerBase);        
+        await request(app).post('/api/servers').send(validServerBase);
 
         // 2. Intentar crear duplicado
         const res = await request(app).post('/api/servers').send(validServerBase);
@@ -81,16 +81,44 @@ describe('Server Service API (CRUD & Logic)', () => {
         expect(res.body.message).toBe('Ya existe un servidor con este nombre.');
     });
 
-    it('3. should return 400 if network cannot be inferred (no rack)', async () => {
-        const invalidServer = { ...validServerBase, name: 'Invalid Server', rackName: undefined };
+    it('3. should successfully create a server without a Rack or Network assigned', async () => {
+        // 💡 Nota: No se requiere preparación de Network/Workspace/Rack
+        const unassignedServerData = {
+            ...validServerBase,
+            name: 'UnassignedServer',
+            rackName: undefined, // Aseguramos que no se envíe
+            ipAddress: '0.0.0.0' // IP por defecto si no hay red
+        };
 
-        const res = await request(app).post('/api/servers').send(invalidServer);        
-        
-        expect(res.statusCode).toEqual(400);
-        expect(res.body.message).toBe("No se pudo determinar la red para el servidor.");
+        const initialCount = (await getDb()).servers.length;
+
+        const res = await request(app).post('/api/servers').send(unassignedServerData);
+        const db_updated = await getDb();
+
+        expect(res.statusCode).toEqual(201);
+        expect(res.body.server).toHaveProperty('rackName', null); // Debe ser null
+        expect(res.body.server).toHaveProperty('network', null); // Debe ser null
+        expect(db_updated.servers.length).toBe(initialCount + 1);
     });
 
-    it('4. should successfully update server components and recalculate costs', async () => {
+    it('4. should return 400 if rackName is provided but network cannot be determined', async () => {
+        // PREPARACIÓN: Crear solo la red
+        await request(app).post('/api/networks').send(testNetwork);
+
+        // El workspace y el rack NO se crean o se usa un nombre inexistente.
+        const invalidRackServer = {
+            ...validServerBase,
+            name: 'InvalidRackServer',
+            rackName: 'NonExistentRack'
+        };
+
+        const res = await request(app).post('/api/servers').send(invalidRackServer);
+
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.message).toBe('No se pudo determinar la red para el servidor.');
+    });
+
+    it('5. should successfully update server components and recalculate costs', async () => {
         //1. Creamos la red
         await request(app).post('/api/networks').send(testNetwork);
         //2. Creamos el workspace
@@ -113,7 +141,7 @@ describe('Server Service API (CRUD & Logic)', () => {
         expect(updatedServer.healthStatus).toBe('Warning');
     });
 
-    it('5. should successfully add a component to a server and recalculate costs', async () => {
+    it('6. should successfully add a component to a server and recalculate costs', async () => {
         //1. Creamos la red
         await request(app).post('/api/networks').send(testNetwork);
         //2. Creamos el workspace
@@ -138,7 +166,7 @@ describe('Server Service API (CRUD & Logic)', () => {
         expect(res.body.server.components).toHaveLength(initialServer.components.length + 1);
     });
 
-    it('6. should successfully delete an existing server', async () => {
+    it('7. should successfully delete an existing server', async () => {
         //1. Creamos la red
         await request(app).post('/api/networks').send(testNetwork);
         //2. Creamos el workspace
@@ -164,7 +192,7 @@ describe('Server Service API (CRUD & Logic)', () => {
         expect(db_updated.servers.length).toBe(initialCount - 1);
     });
 
-    it('7. should return 404 when trying to get a non-existent server', async () => {
+    it('8. should return 404 when trying to get a non-existent server', async () => {
         const res = await request(app).get('/api/servers/NonExistentServer');
         expect(res.statusCode).toEqual(404);
     });

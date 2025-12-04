@@ -73,7 +73,7 @@ const ShopPageDetails = ({ onAddToCart }) => {
             await updateComponent(item.name, { ...item, isSelled: true });
             showToast(`Compra realizada: ${item.name}`, 'success');
             // Navegar a la lista de componentes comprados
-            navigate('/components');
+            navigate('/dashboard');
         } catch (err) {
             console.error('Error actualizando el componente después de la compra:', err);
             showToast('No se pudo completar la compra. Inténtalo de nuevo.', 'error');

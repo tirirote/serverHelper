@@ -35,6 +35,7 @@ const PRECONFIGURED_MODELS = {
   rack: '/assets/models/rack-empty.glb',
   server: '/assets/models/server-closed.glb',  
   workspace: '/assets/models/workspace.glb',
+  network: '/assets/models/router.glb'
 };
 
 // Componente para cargar y renderizar el modelo 3D

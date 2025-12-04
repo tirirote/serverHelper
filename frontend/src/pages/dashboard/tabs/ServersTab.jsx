@@ -83,7 +83,10 @@ const ServersTab = ({ onSelectItem }) => {
     return (
         <div>
             <div className={styles.headerButtons}>
-                <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={14} /> Crear Servidor</Button>
+                <div className={styles.searchContainer}></div>
+                <div className={styles.buttonGroup}>
+                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={14} /> Crear Servidor</Button>
+                </div>
             </div>
 
             <SearchFilterBar onSearchChange={setSearchTerm} />

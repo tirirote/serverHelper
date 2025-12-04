@@ -13,11 +13,27 @@
 
 .headerButtons {
     display: flex;
+    align-self: center;
+    justify-content: space-between;
     flex-direction: row;
-    gap: 32px;
     margin-bottom: 16px;
+    gap: 16px;
+    width: 100%;
+}
+
+.buttonGroup{
+    display: flex;
+    flex-direction: row;
     align-self: end;
     justify-content: end;
+    gap: 16px;
+}
+
+.searchContainer{
+    display: flex;
+    width: auto;
+    align-self: start;
+    justify-content: start;
 }
 
 .contentGrid {

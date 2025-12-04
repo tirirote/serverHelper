@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styles from '../Page.module.css';
 import Tabs from '../../components/ui/tabs/Tabs.jsx';
 import DetailViewerCard from '../../components/ui/detailViewer/DetailViewerCard.jsx';
-import { createWorkspaceSchema, createRackSchema, createServerSchema, createComponentSchema } from '../../components/ui/detailViewer/detailSchemas.js';
+import { createWorkspaceSchema, createRackSchema, createServerSchema, createComponentSchema, createNetworkSchema } from '../../components/ui/detailViewer/detailSchemas.js';
 import WorkspacesTab from './tabs/WorkspacesTab.jsx';
 import RacksTab from './tabs/RacksTab.jsx';
 import ServersTab from './tabs/ServersTab.jsx';
@@ -31,6 +31,7 @@ const DashboardPage = () => {
             case 'rack': setSelectedSchema(createRackSchema(selectedItem)); break;
             case 'server': setSelectedSchema(createServerSchema(selectedItem)); break;
             case 'component': setSelectedSchema(createComponentSchema(selectedItem)); break;
+            case 'network' : setSelectedSchema(createNetworkSchema(selectedItem)); break;
             default: setSelectedSchema({ name: selectedItem.name, description: selectedItem.description || '', modelPath: selectedItem.modelPath || '', details: [], type: 'unknown', compatibilityItems: [] });
         }
     }, [selectedItem]);

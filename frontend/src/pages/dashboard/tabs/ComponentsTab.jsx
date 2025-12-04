@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Trash2, AlertTriangle, Loader2, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Trash2, AlertTriangle, Loader2, Plus, ShoppingBag } from 'lucide-react';
 import { useToast } from '../../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../../components/ui/table/DataTable.jsx';
 import TableActions from '../../../components/ui/table/TableActions.jsx';
@@ -12,6 +13,7 @@ import NewComponentForm from '../../../components/form/component/NewComponentFor
 import { getAllComponents, createComponent, deleteComponent } from '../../../api/services/componentService.js';
 
 const ComponentsTab = ({ onSelectItem }) => {
+    const navigate = useNavigate();
     const { showToast } = useToast();
     const [components, setComponents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -51,7 +53,10 @@ const ComponentsTab = ({ onSelectItem }) => {
     return (
         <div>
             <div className={styles.headerButtons}>
-                <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={14} /> Añadir Componente</Button>
+                <div className={styles.searchContainer}></div>
+                <div className={styles.buttonGroup}>
+                    <Button variant="primary" onClick={() => navigate('/shop')}><ShoppingBag size={20} /> Tienda</Button>
+                </div>
             </div>
 
             <SearchFilterBar onSearchChange={setSearchTerm} />

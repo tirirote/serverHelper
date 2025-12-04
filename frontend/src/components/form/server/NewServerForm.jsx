@@ -69,6 +69,7 @@ const NewServerForm = ({ onClose, onSubmit, racks = [] }) => {
         // sanitize components to avoid sending complex objects (possible circular refs)
         const serverData = {
             name: serverName,
+            description: details,
             components: selectedItems.map(item => ({
                 name: item.name,
                 type: item.type,
@@ -78,21 +79,12 @@ const NewServerForm = ({ onClose, onSubmit, racks = [] }) => {
                 isSelled: item.isSelled,
                 modelPath: item.modelPath
             })),
-            description: details,
-            rackName: selectedRack?.name,
+            rackName: selectedRack?.name || null,
             ipAddress: '10.0.0.2'
         };
 
-        // Aquí iría la llamada a la API de creación de servidor (e.g., createServer(serverData))
-        if (!selectedRack) {
-            showToast('Debes seleccionar un Rack destino antes de crear el servidor.', 'warning');
-            return;
-        }
-
         try {
             setIsSubmitting(true);
-            // Añadir `rackName` si se seleccionó uno
-            if (selectedRack) serverData.rackName = selectedRack.name;
             if (onSubmit) {
                 await onSubmit(serverData);
             }
@@ -137,7 +129,7 @@ const NewServerForm = ({ onClose, onSubmit, racks = [] }) => {
                         setCompatibleRacks([]);
                     }}
                     isLoading={itemLoading || isLoading}
-                    selectorTitle="Rack destino"
+                    selectorTitle="Rack"
                     listTitle='Rack Seleccionado'
                     singleSelection={true}
                 />
@@ -147,7 +139,7 @@ const NewServerForm = ({ onClose, onSubmit, racks = [] }) => {
                     onAddComponent={handleAddItem}
                     onRemoveComponent={handleRemoveItem}
                     isLoading={itemLoading || isLoading}
-                    selectorTitle="Busca Componentes"
+                    selectorTitle="Componentes"
                     listTitle='Componentes Seleccionados'
                 />
                 <div className={styles.doneButton}>

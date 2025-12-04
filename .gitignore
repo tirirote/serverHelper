@@ -29,3 +29,4 @@ dist-ssr
 
 # Backend DB collections (ignore runtime JSON files used as the file-based DB)
 backend/src/db/collections/*.json
+backend/src/db/collections/*

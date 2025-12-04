@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Trash2, AlertTriangle, Loader2, Plus } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { Trash2, AlertTriangle, Loader2, Plus, RefreshCcw } from 'lucide-react';
 import { useToast } from '../../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../../components/ui/table/DataTable.jsx';
 import TableActions from '../../../components/ui/table/TableActions.jsx';
@@ -7,9 +7,11 @@ import Dialog from '../../../components/ui/dialog/Dialog.jsx';
 import Button from '../../../components/ui/button/Button.jsx';
 import styles from '../Tab.module.css';
 import SearchFilterBar from '../../../components/ui/searchbar/SearchFilterBar.jsx';
+import GenericSelector from '../../../components/ui/selector/GenericSelector.jsx';
 import NewRackForm from '../../../components/form/rack/NewRackForm.jsx';
 // API
 import { getAllRacks, createRack, deleteRack } from '../../../api/services/rackService.js';
+import { getAllWorkspaces } from '../../../api/services/workspaceService.js';
 
 const RacksTab = ({ onSelectItem }) => {
     const { showToast } = useToast();
@@ -21,15 +23,91 @@ const RacksTab = ({ onSelectItem }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [rackToDelete, setRackToDelete] = useState(null);
 
+    const [workspaces, setWorkspaces] = useState([]);
+    const [activeWorkspace, setActiveWorkspace] = useState(null);
+    const [selectedRack, setSelectedRack] = useState(null);
+    // --- 1. FUNCIÓN CENTRAL DE FETCH (Reemplaza fetchInitialData y refetchWorkspaces) ---
+    const activeWorkspaceRef = useRef(activeWorkspace);
+    const activeRacksRef = useRef(racks);
+    const fetchAndSetWorkspaces = useCallback(async (initialLoad = false) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const data = await getAllWorkspaces();
+            setWorkspaces(data);
+
+            // Solo seleccionamos el primer workspace si es la carga inicial
+            // o si el workspace activo fue eliminado.
+            const currentActive = activeWorkspaceRef.current;
+            // Do not auto-select a workspace — selection should be explicit by the user
+            // (keeps the page focused on choosing first the workspace to work in).
+            if (initialLoad && !currentActive) {
+                // leave activeWorkspace null by default
+            }
+        } catch (err) {
+            console.error('Error al cargar los workspaces:', err);
+            setError('Error al obtener los workspaces. Asegúrate de que el backend esté funcionando.');
+            showToast('Error de conexión con el servidor.', 'error');
+        } finally {
+            setLoading(false);
+        }
+    }, [showToast]); // don't include activeWorkspace to avoid refetch loop
+
+    const fetchAndSetRacks = useCallback(async (initialLoad = false) => {
+        setLoading(true);
+        setError(null);
+        try {
+            setSelectedRack(null);
+            setRacks([]);
+            if (activeWorkspace) {
+                const fetchExtraData = async () => {
+                    setLoading(true);
+                    setError(null);
+                    try {
+                        const list = await getAllRacks(activeWorkspace.name);
+                        setRacks(list || []);
+                        const currentActive = activeRacksRef.current;
+                        // Do not auto-select a workspace — selection should be explicit by the user
+                        // (keeps the page focused on choosing first the workspace to work in).
+                        if (initialLoad && !currentActive) {
+                            // leave activeWorkspace null by default
+                        }
+                    } catch (err) {
+                        console.error("Error al obtener racks para workspace:", err);
+                        setError('Error');
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                fetchExtraData();
+            } else {
+                setRacks([]);
+                setError(null);
+            }
+        } catch (err) {
+            console.error('Error al cargar los racks:', err);
+            setError('Error al obtener los racks. Asegúrate de que el backend esté funcionando.');
+            showToast('Error de conexión con el servidor.', 'error');
+        } finally {
+            setLoading(false);
+        }
+    }, [activeWorkspace]);
+
+    // --- 2. EFECTO DE CARGA INICIAL ---
     useEffect(() => {
-        (async () => {
-            setLoading(true); setError(null);
-            try {
-                const data = await getAllRacks();
-                setRacks(data || []);
-            } catch (err) { console.error(err); setError('Error cargando racks'); } finally { setLoading(false); }
-        })();
-    }, []);
+        // Al montar, llamamos a la función con initialLoad=true
+        fetchAndSetWorkspaces(true);
+    }, [fetchAndSetWorkspaces]);
+
+    // keep ref in sync
+    useEffect(() => { activeWorkspaceRef.current = activeWorkspace; }, [activeWorkspace]);
+    // --- 3. GESTIÓN DE DATOS EXTRA (RACKS) AL SELECCIONAR UN WORKSPACE (Sin cambios) ---
+
+    useEffect(() => {
+        // Whenever the active workspace changes we fetch the racks for that workspace
+        fetchAndSetRacks(true)
+    }, [fetchAndSetRacks]);
 
     const filtered = useMemo(() => {
         if (!searchTerm) return racks;
@@ -64,7 +142,33 @@ const RacksTab = ({ onSelectItem }) => {
     return (
         <div>
             <div className={styles.headerButtons}>
-                <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={14} /> Crear Rack</Button>
+                {/* Workspace picker - single selection */}
+                <div className={styles.searchContainer}>
+                    <GenericSelector
+                        availableItems={workspaces}
+                        compatibleItems={activeWorkspace ? [activeWorkspace] : []}
+                        onAddComponent={(ws) => {
+                            // set the chosen workspace as active
+                            setActiveWorkspace(ws);
+                            showToast(`Workspace seleccionado: ${ws.name}`, 'info');
+                        }}
+                        onRemoveComponent={() => {
+                            setActiveWorkspace(null);
+                            setSelectedRack(null);
+                            showToast('Workspace deseleccionado', 'info');
+                        }}
+                        isLoading={loading}
+                        selectorTitle="Workspace"
+                        listTitle="Workspace activo"
+                        singleSelection={true}
+                    />
+                </div>
+                <div className={styles.buttonGroup}>
+                    <Button variant='icon-only' onClick={() => fetchAndSetRacks()}><RefreshCcw size={20} /></Button>
+                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={14} /> Crear Rack</Button>
+                </div>
+
+
             </div>
 
             <SearchFilterBar onSearchChange={setSearchTerm} />

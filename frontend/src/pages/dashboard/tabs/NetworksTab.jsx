@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Trash2, AlertTriangle, Loader2, Plus } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { Trash2, AlertTriangle, Loader2, Plus, RefreshCcw } from 'lucide-react';
 import { useToast } from '../../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../../components/ui/table/DataTable.jsx';
 import TableActions from '../../../components/ui/table/TableActions.jsx';
@@ -21,21 +21,26 @@ const NetworksTab = ({ onSelectItem }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [componentToDelete, setComponentToDelete] = useState(null);
 
-    useEffect(() => {
-        (async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const data = await getAllNetworks();
-                setNetworks(data || []);
-            } catch (err) {
-                console.error(err);
-                setError('Error cargando redes');
-            } finally {
-                setLoading(false);
-            }
-        })();
+
+
+    const fetchNetworks = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await getAllNetworks();
+            setNetworks(data || []);
+        } catch (err) {
+            console.error('Error al cargar las redes:', err);
+            setError('Error al obtener las redes.');
+            showToast('Error de conexión con el servidor.', 'error');
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchNetworks();
+    }, [fetchNetworks]);
 
     const filtered = useMemo(() => {
         if (!searchTerm) return networks;
@@ -83,7 +88,11 @@ const NetworksTab = ({ onSelectItem }) => {
     return (
         <div>
             <div className={styles.headerButtons}>
-                <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={14} /> Añadir red</Button>
+                <div className={styles.searchContainer}></div>
+                <div className={styles.buttonGroup}>
+                    <Button variant='icon-only' onClick={() => fetchNetworks()}><RefreshCcw size={20} /></Button>
+                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={14} /> Añadir red</Button>
+                </div>
             </div>
 
             <SearchFilterBar onSearchChange={setSearchTerm} />

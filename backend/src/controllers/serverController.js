@@ -126,18 +126,8 @@ const validateComponents = async (serverComponents, res) => {
   const serverComponentTypes = serverComponents.map(c => c.type);
 
   // 1. Validar componentes obligatorios
-  // Usamos la lista mandatoryComponentTypes, asumiendo que incluye 'OS'
-  // Filtramos 'HardDisk' y 'RAM' ya que son opcionales en el mínimo requerido.
   const requiredTypes = [
-    'CPU',
-    'RAM',
-    'HardDisk',
-    'BiosConfig',
-    'Fan',
-    'PowerSupply',
-    'ServerChasis',
-    'NetworkInterface',
-    'OS'
+    'CPU'
   ]
 
   for (const type of requiredTypes) {
@@ -187,22 +177,24 @@ export const createServer = async (req, res) => {
     const workspaces = [...db.workspaces];
     const { name, rackName } = req.body;
 
-    // 1. Determinar Network (Se mantiene la respuesta rápida aquí, ya que interactúa con colecciones)
-    let network;
+    // 1. Determinar Network (AHORA OPCIONAL)
+    let network = null;
+    let existingNetwork = null;
 
     if (rackName) {
       const workspace = workspaces.find(w => w.racks.includes(rackName));
+
       if (workspace) {
         network = workspace.network;
       }
-    }
 
-    if (!network) {
-      return res.status(400).json({ message: 'No se pudo determinar la red para el servidor.' });
-    }
+      if (!network) {
+        return res.status(400).json({ message: 'No se pudo determinar la red para el servidor.' });
+      }
 
-    // 2. Verificar existencia de la Network (respuesta rápida)
-    const existingNetwork = await findNetworkByName(network);
+      // 2. Verificar existencia de la Network (respuesta rápida)
+      existingNetwork = await findNetworkByName(network);
+    }
 
     // 3. Verificar existencia de servidor (respuesta rápida 409)
     await findExistingServer(name);
@@ -214,8 +206,8 @@ export const createServer = async (req, res) => {
     // 5. Creación del objeto final (ya validado)
     const newServer = {
       ...validatedServerData,
-      network: existingNetwork.name,
-      rackId: rackName
+      network: existingNetwork ? existingNetwork.name : null,
+      rackName: rackName || null
     };
 
     // 4. PERSISTENCIA EN DISCO
@@ -348,6 +340,37 @@ export const getAllComponents = async (req, res) => {
   res.status(200).json({ components: server.components });
 };
 
+export const getMissingComponents = async (req, res) => {
+  const { name } = req.params;
+
+  const server = await findServerByName(name);
+
+  // Usamos la lista mandatoryComponentTypes, asumiendo que incluye 'OS'
+  const serverComponentTypes = server.components.map(c => c.type);
+  const requiredTypes = mandatoryComponentTypes.filter(type => type !== 'HardDisk' && type !== 'RAM');
+
+  const missingComponents = requiredTypes.filter(type => !serverComponentTypes.includes(type));
+
+  res.status(200).json({ missing: missingComponents });
+};
+
+export const getServerTotalCost = async (req, res) => {
+  const { name } = req.params;
+
+  const server = await findServerByName(name);
+
+  res.status(200).json({ totalPrice: server.totalPrice });
+};
+
+export const getServerMaintenanceCost = async (req, res) => {
+  const { name } = req.params;
+
+  const server = await findServerByName(name);
+
+  res.status(200).json({ totalMaintenanceCost: server.totalMaintenanceCost });
+};
+
+//Server - Component Interactions
 export const addComponentToServer = async (req, res) => {
   const db = await getDb();
 
@@ -383,32 +406,61 @@ export const addComponentToServer = async (req, res) => {
   });
 };
 
-export const getMissingComponents = async (req, res) => {
-  const { name } = req.params;
+export const removeComponentFromServer = async (req, res) => {
+  try {
+    const db = await getDb();
+    const servers = [...db.servers]; // Copia mutable
+    const { serverName, componentName } = req.body;
 
-  const server = await findServerByName(name);
+    // 1. Encontrar el índice del servidor (Lanza 404 si no existe)
+    const serverIndex = await findServerIndexByName(serverName);
 
-  // Usamos la lista mandatoryComponentTypes, asumiendo que incluye 'OS'
-  const serverComponentTypes = server.components.map(c => c.type);
-  const requiredTypes = mandatoryComponentTypes.filter(type => type !== 'HardDisk' && type !== 'RAM');
+    const server = servers[serverIndex];
 
-  const missingComponents = requiredTypes.filter(type => !serverComponentTypes.includes(type));
+    // 2. Encontrar el componente en el servidor (buscando por nombre)
+    const componentIndex = server.components.findIndex(c => c.name === componentName);
 
-  res.status(200).json({ missing: missingComponents });
-};
+    if (componentIndex === -1) {
+      return res.status(404).json({ message: `Componente '${componentName}' no encontrado en el servidor.` });
+    }
 
-export const getServerTotalCost = async (req, res) => {
-  const { name } = req.params;
+    // 💡 Obtener los detalles del componente a eliminar
+    const componentToRemove = server.components[componentIndex];
 
-  const server = await findServerByName(name);
 
-  res.status(200).json({ totalPrice: server.totalPrice });
-};
+    // 3. 🚫 COMPROBACIÓN CRÍTICA: Impedir la eliminación de componentes obligatorios
+    if (mandatoryComponentTypes.includes(componentToRemove.type)) {
+      return res.status(400).json({
+        message: `No se puede eliminar el componente obligatorio de tipo: ${componentToRemove.type}.`
+      });
+    }
 
-export const getServerMaintenanceCost = async (req, res) => {
-  const { name } = req.params;
+    // 4. Eliminar el componente del array
+    server.components.splice(componentIndex, 1);
 
-  const server = await findServerByName(name);
+    // 5. Lógica especial para OS
+    if (componentToRemove.type === 'OS') {
+      // Si se elimina el OS, se establece a 'N/A' o al valor que maneje el esquema
+      server.operatingSystem = 'N/A';
+    }
 
-  res.status(200).json({ totalMaintenanceCost: server.totalMaintenanceCost });
+    // 6. Recalcular costos
+    // Se usa la función auxiliar con el array de componentes actualizado
+    server.totalPrice = await calculateTotalCost(server.components);
+    server.totalMaintenanceCost = await calculateTotalMaintenanceCost(server.components);
+
+    // 7. Persistencia
+    await saveCollectionToDisk(servers, 'servers');
+
+    res.status(200).json({
+      message: 'Componente eliminado del servidor con éxito.',
+      server
+    });
+
+  } catch (error) {
+    const status = error.status || 500;
+    res.status(status).json({
+      message: error.message || 'Error interno del servidor.'
+    });
+  }
 };

@@ -9,7 +9,8 @@ import {
   getServerTotalCost,
   getServerMaintenanceCost,
   updateServer,
-  addComponentToServer
+  addComponentToServer,
+  removeComponentFromServer
 } from '../controllers/serverController.js';
 
 const router = Router();
@@ -24,5 +25,6 @@ router.get('/:name/missing', getMissingComponents);
 router.get('/:name/total-cost', getServerTotalCost);
 router.get('/:name/maintenance-cost', getServerMaintenanceCost);
 router.post('/add-component', addComponentToServer);
+router.put('/remove-component', removeComponentFromServer);
 
 export default router;

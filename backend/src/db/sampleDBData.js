@@ -25,14 +25,32 @@ const sampleComponents = [
 
 // --- 2. DATOS DE REDES ---
 const sampleNetworks = [
-    { name: 'NET_PROD_1', ipAddress: '192.168.1.1', subnetMask: '192.168.1.0/24', gateway: '192.168.1.254' },
-    { name: 'NET_DEV_2', ipAddress: '10.0.0.1', subnetMask: '10.0.0.0/8', gateway: '10.0.0.254' },
+    {
+        name: 'NET_PROD_1',
+        ipAddress: '192.168.1.1',
+        subnetMask: '192.168.1.0/24',
+        gateway: '192.168.1.254'
+    },
+    {
+        name: 'NET_DEV_2',
+        ipAddress: '10.0.0.1',
+        subnetMask: '10.0.0.0/8',
+        gateway: '10.0.0.254'
+    },
 ];
 
 // --- 3. DATOS DE WORKSPACES ---
 const sampleWorkspaces = [
-    { name: 'Workspace Europe', description: 'Infraestructura de producción en EU.', network: 'NET_PROD_1' },
-    { name: 'Workspace Asia', description: 'Entornos de desarrollo y testing.', network: 'NET_DEV_2' },
+    {
+        name: 'Workspace Europe',
+        description: 'Infraestructura de producción en EU.',
+        network: 'NET_PROD_1'
+    },
+    {
+        name: 'Workspace Asia',
+        description: 'Entornos de desarrollo y testing.',
+        network: 'NET_DEV_2'
+    },
 ];
 
 // --- 4. DATOS DE RACKS ---
@@ -60,6 +78,7 @@ const serverComponents1 = [
     getComponentRef('10G NIC SFP+'),
     getComponentRef('Ubuntu Server 22.04'),
 ];
+
 const sampleServers = [
     {
         name: 'Web Server Prod EU',
@@ -68,6 +87,7 @@ const sampleServers = [
         totalPrice: 0,
         totalMaintenanceCost: 0,
         healthStatus: healthStatus[0], // Excellent
+        rackName: 'RACK_EU_01',
         network: 'NET_PROD_1',
         ipAddress: '192.168.1.101',
         operatingSystem: 'Ubuntu Server 22.04'
@@ -82,6 +102,7 @@ const sampleServers = [
         totalPrice: 1375 + 5000 - 0, // Ajuste de precio
         totalMaintenanceCost: 18.5 + 15 - 1.5, // Ajuste de costo
         healthStatus: healthStatus[1], // Warning
+        rackName: '',
         network: 'NET_DEV_2',
         ipAddress: '10.0.0.10',
         operatingSystem: 'No OS' // El campo es opcional y se permite ''
@@ -93,7 +114,6 @@ const sampleUsers = [
     { username: 'adminuser', password: 'password123' },
     { username: 'testdev', password: 'devpass456' }
 ];
-
 
 // Exportación final
 export const initialDBData = {

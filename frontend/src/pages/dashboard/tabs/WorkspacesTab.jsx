@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Trash2, AlertTriangle, Loader2, Globe, Plus, Info } from 'lucide-react';
+import { Trash2, AlertTriangle, Loader2, Globe, Plus, Info, RefreshCcw } from 'lucide-react';
 import { useToast } from '../../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../../components/ui/table/DataTable.jsx';
 import TableActions from '../../../components/ui/table/TableActions.jsx';
@@ -129,7 +129,11 @@ const WorkspacesTab = ({ onSelectItem }) => {
     return (
         <div>
             <div className={styles.headerButtons}>
-                <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={16} /> Crear Workspace</Button>
+                <div className={styles.searchContainer}></div>
+                <div className={styles.buttonGroup}>
+                    <Button variant='icon-only' onClick={() => fetchAndSetWorkspaces()}><RefreshCcw size={20}/></Button>
+                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={16} /> Crear Workspace</Button>
+                </div>
             </div>
 
             <SearchFilterBar onSearchChange={setSearchTerm} />
