@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Trash2, AlertTriangle, Loader2, Plus } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Trash2, AlertTriangle, Loader2, Plus, RefreshCcw } from 'lucide-react';
 import { useToast } from '../../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../../components/ui/table/DataTable.jsx';
 import TableActions from '../../../components/ui/table/TableActions.jsx';
@@ -21,20 +21,24 @@ const ServersTab = ({ onSelectItem }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [serverToDelete, setServerToDelete] = useState(null);
 
-    useEffect(() => {
-        (async () => {
-            setLoading(true); setError(null);
-            try {
-                const data = await getAllServers();
-                setServers(data || []);
-            } catch (err) {
-                console.error(err);
-                setError('Error cargando servidores');
-            } finally {
-                setLoading(false);
-            }
-        })();
+    const fetchServers = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await getAllServers();
+            setServers(data || []);
+        } catch (err) {
+            console.error('Error al cargar los servidores:', err);
+            setError('Error al obtener las servidores.');
+            showToast('Error de conexión con el servidor.', 'error');
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchServers();
+    }, [fetchServers]);
 
     const filtered = useMemo(() => {
         if (!searchTerm) return servers;
@@ -44,6 +48,7 @@ const ServersTab = ({ onSelectItem }) => {
 
     const columns = useMemo(() => [
         { header: 'Servidor', key: 'name', render: item => <div onClick={() => onSelectItem && onSelectItem({ ...item, type: 'server' })}>{item.name}</div> },
+        { header: 'Estado', key: 'healthStatus', render: item => <div>{item.healthStatus}</div> },
         { header: 'OS', key: 'operatingSystem', render: item => item.operatingSystem || '—' },
         {
             header: 'Acciones', key: 'actions', className: styles.centerAlign, render: item => (
@@ -85,6 +90,7 @@ const ServersTab = ({ onSelectItem }) => {
             <div className={styles.headerButtons}>
                 <div className={styles.searchContainer}></div>
                 <div className={styles.buttonGroup}>
+                    <Button variant='icon-only' onClick={() => fetchServers()}><RefreshCcw size={24} /></Button>
                     <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={24} /> Servidor nuevo</Button>
                 </div>
             </div>

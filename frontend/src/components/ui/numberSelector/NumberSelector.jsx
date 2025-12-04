@@ -48,11 +48,15 @@ const NumberSelector = ({ title = 'Selecciona', value, unit = "€", min = -5, m
         </button>
 
         <input
-          className={styles.valueDisplay}
-          value={currentValue}
+          className={styles.inputField}
           type='text'
-          onChange={handleChange} />
-
+          value={value}
+          onChange={(e) => handleChange(Number(e.target.value))}
+          disabled={disabled}
+          min={min}
+          max={max}
+        />
+        
         <button
           type='button'
           onClick={handleIncrement}
@@ -62,6 +66,7 @@ const NumberSelector = ({ title = 'Selecciona', value, unit = "€", min = -5, m
           <ChevronRight size={24} />
         </button>
       </div>
+      {unit && (<span className={styles.unitLabel}>{unit}</span>)}
     </div>
   );
 };

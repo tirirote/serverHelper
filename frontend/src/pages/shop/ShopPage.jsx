@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { ShoppingCart, Server, Package, Cpu, HardDrive, PlusCircle, MemoryStick, Eye, Loader2, Plus, Info } from 'lucide-react';
+import { ShoppingCart, Server, Package, Cpu, HardDrive, PlusCircle, MemoryStick, Eye, Loader2, Plus, Info, RefreshCcw, ShoppingBag } from 'lucide-react';
 import { useToast } from '../../components/ui/toasts/ToastProvider.jsx';
 import SearchFilterBar from '../../components/ui/searchbar/SearchFilterBar.jsx';
 import Button from '../../components/ui/button/Button.jsx';
@@ -14,7 +14,6 @@ import Dialog from '../../components/ui/dialog/Dialog.jsx';
 
 const ShopPage = () => {
     const { showToast } = useToast();
-    const navigate = useNavigate();
     const [isFormOpen, setIsFormOpen] = useState(false);
     // NUEVOS ESTADOS para manejar datos y carga
     const [shopItems, setShopItems] = useState([]);
@@ -75,16 +74,15 @@ const ShopPage = () => {
         }
     };
 
-    const handleViewDetails = (item) => {
+    const handleBuy = async (item) => {
         try {
-            // 1. Guardar el objeto completo en localStorage
-            localStorage.setItem('selectedShopItemData', JSON.stringify(item));
-
-            // 2. Navegar al componente de detalles usando el ID
-            navigate(`/shop/${item.name}`);
-        } catch (error) {
-            console.error("Error al guardar el ítem en localStorage:", error);
-            showToast('No se pudo abrir los detalles del producto.', 'error');
+            // Llama a API para marcar el componente como vendido
+            await updateComponent(item.name, { ...item, isSelled: true });
+            showToast(`Compra realizada: ${item.name}`, 'success');
+            await fetchShopItems();
+        } catch (err) {
+            console.error('Error actualizando el componente después de la compra:', err);
+            showToast('No se pudo completar la compra. Inténtalo de nuevo.', 'error');
         }
     };
 
@@ -129,13 +127,12 @@ const ShopPage = () => {
                 <div className={styles.itemFooter}>
                     <p className={styles.itemPrice}>${item.price.toFixed(2)}</p>
                     <Button
-                        variant="primary"
+                        variant={item.isSelled ? 'secondary' : 'primary'}
                         size="small"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleViewDetails(item);
-                        }}                    >
-                        <Eye size={24} /> Ver
+                        onClick={() => handleBuy(item)}
+                        disabled={item.isSelled}>
+                        <ShoppingBag size={24} />
+                        {item.isSelled ? 'Comprado' : 'Comprar'}
                     </Button>
                 </div>
             </div>
@@ -165,6 +162,7 @@ const ShopPage = () => {
                 </div>
 
                 <div className={styles.actionButtons}>
+                    <Button variant='icon-only' onClick={() => fetchShopItems()}><RefreshCcw size={24} /></Button>
                     <Button
                         variant="primary"
                         onClick={() => setIsFormOpen(true)}

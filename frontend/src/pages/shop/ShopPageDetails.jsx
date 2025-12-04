@@ -82,46 +82,40 @@ const ShopPageDetails = ({ onAddToCart }) => {
 
     const formatCurrency = (amount) => `${(amount || 0).toFixed(2)} €`;
 
-    const compatibleList = item.compatibleComponents || item.compatibleWith || [];
-
     return (
         <div className={styles.page}>
-            <div className={styles.headerContainer}>
-                {/* Botón de Regreso */}
-                <Button
-                    variant="secondary"
-                    size="medium"
-                    onClick={() => navigate('/shop')}>
-                    <ChevronLeft size={24} /> Volver
-                </Button>
+            <div className={styles.header}>
+                <div className={styles.actionButtons}>
+                    <Button
+                        variant="primary"
+                        size="medium"
+                        onClick={() => navigate('/shop')}>
+                        <ChevronLeft size={24} /> Volver
+                    </Button>
+                </div>
             </div>
+
             <div className={styles.productCard}>
 
-                <div className={styles.viewerColumn}>
+                <div className={styles.productInfo}>
+
                     <div className={styles.viewerContainer}>
-                        <ModelViewer
-                            modelPath={item.modelPath}
-                            variant="default"
-                        />
+                        <ModelViewer modelPath={item.modelPath} variant="default" />
                     </div>
-                    <p className={styles.viewerTip}>* Usa el ratón para rotar y hacer zoom en el modelo 3D.</p>
-                </div>
-
-                <div className={styles.infoColumn}>
-
-                    <div className={styles.namePriceContainer}>
-                        <h1 className={styles.productName}>{item.name}</h1>
-                        <span className={styles.priceTag}>{formatCurrency(item.price)}</span>
-                    </div>
-
-                    <p className={styles.description}>{item.details}</p>
 
                     <div className={styles.infoSection}>
 
-                        <h2 className={styles.infoHeader}>Detalles</h2>
+                        <div className={styles.productNameHeader}>
+                            <h1 className={styles.productName}>{item.name}</h1>
+                            <span className={styles.priceTag}>{formatCurrency(item.price)}</span>
+                        </div>
+
+                        <div className={styles.descriptionCard}>
+                            <label>Descripción</label>
+                            <p>{item.details}</p>
+                        </div>
 
                         <div className={styles.infoList}>
-
                             <div className={styles.infoCard}>
                                 <label className={styles.infoLabel}>Tipo de Componente</label>
                                 <span className={styles.infoValue}>{item.type}</span>
@@ -134,26 +128,20 @@ const ShopPageDetails = ({ onAddToCart }) => {
                                 <label className={styles.infoLabel}>Consumo Estimado</label>
                                 <span className={styles.infoValue}>{item.estimatedConsumption}W /mes</span>
                             </div>
-
                         </div>
-
-                        <GenericList
-                            title='Compatible con'
-                            items={item.compatibleList} />
                     </div>
-
-                    <div className={styles.purchaseControls}>
-                        <div className={styles.quantityControl}>
-                            <label htmlFor="quantity" className={styles.quantityLabel}>Cantidad</label>
-                            <NumberSelector
-                                value={quantity}
-                                min={1}
-                                max={255}
-                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                unit=''
-                            />
-                        </div>
-
+                </div>
+                <div className={styles.purchaseCard}>
+                    <h2 className={styles.purchaseHeader} >Compra</h2>
+                    <div className={styles.purchaseBody}>
+                        <NumberSelector
+                            value={quantity}
+                            min={1}
+                            max={1}
+                            onChange={(e) => setQuantity(e)}
+                            unit=''
+                            title='Cantidad'
+                        />
                         <Button
                             variant={item.isSelled ? 'secondary' : 'primary'}
                             onClick={handleAdd}
@@ -164,8 +152,9 @@ const ShopPageDetails = ({ onAddToCart }) => {
                         </Button>
                     </div>
                 </div>
-
             </div>
+
+
         </div>
     );
 };

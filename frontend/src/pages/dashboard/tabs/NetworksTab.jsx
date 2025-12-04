@@ -91,7 +91,7 @@ const NetworksTab = ({ onSelectItem }) => {
                 <div className={styles.searchContainer}></div>
                 <div className={styles.buttonGroup}>
                     <Button variant='icon-only' onClick={() => fetchNetworks()}><RefreshCcw size={24} /></Button>
-                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={14} /> Añadir red</Button>
+                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={24} /> Añadir red</Button>
                 </div>
             </div>
 
