@@ -223,7 +223,6 @@ Modelos 3D no cargan en `ModelViewer`:
 ### Licencia
 
 Licencia Creative Commons CC BY-NC
-![[Pasted image 20250825174726.png]]
-
+<img width="468" height="167" alt="image" src="https://github.com/user-attachments/assets/691bfaba-42a0-473b-add5-e280ade29f21" />
 ___
 *README* creado con [Obsidian](https://obsidian.md/)
