@@ -209,12 +209,12 @@ const MyComponents = () => {
                         variant="primary"
                         onClick={handleGoToStore}
                     >
-                        <ShoppingBag size={20} />Tienda
+                        <ShoppingBag size={24} />Tienda
                     </Button>
                     <Button
                         variant="primary"
                         onClick={() => showToast('Gestiona los componentes instalados en tus servidores y racks. Selecciona un componente para ver su modelo 3D y detalles.', 'info')}
-                    > <Info size={20} />
+                    > <Info size={24} />
                     </Button>
                 </div>
             </div>

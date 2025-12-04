@@ -356,7 +356,7 @@ const MyRacksPage = () => {
                 <Button
                     variant="primary"
                     onClick={() => showToast('Selecciona un workspace para gestionar racks y servidores dentro de él.', 'info')}
-                > <Info size={20} />
+                > <Info size={24} />
                 </Button>
             </div>
 
@@ -419,7 +419,7 @@ const MyRacksPage = () => {
                         {activeWorkspace ? (
                             <div style={{ display: 'flex', gap: 10 }}>
                                 <Button variant="primary" onClick={() => setIsCreateRackModalOpen(true)}>
-                                    <Plus size={20} />
+                                    <Plus size={24} />
                                     Crear Rack en {activeWorkspace.name}
                                 </Button>
                                 <Button variant="primary" onClick={async () => {
@@ -453,7 +453,7 @@ const MyRacksPage = () => {
                                 variant="primary"
                                 onClick={() => setIsCreateModalOpen(true)}
                             >
-                                <Plus size={20} style={{ marginRight: '5px' }} />
+                                <Plus size={24} style={{ marginRight: '5px' }} />
                                 Crear Workspace
                             </Button>
                         )}

@@ -5,7 +5,7 @@ import InputField from '../../ui/input/InputField.jsx';
 import DetailsField from '../../ui/details/DetailsField.jsx';
 import GenericSelector from '../../ui/selector/GenericSelector.jsx'
 import styles from '../Forms.module.css'; // Estilos genéricos para formularios
-
+import { X, Check } from 'lucide-react';
 //API Services
 import { getAllNetworks } from '../../../api/services/networkService.js'
 /**
@@ -117,14 +117,19 @@ const NewWorkspaceForm = ({ onClose, onSubmit }) => {
                     onAddComponent={handleAddNetwork}
                     onRemoveComponent={handleRemoveNetwork}
                     isLoading={networkLoading || isLoading}
-                    selectorTitle="Asigna una red"
+                    selectorTitle="Red"
                     listTitle='Red Asignada'
                     singleSelection={true}
                 />
 
-                {/* Botón de Envío */}
-                <div className={styles.doneButton}>
-                    <Button type="submit" variant="primary">Crear Workspace</Button>
+                {/* Botones de Acción */}
+                <div className={styles.actionButtons}>
+                    <Button variant="secondary" onClick={onClose}>
+                        <X size={24} />
+                    </Button>
+                    <Button variant="primary" type="submit">
+                        <Check size={24} />
+                    </Button>
                 </div>
             </form>
         </div>

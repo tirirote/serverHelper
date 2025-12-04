@@ -131,8 +131,8 @@ const WorkspacesTab = ({ onSelectItem }) => {
             <div className={styles.headerButtons}>
                 <div className={styles.searchContainer}></div>
                 <div className={styles.buttonGroup}>
-                    <Button variant='icon-only' onClick={() => fetchAndSetWorkspaces()}><RefreshCcw size={20}/></Button>
-                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={16} /> Crear Workspace</Button>
+                    <Button variant='icon-only' onClick={() => fetchAndSetWorkspaces()}><RefreshCcw size={24}/></Button>
+                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={24} /> Nuevo Workspace</Button>
                 </div>
             </div>
 
@@ -163,7 +163,7 @@ const WorkspacesTab = ({ onSelectItem }) => {
                             Esta acción es irreversible y toda la información asociada se perderá.
                             ¿Estás seguro de continuar?
                         </p>
-                        <Button variant="danger" onClick={handleConfirmDelete}><Trash2 size={20} /> Eliminar</Button>
+                        <Button variant="danger" onClick={handleConfirmDelete}><Trash2 size={24} /> Eliminar</Button>
                     </div>
                 </div>
             </Dialog>

@@ -189,11 +189,11 @@ const WorkspaceDetailsPage = () => {
                         {renderRacksTab()}
                         <div className={styles.buttonGroup}>
                             <Button variant="primary" onClick={() => setIsRackModalOpen(true)}>
-                                <Plus size={20} />
+                                <Plus size={24} />
                                 Añadir Nuevo Rack
                             </Button>
                             <Button variant="primary" onClick={() => showToast('Abriendo Configuración...', 'info')}>
-                                <Settings size={20} />
+                                <Settings size={24} />
                             </Button>
                         </div>
                     </div>
@@ -222,7 +222,7 @@ const WorkspaceDetailsPage = () => {
                 <Button
                     variant="primary"
                     onClick={() => showToast('Aquí verás la información más relevante sobre el workspace seleccionado.', 'info')}
-                > <Info size={20} />
+                > <Info size={24} />
                 </Button>
             </div>
             {renderHeaderInfo()}

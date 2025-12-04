@@ -165,10 +165,10 @@ const Simulation = () => {
                             <Button
                                 variant={running ? 'danger' : 'primary'}
                                 onClick={handleStartStop}>
-                                {running ? <Square size={20} /> :
-                                    <Play size={20} />}
+                                {running ? <Square size={24} /> :
+                                    <Play size={24} />}
                             </Button>
-                            <Button variant='danger' onClick={handleReset}><UndoDot size={20}/></Button>
+                            <Button variant='danger' onClick={handleReset}><UndoDot size={24}/></Button>
                         </div>
                     </div>
                 </div>

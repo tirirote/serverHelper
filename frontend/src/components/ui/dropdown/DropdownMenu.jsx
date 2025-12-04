@@ -79,7 +79,7 @@ const DropdownMenu = ({ label, items, value, onChange, placeholder = "Selecciona
                                 {item.label}
                                 {/* Icono de Verificación si está seleccionado */}
                                 {item.value === value && (
-                                    <Check size={20} />
+                                    <Check size={24} />
                                 )}
                             </div>
                         ))}

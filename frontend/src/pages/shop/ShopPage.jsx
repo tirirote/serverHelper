@@ -95,13 +95,12 @@ const ShopPage = () => {
         return (
             <div key={item.name} className={styles.itemCard}>
                 <div className={styles.itemNameContainer}>
-                    {/* Si el item ya está comprado, mostramos un overlay/badge */}
-                    {item.isSelled && (
-                        <div className={styles.soldBadge} title="Comprado">Comprado</div>
-                    )}
                     <h4 className={styles.itemName} title={item.name}>{item.name}</h4>
                 </div>
-
+                {/* Si el item ya está comprado, mostramos un overlay/badge */}
+                {item.isSelled && (
+                    <div className={styles.soldBadge} title="Comprado">Comprado</div>
+                )}
                 <div className={styles.cardBody}>
                     <div className={styles.viewer3DContainer}>
                         <ModelViewer
@@ -147,24 +146,30 @@ const ShopPage = () => {
         <div className={styles.page}>
             <div className={styles.header}>
                 <h1>Tienda</h1>
-                <Button
-                    variant="primary"
-                    onClick={() => showToast('Explora y adquiere componentes para tus servidores y racks. Usa el buscador para filtrar por tipo, nombre o descripción.', 'info')}
-                > <Info size={20} />
-                </Button>
+                <div className={styles.headerButtons}>
+                    <Button
+                        variant="primary"
+                        onClick={() => showToast('Explora y adquiere componentes para tus servidores y racks. Usa el buscador para filtrar por tipo, nombre o descripción.', 'info')}
+                    > <Info size={24} />
+                    </Button>
+                </div>
+
             </div>
 
             <div className={styles.headerContainer}>
-                <SearchFilterBar
-                    onSearchChange={setSearchTerm}
-                    searchPlaceholder="Buscar servidores, CPUs, RAM o componentes..."
-                />
+                <div className={styles.searchBar}>
+                    <SearchFilterBar
+                        onSearchChange={setSearchTerm}
+                        searchPlaceholder="Buscar servidores, CPUs, RAM o componentes..."
+                    />
+                </div>
+
                 <div className={styles.actionButtons}>
                     <Button
                         variant="primary"
                         onClick={() => setIsFormOpen(true)}
                     >
-                        <Plus size={20} />
+                        <Plus size={24} />
                         Nuevo Componente
                     </Button>
                 </div>

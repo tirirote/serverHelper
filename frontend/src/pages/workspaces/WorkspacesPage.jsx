@@ -278,7 +278,7 @@ const WorkspacesPage = () => {
                 <Button
                     variant="primary"
                     onClick={() => showToast('Los Workspaces son entornos aislados para gestionar recursos.', 'info')}
-                > <Info size={20} />
+                > <Info size={24} />
                 </Button>
             </div>
 
@@ -323,7 +323,7 @@ const WorkspacesPage = () => {
                             variant="primary"
                             onClick={() => setIsCreateModalOpen(true)}
                         >
-                            <Plus size={20} style={{ marginRight: '5px' }} />
+                            <Plus size={24} style={{ marginRight: '5px' }} />
                             Crear Workspace
                         </Button>
                     </div>

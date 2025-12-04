@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo,useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, AlertTriangle, Loader2, Plus, ShoppingBag } from 'lucide-react';
+import { Trash2, AlertTriangle, Loader2, Plus, ShoppingBag, RefreshCcw } from 'lucide-react';
 import { useToast } from '../../../components/ui/toasts/ToastProvider.jsx';
 import DataTable from '../../../components/ui/table/DataTable.jsx';
 import TableActions from '../../../components/ui/table/TableActions.jsx';
@@ -23,7 +23,24 @@ const ComponentsTab = ({ onSelectItem }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [componentToDelete, setComponentToDelete] = useState(null);
 
-    useEffect(() => { (async () => { setLoading(true); setError(null); try { const data = await getAllComponents(); setComponents((data || []).filter(c => c.isSelled)); } catch (err) { console.error(err); setError('Error cargando componentes'); } finally { setLoading(false); } })(); }, []);
+    const fetchComponents = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await getAllComponents();
+            setComponents((data || []).filter(c => c.isSelled));
+        } catch (err) {
+            console.error('Error al cargar los componentes comprados:', err);
+            setError('Error al obtener los componentes.');
+            showToast('Error de conexión con el servidor.', 'error');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchComponents();
+    }, [fetchComponents]);
 
     const filtered = useMemo(() => {
         if (!searchTerm) return components;
@@ -55,7 +72,8 @@ const ComponentsTab = ({ onSelectItem }) => {
             <div className={styles.headerButtons}>
                 <div className={styles.searchContainer}></div>
                 <div className={styles.buttonGroup}>
-                    <Button variant="primary" onClick={() => navigate('/shop')}><ShoppingBag size={20} /> Tienda</Button>
+                    <Button variant='icon-only' onClick={() => fetchComponents()}><RefreshCcw size={24} /></Button>
+                    <Button variant="primary" onClick={() => navigate('/shop')}><ShoppingBag size={24} /> Tienda</Button>
                 </div>
             </div>
 
@@ -80,7 +98,7 @@ const ComponentsTab = ({ onSelectItem }) => {
                             Esta acción es irreversible y toda la información asociada se perderá.
                             ¿Estás seguro de continuar?
                         </p>
-                        <Button variant="danger" onClick={handleConfirmDelete}><Trash2 size={20} /> Eliminar</Button>
+                        <Button variant="danger" onClick={handleConfirmDelete}><Trash2 size={24} /> Eliminar</Button>
                     </div>
                 </div>
             </Dialog>

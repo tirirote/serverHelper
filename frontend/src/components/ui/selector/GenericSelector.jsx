@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Plus, Loader2, ArrowLeftRight, Trash2 } from 'lucide-react';
+import { Search, Plus, Loader2, ArrowLeftRight, Trash2, CornerDownLeft, CornerDownRight, ChevronRight } from 'lucide-react';
 import Button from '../button/Button.jsx';
 import InputField from '../input/InputField.jsx';
 import NumberSelector from '../numberSelector/NumberSelector.jsx';
@@ -120,7 +120,7 @@ const GenericSelector = ({
     if (isLoading) {
         return (
             <div className={styles.loading}>
-                <Loader2 size={20} className="animate-spin" /> Cargando Componentes...
+                <Loader2 size={24} className="animate-spin" /> Cargando Componentes...
             </div>
         );
     }
@@ -133,7 +133,7 @@ const GenericSelector = ({
                 {hasSingleItem && (
                     <div className={styles.singleSelectionRow}>
                         <p className={styles.selectedItemText}>
-                            Seleccionado: {compatibleItems[0].name}
+                            <ChevronRight size={24}/>{compatibleItems[0].name}
                         </p>
                         <div className={styles.singleSelectionActions}>
                             <Button
@@ -146,7 +146,7 @@ const GenericSelector = ({
                                     setSearchTerm('');
                                     setIsFocused(true);
                                 }}
-                            ><ArrowLeftRight size={20} /></Button>
+                            ><ArrowLeftRight size={24} /></Button>
                             <Button
                                 variant="icon-only"
                                 size="small"
@@ -157,7 +157,7 @@ const GenericSelector = ({
                                     setSearchTerm('');
                                     setIsFocused(false);
                                 }}
-                            ><Trash2 size={20} /></Button>
+                            ><Trash2 size={24} /></Button>
                         </div>
                     </div>
                 )}
@@ -166,7 +166,7 @@ const GenericSelector = ({
                 {(!singleSelection || !hasSingleItem) && (
                     <div className={styles.searchAndSelect}>
                         <InputField
-                            icon={<Search size={20} />}
+                            icon={<Search size={24} />}
                             value={searchTerm}
                             onChange={handleSearchChange}
                             onFocus={handleFocus}

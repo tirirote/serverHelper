@@ -3,6 +3,7 @@ import InputField from '../../ui/input/InputField.jsx';
 import NumberSelector from '../../ui/numberSelector/NumberSelector.jsx';
 import Button from '../../ui/button/Button.jsx';
 import DetailsField from '../../ui/details/DetailsField.jsx';
+import { X, Check } from 'lucide-react';
 import GenericSelector from '../../ui/selector/GenericSelector.jsx';
 import { useToast } from '../../ui/toasts/ToastProvider.jsx';
 import styles from '../Forms.module.css'; // Reutilizaremos los estilos del formulario de componente
@@ -142,8 +143,14 @@ const NewServerForm = ({ onClose, onSubmit, racks = [] }) => {
                     selectorTitle="Componentes"
                     listTitle='Componentes Seleccionados'
                 />
-                <div className={styles.doneButton}>
-                    <Button type="submit" variant="primary" disabled={isSubmitting}>{isSubmitting ? 'CREATING...' : 'Crear Servidor'}</Button>
+                {/* Botones de Acción */}
+                <div className={styles.actionButtons}>
+                    <Button variant="secondary" onClick={onClose}>
+                        <X size={24} />
+                    </Button>
+                    <Button variant="primary" type="submit">
+                        <Check size={24} />
+                    </Button>
                 </div>
 
             </form>

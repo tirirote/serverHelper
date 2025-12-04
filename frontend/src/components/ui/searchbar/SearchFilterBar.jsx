@@ -37,7 +37,7 @@ const SearchFilterBar = ({
                 placeholder={searchPlaceholder}
                 value={searchTerm}
                 onChange={handleSearchChange}
-                startAdornment={<Search size={20} />} 
+                startAdornment={<Search size={24} />} 
             />
         </div>
     );

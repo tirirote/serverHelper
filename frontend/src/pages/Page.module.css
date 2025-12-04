@@ -14,7 +14,16 @@
 .headerButtons {
     display: flex;
     flex-direction: row;
-    gap: 32px;
+    gap: 16px;
+    width: fit-content;
+}
+
+.actionButtons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 16px;
+    width: auto;
 }
 
 .contentGrid {

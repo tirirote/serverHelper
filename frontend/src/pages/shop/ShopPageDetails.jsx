@@ -47,7 +47,7 @@ const ShopPageDetails = ({ onAddToCart }) => {
         return (
             <div className={styles.detailsPage} style={{ padding: '32px', color: '#f9fafb', backgroundColor: '#111827' }}>
                 <Button variant="secondary" onClick={() => navigate('/')} className="mb-5">
-                    <ArrowLeft size={20} style={{ marginRight: '10px' }} /> Volver a la Tienda
+                    <ArrowLeft size={24} style={{ marginRight: '10px' }} /> Volver a la Tienda
                 </Button>
                 <h2 style={{ fontSize: '2rem', color: '#ef4444' }}>Error 404: Producto no encontrado</h2>
                 <p style={{ color: '#9ca3af' }}>El ítem con ID **{itemName}** no pudo ser cargado (Puede que se haya perdido el dato de `localStorage` o el URL es inválido).</p>
@@ -92,7 +92,7 @@ const ShopPageDetails = ({ onAddToCart }) => {
                     variant="secondary"
                     size="medium"
                     onClick={() => navigate('/shop')}>
-                    <ChevronLeft size={20} /> Volver
+                    <ChevronLeft size={24} /> Volver
                 </Button>
             </div>
             <div className={styles.productCard}>

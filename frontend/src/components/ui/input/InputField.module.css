@@ -6,11 +6,6 @@
   width: 100%;
 }
 
-.label {
-  font-family: var(--font-body);
-  color: var(--color-white);
-}
-
 /* Contenedor que agrupa el input y el contador para el posicionamiento */
 .inputWrapper {
   position: relative;
@@ -84,8 +79,8 @@
   --clear-icon-size: 18px;
 
   display: inline-block;
-  height: var(--clear-icon-size);
-  width: var(--clear-icon-size);
+  height: 24px;
+  width: 24px;
   cursor: pointer;
 
   -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>');
@@ -94,7 +89,7 @@
   -webkit-mask-size: 100%;
 
   /* 🚨 4. Aplicar el color usando background-color (Controlado por la variable) */
-  background-color: var(--clear-icon-color);
+  background-color: var(--color-gray-dark);
   opacity: 1;
   transition: all 0.2s ease-in-out;
 }

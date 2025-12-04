@@ -5,9 +5,9 @@ import { Info, AlertTriangle, XCircle } from 'lucide-react';
 
 const Callout = ({ type = 'info', children }) => {
     const iconMap = {
-        info: <Info size={20} />,
-        warning: <AlertTriangle size={20} />,
-        danger: <XCircle size={20} />,
+        info: <Info size={24} />,
+        warning: <AlertTriangle size={24} />,
+        danger: <XCircle size={24} />,
     };
 
     return (

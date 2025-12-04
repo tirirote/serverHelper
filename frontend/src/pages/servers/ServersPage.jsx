@@ -297,7 +297,7 @@ const ServersPage = () => {
                             variant="primary"
                             onClick={() => setIsCreateModalOpen(true)}
                         >
-                            <Plus size={20} style={{ marginRight: '5px' }} />
+                            <Plus size={24} style={{ marginRight: '5px' }} />
                             Crear Servidor
                         </Button>
                     </div>

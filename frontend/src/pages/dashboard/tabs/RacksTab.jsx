@@ -164,8 +164,8 @@ const RacksTab = ({ onSelectItem }) => {
                     />
                 </div>
                 <div className={styles.buttonGroup}>
-                    <Button variant='icon-only' onClick={() => fetchAndSetRacks()}><RefreshCcw size={20} /></Button>
-                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={14} /> Crear Rack</Button>
+                    <Button variant='icon-only' onClick={() => fetchAndSetRacks()}><RefreshCcw size={24} /></Button>
+                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={24} /> Rack Nuevo</Button>
                 </div>
 
 
@@ -192,7 +192,7 @@ const RacksTab = ({ onSelectItem }) => {
                             Esta acción es irreversible y toda la información asociada se perderá.
                             ¿Estás seguro de continuar?
                         </p>
-                        <Button variant="danger" onClick={handleConfirmDelete}><Trash2 size={20} /> Eliminar</Button>
+                        <Button variant="danger" onClick={handleConfirmDelete}><Trash2 size={24} /> Eliminar</Button>
                     </div>
                 </div>
             </Dialog>

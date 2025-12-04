@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useToast } from '../../ui/toasts/ToastProvider.jsx';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X, Check } from 'lucide-react';
 
 import InputField from '../../ui/input/InputField.jsx';
 import NumberSelector from '../../ui/numberSelector/NumberSelector.jsx';
@@ -112,7 +112,7 @@ const NewComponentForm = ({ onClose, onSubmit }) => {
             </div>
             <form onSubmit={handleSubmit} className={styles.form}>
                 <InputField
-                    label="Component Name"
+                    label="Nombre"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     maxLength={30}
@@ -120,7 +120,7 @@ const NewComponentForm = ({ onClose, onSubmit }) => {
                 />
                 {/* Usar el nuevo componente de DetailsField */}
                 <DetailsField
-                    label="Details"
+                    label="Descripción"
                     value={details}
                     onChange={(e) => setDetails(e.target.value)}
                     maxLength={255}
@@ -138,6 +138,7 @@ const NewComponentForm = ({ onClose, onSubmit }) => {
                         title='Coste'
                         value={cost}
                         min={0}
+                        max={9999}
                         onChange={(e) => setCost(e)}
                     />
                     <NumberSelector
@@ -145,6 +146,7 @@ const NewComponentForm = ({ onClose, onSubmit }) => {
                         unit='€/mes'
                         value={maintenanceCost}
                         min={0}
+                        max={9999}
                         onChange={(e) => setMaintenanceCost(e)}
                     />
                     <NumberSelector
@@ -152,12 +154,17 @@ const NewComponentForm = ({ onClose, onSubmit }) => {
                         unit='w'
                         value={estimatedConsumption}
                         min={0}
+                        max={9999}
                         onChange={(e) => setEstimatedConsumption(e)}
                     />
                 </div>
-                <div className={styles.doneButton}>
-                    <Button type="submit" variant="primary" disabled={isLoading}>
-                        {isLoading ? <Loader2 size={18} /> : 'DONE'}
+                {/* Botones de Acción */}
+                <div className={styles.actionButtons}>
+                    <Button variant="secondary" onClick={onClose}>
+                        <X size={24} />
+                    </Button>
+                    <Button variant="primary" type="submit">
+                        <Check size={24} />
                     </Button>
                 </div>
             </form>

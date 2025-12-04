@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'; // Importamos los icon
 
 const NumberSelector = ({ title = 'Selecciona', value, unit = "€", min = -5, max = 5, onChange, disabled = false }) => {
 
-  const currentValue = typeof value === 'number' && !isNaN(value) ? value : 0;
+  const currentValue = value || 0;
 
   const safeOnChange = (newValue) => {
     if (onChange) {
@@ -16,6 +16,12 @@ const NumberSelector = ({ title = 'Selecciona', value, unit = "€", min = -5, m
       } else {
         onChange(newValue);
       }
+    }
+  };
+
+  const handleChange = (e) => {
+    if (onChange) {
+      safeOnChange(e);
     }
   };
 
@@ -30,7 +36,7 @@ const NumberSelector = ({ title = 'Selecciona', value, unit = "€", min = -5, m
   return (
     <div className={styles.selectorContainer}>
 
-      {!title !== '' && !title && (<label className={styles.selectorLabel}>{title}</label>)}
+      {title && (<label className={styles.selectorLabel}>{title}</label>)}
       <div className={styles.selectorBody}>
         <button
           type='button'
@@ -41,7 +47,11 @@ const NumberSelector = ({ title = 'Selecciona', value, unit = "€", min = -5, m
           <ChevronLeft size={24} />
         </button>
 
-        <div className={styles.valueDisplay}>{value}{unit}</div>
+        <input
+          className={styles.valueDisplay}
+          value={currentValue}
+          type='text'
+          onChange={handleChange} />
 
         <button
           type='button'

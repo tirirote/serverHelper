@@ -4,7 +4,7 @@ import InputField from '../../ui/input/InputField.jsx'; // Usamos tu InputField 
 import Button from '../../ui/button/Button.jsx';
 import DetailsField from '../../ui/details/DetailsField.jsx'; // Usamos tu campo de texto grande
 import styles from '../Forms.module.css'; // Reutilizaremos los estilos del formulario de componente
-import { Network, Server, Info } from 'lucide-react'; // Íconos para adornos
+import { Network, Server, Info, Check, Cross, X } from 'lucide-react'; // Íconos para adornos
 
 const NetworkConfigForm = ({ onClose, onSubmit }) => {
     const [formData, setFormData] = useState({
@@ -30,7 +30,7 @@ const NetworkConfigForm = ({ onClose, onSubmit }) => {
             subnetMask: formData.subnetMask,
             gateway: formData.gateway
         };
-        
+
         console.log('Payload de Nueva Red:', newNetworkPayload);
 
         if (onSubmit) {
@@ -47,7 +47,7 @@ const NetworkConfigForm = ({ onClose, onSubmit }) => {
             <form onSubmit={handleSubmit} className={styles.form}>
                 {/* Nombre de la Red */}
                 <InputField
-                    label="Network Name"
+                    label="Nombre"
                     name="networkName"
                     placeholder="Escribe el nombre de red"
                     value={formData.networkName}
@@ -56,7 +56,7 @@ const NetworkConfigForm = ({ onClose, onSubmit }) => {
                 />
                 {/* Máscara de Subred */}
                 <InputField
-                    label="Ip Address"
+                    label="Dirección IP"
                     name="ipAddress"
                     placeholder="Escribe la dirección IP"
                     value={formData.ipAddress}
@@ -66,7 +66,7 @@ const NetworkConfigForm = ({ onClose, onSubmit }) => {
 
                 {/* Máscara de Subred */}
                 <InputField
-                    label="Net Mask"
+                    label="Máscara de Red"
                     name="subnetMask"
                     placeholder="Escribe la máscara de red"
                     value={formData.subnetMask}
@@ -85,9 +85,12 @@ const NetworkConfigForm = ({ onClose, onSubmit }) => {
                 />
 
                 {/* Botones de Acción */}
-                <div className={styles.doneButton}>
+                <div className={styles.actionButtons}>
+                    <Button variant="secondary" onClick={onClose}>
+                        <X size={24} />
+                    </Button>
                     <Button variant="primary" type="submit">
-                        Done
+                        <Check size={24} />
                     </Button>
                 </div>
             </form>

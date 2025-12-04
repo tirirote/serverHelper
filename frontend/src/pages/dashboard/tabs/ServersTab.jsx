@@ -85,7 +85,7 @@ const ServersTab = ({ onSelectItem }) => {
             <div className={styles.headerButtons}>
                 <div className={styles.searchContainer}></div>
                 <div className={styles.buttonGroup}>
-                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={14} /> Crear Servidor</Button>
+                    <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}><Plus size={24} /> Servidor nuevo</Button>
                 </div>
             </div>
 
@@ -112,7 +112,7 @@ const ServersTab = ({ onSelectItem }) => {
                             Esta acción es irreversible y toda la información asociada se perderá.
                             ¿Estás seguro de continuar?
                         </p>
-                        <Button variant="danger" onClick={handleConfirmDelete}><Trash2 size={20} /> Eliminar</Button>
+                        <Button variant="danger" onClick={handleConfirmDelete}><Trash2 size={24} /> Eliminar</Button>
                     </div>
                 </div>
             </Dialog>

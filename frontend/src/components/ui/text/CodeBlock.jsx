@@ -19,7 +19,7 @@ const CodeBlock = ({ children }) => {
     return (
         <div className={styles.codeContainer}>
             <button onClick={handleCopy} className={styles.copyButton}>
-                {copied ? <Check size={20} /> : <Copy size={20} />}
+                {copied ? <Check size={24} /> : <Copy size={24} />}
             </button>
             <pre className={styles.codeBlock}>
                 <code>

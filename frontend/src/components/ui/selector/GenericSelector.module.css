@@ -114,8 +114,13 @@
 }
 
 .selectedItemText {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     color: var(--color-white);
+    font-size: 16px;
     font-weight: 400;
+    margin-left: 16px;
 }
 
 .singleSelectionRow {
@@ -127,6 +132,7 @@
     border-radius: 8px;
     padding: 8px;
     gap: 8px;
+    width: 100%;
 }
 
 .singleSelectionActions {

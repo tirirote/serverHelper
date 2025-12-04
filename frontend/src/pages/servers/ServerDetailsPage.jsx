@@ -193,11 +193,11 @@ const ServerDetailsPage = () => {
                     <h2 className={styles.panelTitle}>Resumen del Sistema</h2>
                     <div className={styles.detailsGrid}>
                         {/* Tarjetas de Datos Clave */}
-                        <DetailItem icon={<Cpu size={20} />} label="Sistema Operativo" value={srv.os} />
-                        <DetailItem icon={<HardDrive size={20} />} label="Red" value={srv.network} />
-                        <DetailItem icon={<MapPin size={20} />} label="Dirección IP" value={srv.ip} />
-                        <DetailItem icon={<Calendar size={20} />} label="Costo de Mantenimiento" value={`$${srv.maintenanceCost.toFixed(2)} / mes`} />
-                        <DetailItem icon={<Info size={20} />} label="Precio Total (HW)" value={`$${srv.totalPrice.toFixed(2)}`} />
+                        <DetailItem icon={<Cpu size={24} />} label="Sistema Operativo" value={srv.os} />
+                        <DetailItem icon={<HardDrive size={24} />} label="Red" value={srv.network} />
+                        <DetailItem icon={<MapPin size={24} />} label="Dirección IP" value={srv.ip} />
+                        <DetailItem icon={<Calendar size={24} />} label="Costo de Mantenimiento" value={`$${srv.maintenanceCost.toFixed(2)} / mes`} />
+                        <DetailItem icon={<Info size={24} />} label="Precio Total (HW)" value={`$${srv.totalPrice.toFixed(2)}`} />
                     </div>
 
                     {/* Descripción */}

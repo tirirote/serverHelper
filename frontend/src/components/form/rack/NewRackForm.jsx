@@ -5,7 +5,7 @@ import DetailsField from '../../ui/details/DetailsField.jsx';
 import NumberSelector from '../../ui/numberSelector/NumberSelector.jsx';
 import Button from '../../ui/button/Button.jsx';
 import styles from '../Forms.module.css'; // Reutilizaremos los estilos del formulario de componente
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, X, Check } from 'lucide-react';
 import GenericSelector from '../../ui/selector/GenericSelector.jsx';
 import { getAllServers } from '../../../api/services/serverService.js';
 
@@ -110,8 +110,14 @@ const NewRackForm = ({ onClose, onSubmit, workspaces = [] }) => {
                     listTitle='Servidores Seleccionados'
                     singleSelection={false}
                 />
-                <div className={styles.doneButton} >
-                    <Button type="submit" variant="primary" disabled={isLoading}>{isLoading ? 'CREATING...' : 'DONE'}</Button>
+                {/* Botones de Acción */}
+                <div className={styles.actionButtons}>
+                    <Button variant="secondary" onClick={onClose}>
+                        <X size={24} />
+                    </Button>
+                    <Button variant="primary" type="submit">
+                        <Check size={24} />
+                    </Button>
                 </div>
             </form>
         </div>

@@ -332,7 +332,7 @@ const NetworksPage = () => {
 
                     <div className={styles.listColumnFooter}>
                         <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
-                            <Plus size={20} style={{ marginRight: '5px' }} />
+                            <Plus size={24} style={{ marginRight: '5px' }} />
                             Crear Red
                         </Button>
                     </div>
