@@ -17,16 +17,15 @@ export const createWorkspaceSchema = (workspaceItem, totalRacks = 0, racksLoadin
   };
 };
 
-export const createRackSchema = (rackItem, totalServers = 0, serversLoading = false, serversError = false) => {
+export const createRackSchema = (rackItem, serversLoading = false, serversError = false) => {
   if (!rackItem) return null;
-  const serverValue = serversLoading ? 'Cargando...' : serversError ? 'N/A (Error)' : totalServers;
+  const serverValue = serversLoading ? 'Cargando...' : serversError ? 'N/A (Error)' : rackItem.servers.length;
   const details = [
     { label: 'Nombre', value: rackItem.name },
     { label: 'Unidades', value: rackItem.units },
-    { label: 'Servidores Totales', value: serverValue },
+    { label: 'Servidores', value: serverValue },
     { label: 'Coste Total', value: rackItem.totalCost },
     { label: 'Mantenimiento', value: rackItem.totalMaintenanceCost },
-    { label: 'Workspace', value: rackItem.workspaceName },
     { label: 'Salud', value: rackItem.healthStatus },
     { label: 'Estado', value: rackItem.powerStatus }
   ];
@@ -45,6 +44,7 @@ export const createServerSchema = (serverItem) => {
   if (!serverItem) return null;
   const details = [
     { label: 'Sistema Operativo', value: serverItem.operatingSystem },
+    { label: 'Rack', value: serverItem.rackName },
     { label: 'Estado', value: serverItem.status ?? serverItem.powerStatus, isStatus: true },
     { label: 'Salud', value: serverItem.healthStatus },
     { label: 'Dirección IP', value: serverItem.ipAddress },

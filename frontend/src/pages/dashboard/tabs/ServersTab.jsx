@@ -21,6 +21,8 @@ const ServersTab = ({ onSelectItem }) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [serverToDelete, setServerToDelete] = useState(null);
 
+    
+
     const fetchServers = useCallback(async () => {
         setLoading(true);
         setError(null);

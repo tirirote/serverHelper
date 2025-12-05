@@ -117,12 +117,6 @@ const DetailViewerCard = ({
                         })}
                     </div>
                 </div>
-                {/* Sección Condicional de Compatibilidad */}
-                {(type === 'component' || type === 'rack') && hasCompatibility && (
-                    <div className={styles.compatibilitySection}>
-                        <CompatibilityList items={compatibilityItems} />
-                    </div>
-                )}
             </div>
         </div>
     );

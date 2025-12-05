@@ -556,6 +556,8 @@ const MyRacksPage = () => {
                 onClose={() => setIsCreateServerModalOpen(false)}>
                 <NewServerForm
                     racks={selectedRack ? [selectedRack, ...racks.filter(r => r.name !== selectedRack.name)] : racks}
+                    initialSelectedRack={selectedRack}
+                    initialActiveWorkspace={activeWorkspace}
                     onClose={() => setIsCreateServerModalOpen(false)}
                     onSubmit={async (serverData) => {
                         // The form will include rackName (if selected) but we ensure it targets the selectedRack
