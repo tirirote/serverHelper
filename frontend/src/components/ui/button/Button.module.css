@@ -42,7 +42,7 @@
 .primary:active {
   background-color: var(--color-white);
   border: solid 4px var(--color-white);
-    color: var(--color-gray-darkest);
+  color: var(--color-gray-darkest);
   transform: translateY(8px);
   box-shadow: none;
 }
@@ -70,7 +70,7 @@
 .danger {
   background-color: var(--color-gray-darkest);
   border-color: var(--color-red);
-  color: var(--color-red);  
+  color: var(--color-red);
   box-shadow: 0px 8px 0px var(--color-red);
 
 }
@@ -92,7 +92,7 @@
   background: var(--color-gray-dark);
   border: none;
   color: var(--color-gray-lightest);
-  border-radius: 16px;
+  border-radius: 32px;
   box-shadow: none;
 
 }
@@ -100,13 +100,10 @@
 .ghost:hover {
   background: var(--color-gray-light);
   color: var(--color-white);
-  transform: translateY(-4px);
-  font-weight: 700;
 }
 
 .ghost:active {
   background: var(--color-gray-lightest);
-  transform: translateY(2px);
 }
 
 /* Botón de solo icono */
@@ -115,12 +112,7 @@
   color: var(--color-gray-lightest);
   border-radius: 8px;
   border: solid 4px var(--color-gray-light);
-  box-shadow: none;
-  transition: all 0.2s ease-in-out;
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  justify-content: center;
+  box-shadow: 0px 8px 0px var(--color-gray-darkest);
   width: fit-content;
 }
 
@@ -128,11 +120,15 @@
   color: var(--color-white);
   background-color: var(--color-gray-light);
   border: solid 4px var(--color-white);
+  transform: translateY(-4px);
+  box-shadow: 0px 12px 0px var(--color-white);
 }
 
 .icon-only:active {
   background-color: var(--color-white);
+  border: solid 4px var(--color-white);
   color: var(--color-gray-darkest);
+  transform: translateY(8px);
   box-shadow: none;
 }
 

@@ -137,7 +137,7 @@ const GenericSelector = ({
                         </p>
                         <div className={styles.singleSelectionActions}>
                             <Button
-                                variant="icon-only"
+                                variant="ghost"
                                 size="small"
                                 onClick={() => {
                                     // Ask parent to remove current selection and allow choosing again (open selector)
@@ -148,7 +148,7 @@ const GenericSelector = ({
                                 }}
                             ><ArrowLeftRight size={24} /></Button>
                             <Button
-                                variant="icon-only"
+                                variant="ghost"
                                 size="small"
                                 onClick={() => {
                                     // Clear selection but keep dropdown closed

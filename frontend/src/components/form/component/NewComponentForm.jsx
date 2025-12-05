@@ -160,11 +160,8 @@ const NewComponentForm = ({ onClose, onSubmit }) => {
                 </div>
                 {/* Botones de Acción */}
                 <div className={styles.actionButtons}>
-                    <Button variant="secondary" onClick={onClose}>
-                        <X size={24} />
-                    </Button>
                     <Button variant="primary" type="submit">
-                        <Check size={24} />
+                        <Check size={24} /> Listo
                     </Button>
                 </div>
             </form>

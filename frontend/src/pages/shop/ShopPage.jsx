@@ -132,7 +132,7 @@ const ShopPage = () => {
                         onClick={() => handleBuy(item)}
                         disabled={item.isSelled}>
                         <ShoppingBag size={24} />
-                        {item.isSelled ? 'Comprado' : 'Comprar'}
+                        {item.isSelled ? ('Comprado') : 'Comprar'}
                     </Button>
                 </div>
             </div>

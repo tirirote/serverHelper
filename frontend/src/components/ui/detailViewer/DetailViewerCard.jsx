@@ -57,7 +57,6 @@ const DetailViewerCard = ({
         <div className={styles.viewerCard}>
             <h1 className={styles.visualizerHeader}>{name}</h1>
             <div className={styles.visualizerContainer}>
-
                 {/* Visualizador 3D (Mocked) */}
                 <ModelViewer
                     modelPath={modelPath}
@@ -73,7 +72,6 @@ const DetailViewerCard = ({
                 <div className={styles.detailsContent}>
 
                     <div className={styles.descriptionSection}>
-                        <label className={styles.detailLabel}>Descripción</label>
                         <p className={styles.description}>{description || 'Sin descripción detallada.'}</p>
                     </div>
 
