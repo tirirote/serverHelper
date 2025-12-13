@@ -5,9 +5,10 @@
     "price": 500,
     "maintenanceCost": 5,
     "estimatedConsumption": 120,
-    "isSelled": false,
+    "isSelled": true,
     "modelPath": "/assets/models/cpu.glb",
-    "details": "CPU de alto rendimiento."
+    "details": "CPU de alto rendimiento.",
+    "compatibleList": []
   },
   {
     "type": "RAM",
@@ -37,9 +38,10 @@
     "price": 5,
     "maintenanceCost": 0,
     "estimatedConsumption": 1,
-    "isSelled": false,
+    "isSelled": true,
     "modelPath": "/assets/models/os.glb",
-    "details": "Configuración inicial."
+    "details": "Configuración inicial.",
+    "compatibleList": []
   },
   {
     "type": "Fan",
@@ -47,9 +49,10 @@
     "price": 20,
     "maintenanceCost": 0.5,
     "estimatedConsumption": 5,
-    "isSelled": false,
+    "isSelled": true,
     "modelPath": "/assets/models/fan.glb",
-    "details": "Ventilador principal."
+    "details": "Ventilador principal.",
+    "compatibleList": []
   },
   {
     "type": "PowerSupply",
@@ -57,9 +60,10 @@
     "price": 200,
     "maintenanceCost": 3,
     "estimatedConsumption": 0,
-    "isSelled": false,
+    "isSelled": true,
     "modelPath": "/assets/models/psu.glb",
-    "details": "Fuente de alimentación."
+    "details": "Fuente de alimentación.",
+    "compatibleList": []
   },
   {
     "type": "ServerChasis",
@@ -67,9 +71,10 @@
     "price": 300,
     "maintenanceCost": 4,
     "estimatedConsumption": 5,
-    "isSelled": false,
+    "isSelled": true,
     "modelPath": "/assets/models/server-closed.glb",
-    "details": "Chasis físico del servidor."
+    "details": "Chasis físico del servidor.",
+    "compatibleList": []
   },
   {
     "type": "NetworkInterface",
@@ -77,9 +82,10 @@
     "price": 150,
     "maintenanceCost": 1,
     "estimatedConsumption": 5,
-    "isSelled": false,
+    "isSelled": true,
     "modelPath": "/assets/models/ni.glb",
-    "details": "Tarjeta de red 10G."
+    "details": "Tarjeta de red 10G.",
+    "compatibleList": []
   },
   {
     "type": "OS",
@@ -87,9 +93,10 @@
     "price": 0,
     "maintenanceCost": 1.5,
     "estimatedConsumption": 0,
-    "isSelled": false,
+    "isSelled": true,
     "modelPath": "/assets/models/os.glb",
-    "details": "Sistema Operativo."
+    "details": "Sistema Operativo.",
+    "compatibleList": []
   },
   {
     "type": "GPU",
@@ -97,8 +104,9 @@
     "price": 5000,
     "maintenanceCost": 15,
     "estimatedConsumption": 300,
-    "isSelled": false,
+    "isSelled": true,
     "modelPath": "/assets/models/gpu.glb",
-    "details": "GPU para IA/Cálculo."
+    "details": "GPU para IA/Cálculo.",
+    "compatibleList": []
   }
 ]

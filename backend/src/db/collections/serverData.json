@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "name": "Servidor de ejemplo",
+    "components": [
+      "Intel Xeon E5",
+      "DDR4 ECC 32GB",
+      "SSD 1TB Enterprise",
+      "BIOS v4.1",
+      "Cooler Master R5",
+      "PSU 1000W Platinum",
+      "Rack 1U Chassis",
+      "10G NIC SFP+",
+      "Ubuntu Server 22.04",
+      "NVIDIA A100"
+    ],
+    "totalPrice": 6425,
+    "totalMaintenanceCost": 33,
+    "network": null,
+    "ipAddress": "10.0.0.2",
+    "operatingSystem": "Ubuntu Server 22.04",
+    "healthStatus": "Unknown",
+    "rackName": null
+  }
+]

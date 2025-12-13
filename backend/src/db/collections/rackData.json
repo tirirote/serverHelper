@@ -5,8 +5,10 @@
     "workspaceName": "Workspace 1",
     "powerStatus": "Off",
     "healthStatus": "Unknown",
-    "servers": [],
-    "totalCost": 0,
-    "totalMaintenanceCost": 0
+    "servers": [
+      "Servidor de ejemplo"
+    ],
+    "totalCost": 6425,
+    "totalMaintenanceCost": 33
   }
 ]

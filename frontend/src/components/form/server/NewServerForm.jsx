@@ -152,7 +152,7 @@ const NewServerForm = ({ onClose, onSubmit, racks: propsRacks = null, initialSel
                 isSelled: item.isSelled,
                 modelPath: item.modelPath
             })),
-            rackName: selectedRack.name,
+            rackName: selectedRack?.name || '',
             ipAddress: '10.0.0.2'
         };
 

@@ -2,10 +2,10 @@ export const createWorkspaceSchema = (workspaceItem, totalRacks = 0, racksLoadin
   if (!workspaceItem) return null;
   const racksValue = racksLoading ? 'Cargando...' : racksError ? 'N/A (Error)' : totalRacks;
   const details = [
+    { label: 'Racks', isList: true, items: (workspaceItem.racks || []).map(r => ({ name: r.name || r })) },
     { label: 'Nombre', value: workspaceItem.name },
     { label: 'Red', value: workspaceItem.network ? workspaceItem.network.name : 'N/A' },
-    { label: 'Racks Totales', value: racksValue },
-    { label: 'Descripción', value: workspaceItem.description || '' }
+    { label: 'Racks Totales', value: racksValue }
   ];
   return {
     name: workspaceItem.name,
@@ -21,9 +21,9 @@ export const createRackSchema = (rackItem, serversLoading = false, serversError 
   if (!rackItem) return null;
   const serverValue = serversLoading ? 'Cargando...' : serversError ? 'N/A (Error)' : rackItem.servers.length;
   const details = [
+    { label: 'Servidores', isList: true, items: (rackItem.servers || []).map(s => ({ name: s.name || s })) },
     { label: 'Nombre', value: rackItem.name },
     { label: 'Unidades', value: rackItem.units },
-    { label: 'Servidores', value: serverValue },
     { label: 'Coste Total', value: rackItem.totalCost },
     { label: 'Mantenimiento', value: rackItem.totalMaintenanceCost },
     { label: 'Salud', value: rackItem.healthStatus },
@@ -43,6 +43,7 @@ export const createRackSchema = (rackItem, serversLoading = false, serversError 
 export const createServerSchema = (serverItem) => {
   if (!serverItem) return null;
   const details = [
+    { label: 'Componentes', isList: true, items: (serverItem.components || []).map(c => ({ name: c.name || c })) },
     { label: 'Sistema Operativo', value: serverItem.operatingSystem },
     { label: 'Rack', value: serverItem.rackName },
     { label: 'Estado', value: serverItem.status ?? serverItem.powerStatus, isStatus: true },
@@ -50,8 +51,7 @@ export const createServerSchema = (serverItem) => {
     { label: 'Dirección IP', value: serverItem.ipAddress },
     { label: 'Red', value: serverItem.network },
     { label: 'Coste Mantenimiento', value: serverItem.totalMaintenanceCost ? `${serverItem.totalMaintenanceCost} €/Mes` : 'N/A' },
-    { label: 'Precio Total', value: serverItem.totalPrice ? `${serverItem.totalPrice} €` : 'N/A' },
-    { label: 'Componentes Instalados', isList: true, items: (serverItem.components || []).map(c => ({ name: c.name || c })) }
+    { label: 'Precio Total', value: serverItem.totalPrice ? `${serverItem.totalPrice} €` : 'N/A' }
   ];
 
   return {

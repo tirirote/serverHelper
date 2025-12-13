@@ -22,7 +22,11 @@ const NewRackForm = ({ onClose, onSubmit, workspaces = [] }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const rackData = { name: rackName.trim(), description: description.trim(), units };
+        const rackData = {
+            name: rackName.trim(),
+            description: description.trim(),
+            units
+        };
         if (selectedWorkspace && (selectedWorkspace.name || selectedWorkspace.id)) {
             rackData.workspaceName = selectedWorkspace.name || selectedWorkspace.id;
         }
