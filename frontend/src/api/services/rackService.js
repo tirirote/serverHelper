@@ -27,7 +27,7 @@ export const deleteRack = async (workspaceName, rackName) => {
   }
 };
 
-export const getRackByName = async () => {
+export const getRackByName = async (workspaceName, rackName) => {
   try {
     const response = await apiClient.get(`/racks/${workspaceName}/${rackName}`);
     return response.data;
@@ -38,7 +38,16 @@ export const getRackByName = async () => {
 
 export const getMaintenanceCost = async (workspaceName, rackName) => {
   try {
-    const response = await apiClient.get(`/racks/${workspaceName}/${rackName}/maintenance`);
+    const response = await apiClient.get(`/racks/${workspaceName}/${rackName}/maintenance-cost`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateRack = async (rackName, updateData) => {
+  try {
+    const response = await apiClient.put(`/racks/${rackName}`, updateData);
     return response.data;
   } catch (error) {
     throw error;

@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './LineChart.module.css';
 
 // Very small, dependency-free SVG line chart.
-// Props: data = [{label, value}], width, height, stroke
+// Props: data = [{label, value}] or [{label, maintenance, consumption, total}], width, height
 const LineChart = ({ data = [], width = 640, height = 240, stroke = '#a2fa0c' }) => {
   if (!data || data.length === 0) {
     return (
@@ -10,9 +10,23 @@ const LineChart = ({ data = [], width = 640, height = 240, stroke = '#a2fa0c' })
     );
   }
 
-  const values = data.map(d => d.value);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  // Determine keys (series) available
+  const seriesKeys = Object.keys(data[0] || {}).filter(k => k !== 'label' && typeof data[0][k] === 'number');
+
+  // If only 'value' key exists, keep compatibility and plot single series
+  const keys = seriesKeys.length ? seriesKeys : (data[0].value ? ['value'] : []);
+
+  // Flatten all values to compute global min/max
+  let allValues = [];
+  data.forEach(d => {
+    keys.forEach(k => {
+      const v = d[k];
+      if (typeof v === 'number') allValues.push(v);
+    });
+  });
+
+  const min = Math.min(...allValues);
+  const max = Math.max(...allValues);
   const pad = 24; // padding for axes
   const innerW = width - pad * 2;
   const innerH = height - pad * 2;
@@ -20,7 +34,13 @@ const LineChart = ({ data = [], width = 640, height = 240, stroke = '#a2fa0c' })
   const x = (i) => pad + (i / (data.length - 1 || 1)) * innerW;
   const y = (v) => pad + (1 - ((v - min) / ((max - min) || 1))) * innerH;
 
-  const points = data.map((d, i) => `${x(i)},${y(d.value)}`).join(' ');
+  const colors = ['#a2fa0c', '#0cc7ff', '#ffa500', '#ff6b6b'];
+
+  const seriesPoints = keys.map((k) => ({
+    key: k,
+    color: colors[keys.indexOf(k) % colors.length],
+    points: data.map((d, i) => `${x(i)},${y(d[k])}`).join(' ')
+  }));
 
   return (
     <div className={styles.chart} style={{ width }}>
@@ -33,19 +53,24 @@ const LineChart = ({ data = [], width = 640, height = 240, stroke = '#a2fa0c' })
             stroke="#4a4c41" strokeWidth="1" opacity="0.6" />
         ))}
 
-        {/* line */}
-        <polyline
-          fill="none"
-          stroke={stroke}
-          strokeWidth="2.5"
-          points={points}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        {/* series lines */}
+        {seriesPoints.map((s) => (
+          <polyline
+            key={s.key}
+            fill="none"
+            stroke={s.color}
+            strokeWidth="2.5"
+            points={s.points}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        ))}
 
-        {/* points */}
-        {data.map((d, i) => (
-          <circle key={i} cx={x(i)} cy={y(d.value)} r={3.5} fill={stroke} />
+        {/* points (for each series, we draw smaller points) */}
+        {keys.map((k, seriesIndex) => (
+          data.map((d, i) => (
+            <circle key={`${k}-${i}`} cx={x(i)} cy={y(d[k])} r={2.5} fill={colors[seriesIndex % colors.length]} />
+          ))
         ))}
 
         {/* X labels */}
@@ -56,6 +81,17 @@ const LineChart = ({ data = [], width = 640, height = 240, stroke = '#a2fa0c' })
         {/* Y min/max labels */}
         <text x={8} y={pad + innerH} className={styles.yLabel}>{min.toFixed(2)}</text>
         <text x={8} y={pad - 4} className={styles.yLabel}>{max.toFixed(2)}</text>
+
+        {/* legend */}
+        <g transform={`translate(${width - pad - 140}, ${pad})`}>
+          {keys.map((k, i) => (
+            <g key={k} transform={`translate(0, ${i * 18})`}>
+              <rect x={0} y={-10} width={12} height={8} fill={colors[i % colors.length]} />
+              <text x={18} y={-2} className={styles.yLabel}>{k}</text>
+            </g>
+          ))}
+        </g>
+
       </svg>
     </div>
   );

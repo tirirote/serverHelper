@@ -1,15 +1,24 @@
 /* Estilos para el Wrapper */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
 .sliderWrapper {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 12px 16px;
+  padding: 8px;
   border-radius: 8px;
   background-color: var(--color-gray-dark);
   border: solid;
   border-color: var(--color-gray-light);
-  border-radius: 8px;
   box-shadow: 0px 8px 0px var(--color-gray-darkest);
   transition: all 0.2s ease-in-out;
 }

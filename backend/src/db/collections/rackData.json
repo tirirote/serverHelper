@@ -3,7 +3,7 @@
     "name": "rack de ejemplo",
     "units": 24,
     "workspaceName": "Workspace 1",
-    "powerStatus": "Off",
+    "powerStatus": "On",
     "healthStatus": "Unknown",
     "servers": [
       "Servidor de ejemplo"

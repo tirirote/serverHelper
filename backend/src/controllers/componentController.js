@@ -101,7 +101,6 @@ export const createComponent = async (req, res) => {
     });
   }
 
-
 };
 
 export const deleteComponent = async (req, res) => {
